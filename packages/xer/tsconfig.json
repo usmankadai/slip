@@ -1,0 +1,9 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    // WebWorker gives TextEncoder and TextDecoder without the DOM.
+    "lib": ["ES2023", "WebWorker"],
+    "types": []
+  },
+  "include": ["src", "test"]
+}
