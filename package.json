@@ -17,7 +17,9 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "check": "pnpm format:check && pnpm lint && pnpm typecheck && pnpm test && pnpm build",
-    "gen-xer": "node tools/gen-xer/src/cli.ts"
+    "gen-xer": "node tools/gen-xer/src/cli.ts",
+    "perf": "pnpm --filter @slip/perf run local",
+    "perf:ci": "pnpm --filter @slip/perf run ci"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",

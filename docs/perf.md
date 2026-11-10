@@ -2,7 +2,7 @@
 
 Budgets are in [docs/spec/performance.md](spec/performance.md). This file records what was measured, when, and how.
 
-## 10 November 2026: first browser measurements of the import path
+## 10 November 2026: first browser measurements of the import path (by hand, superseded)
 
 **How these were taken.** By hand, through the developer harness in the app: a worker generates a synthetic rail pair (seed 42), and each file is then imported through the real path (stream, hash, decode windows-1252, parse, pack, write to the browser cache, transfer). One run each, on the Vite development server, in Chromium 152 on an Apple M3 with 8 cores.
 
@@ -28,3 +28,31 @@ Cache size on disk for both updates: 111MB at 350K and about 320MB at 1M.
 - Generating the 1M pair in the browser takes about 6s, twice as long as in Node. It is a one-off for the demo, but worth a look.
 
 **Not measured yet:** memory, first rows visible, CPM, diff, scroll frame times, Firefox and Safari.
+
+<!-- perf:start -->
+## Latest suite run
+
+Written by `pnpm perf`. Release build served by `vite preview`, headless Chromium, synthetic rail fixtures at seed 42, median of 5 runs.
+
+- Machine: Apple M3, 8 cores, 16GB, darwin 27.2.0 arm64
+- Commit: f284ad0
+
+| Per file, median of 5 | 100K | 350K | 1M |
+|---|---|---|---|
+| File size | 27MB | 93MB | 267MB |
+| Hash | 0.11s | 0.39s | 1.10s |
+| Parse | 0.22s | 0.78s | 2.32s |
+| Pack and write to cache | 0.02s | 0.06s | 0.23s |
+| **Full import** | **0.36s** | **1.24s** | **3.66s** |
+| Budget | 1.50s, within | 4.00s, within | 10.00s, within |
+| **Reopen from cache** | **0.12s** | **0.41s** | **1.16s** |
+| Budget | 0.30s, within | 0.60s, within | 1.50s, within |
+| Main thread long tasks, worst import | 0 | 0 | 0 |
+| JS heap, both updates loaded | 2MB | 2MB | 2MB |
+| Typed arrays, both updates loaded | 32MB | 110MB | 317MB |
+| **Memory total** | **33MB** | **112MB** | **318MB** |
+| Budget (starting estimate) | 250MB, within | 700MB, within | 1800MB, within |
+| Generate the pair in the browser | 0.55s | 1.83s | 5.29s |
+
+Not measured yet: first rows visible, CPM, diff, scroll frame times, Firefox and Safari.
+<!-- perf:end -->
