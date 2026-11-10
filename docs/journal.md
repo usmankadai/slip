@@ -2,6 +2,35 @@
 
 What was built, what Usman decided or designed, and what an agent generated. Newest first.
 
+## 10 November 2026: CPM and the diff of two updates
+
+**Built**
+
+- CPM in `packages/engine`: forward and backward passes in topological order, all four relationship types, lags and leads, constraints, progress, several calendars, and logic loops that are reported instead of hanging.
+- The diff: activities matched by code, a bitmask of change kinds per activity, deltas in working minutes, added and removed activities, and relationship changes counted and flagged at both ends.
+- Validation: the engine matches the generator on every date and float value in eight generated files, and at 1M activities with zero differences in six million values. The diff finds exactly the changes the generator recorded.
+- Rough timings in Node: CPM about 0.36s and diff about 0.96s at 1M activities, against budgets of 3s each.
+
+**Usman decided or designed**
+
+- To begin phase 2's engine work while the phase 1 items that need him (import flow, colours, real files, deploy) are open. This departs from the rule that a phase does not start until the last one is done; it is his call and is recorded here.
+- The change kinds, matching by activity code, and the bitmask storage, from the original spec.
+- That commits and pull requests no longer credit the agent in git. This journal remains the record of who did what.
+
+**The agent (Claude) generated**
+
+- All code and tests in this entry, and decision D18, including the table of known differences from P6.
+- Choices made without asking: how loops are broken, the `DuplicateCode` flag, deltas in working minutes, flagging both ends of a changed relationship, and critical meaning float of zero or less.
+
+**Worth Usman's attention**
+
+- In the synthetic pairs, more than half of all activities count as "changed", mostly because float moves everywhere when completion slips, and about a third have a moved finish. A changes view that shows every changed activity would be mostly noise. This is a design question (which changes are causes and which are consequences), not an engine one.
+
+**Not verified**
+
+- Nothing has been compared with a real P6 export.
+- The timings are not from the perf suite and are not in a worker.
+
 ## 10 November 2026: security headers and the secrets check
 
 **Built**
