@@ -132,8 +132,8 @@ function periodsOf(day: Node): DayPeriods {
     let start = clockMinutes(attr(child.attrs, 's'));
     let finish = clockMinutes(attr(child.attrs, 'f'));
     if (start < 0 || finish < 0) continue;
-    // "00:00" as a finish means the end of the day.
-    if (finish === 0 && start > 0) finish = 1440;
+    // "00:00" as a finish means the end of the day. P6 writes a 24 hour day as 00:00 to 00:00.
+    if (finish === 0) finish = 1440;
     if (finish < start) [start, finish] = [finish, start];
     if (finish > start) spans.push([start, finish]);
   }

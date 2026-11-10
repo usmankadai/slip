@@ -1,0 +1,96 @@
+{
+  "options": {
+    "activities": 1000,
+    "seed": 42,
+    "sector": "rail"
+  },
+  "update01": {
+    "activities": 1000,
+    "relationships": 1254,
+    "dataDate": "2026-05-31 08:00"
+  },
+  "update02": {
+    "activities": 1000,
+    "relationships": 1251,
+    "dataDate": "2026-06-28 08:00"
+  },
+  "milestone": {
+    "code": "MS-COMPLETE",
+    "finish01": "2027-05-07 17:00",
+    "finish02": "2027-08-10 17:00",
+    "slipMinutes": 32160,
+    "slipWorkingDays": 67
+  },
+  "drivers": [
+    {
+      "code": "P03-A002-ENB-0120",
+      "growthMinutes": 9600,
+      "growthWorkingDays": 20
+    },
+    {
+      "code": "P03-A002-TRK-0170",
+      "growthMinutes": 8640,
+      "growthWorkingDays": 18
+    },
+    {
+      "code": "P03-A002-TRK-0010",
+      "growthMinutes": 7680,
+      "growthWorkingDays": 16
+    },
+    {
+      "code": "P03-A002-CIV-0050",
+      "growthMinutes": 6240,
+      "growthWorkingDays": 13
+    }
+  ],
+  "changes": {
+    "added": [
+      "P02-A002-CIV-N0001",
+      "P03-A003-TRK-N0002"
+    ],
+    "removed": [
+      "P02-A001-CIV-0030",
+      "P03-A005-ENB-0190"
+    ],
+    "durationChanged": [
+      "P01-A002-TRK-0110",
+      "P02-A002-TRK-0160",
+      "P02-A005-CIV-0050",
+      "P03-A001-ENB-0160",
+      "P03-A002-ENB-0120",
+      "P03-A002-CIV-0050",
+      "P03-A002-TRK-0010",
+      "P03-A002-TRK-0170",
+      "P03-A005-TRK-0030"
+    ],
+    "constraintAdded": [
+      "P03-A001-CIV-0140"
+    ],
+    "relationshipAdded": [
+      [
+        "P02-A004-CIV-0120",
+        "P02-A004-CIV-0150",
+        "FS"
+      ],
+      [
+        "P02-A002-CIV-0140",
+        "P02-A002-CIV-0170",
+        "FS"
+      ]
+    ],
+    "relationshipRemoved": [
+      [
+        "P02-A003-CIV-0130",
+        "P02-A003-CIV-0160",
+        "FS"
+      ]
+    ],
+    "lagChanged": [
+      [
+        "P01-A002-TRK-0190",
+        "P01-A002-TRK-0220",
+        "FS"
+      ]
+    ]
+  }
+}
