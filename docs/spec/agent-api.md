@@ -67,5 +67,6 @@ The client keeps the set of task codes that appeared in tool results for the cur
 - `apps/api`: `POST /agent/chat` and `GET /health` on Hono, with request validation, the per-visitor limit, the daily cap (memory or Upstash Redis), an origin check, and the model call behind an injected function.
 - How it differs from the description above is in [D20](../decisions/D20-agent-server.md). In short: the server sends `text-delta`, `tool-request`, `done` and `error`; steps and blocks are built in the browser.
 - Environment variables are listed in `.env.example`.
-- Not yet: the browser side (running tools against the engine, the panel, the audit entries), scripted mode, the evals, deployment to Vercel, and a first call with a real key.
+- A first live run is written up in [D20](../decisions/D20-agent-server.md): the tool loop, grounding, the planted instruction, proposals and caching all held. It used made-up tool results, not the engine.
+- Not yet: the browser side (running tools against the engine, the panel, the audit entries), scripted mode, the evals, and deployment to Vercel.
 

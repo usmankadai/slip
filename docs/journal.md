@@ -2,6 +2,29 @@
 
 What was built, what Usman decided or designed, and what an agent generated. Newest first.
 
+## 10 November 2026: first live run of the agent
+
+**Done**
+
+- Three real questions through the local server, with a script answering tool requests with made-up schedule data. Written up in decision D20.
+- It worked end to end: the tool loop, citations, refusing a planted instruction, proposing an edit only when asked, and prompt caching. Eleven model calls cost about $0.12.
+
+**Usman decided or designed**
+
+- To test live, and to pay for it. He added the key and the credit himself.
+
+**The agent (Claude) generated**
+
+- The test script (not committed; it is a throwaway) and the write-up.
+
+**Worth Usman's attention**
+
+- Answers are longer than the prompt asks for, and there can be ten seconds with nothing on screen while the model thinks. Both are design questions for the agent panel and the prompt.
+
+**Not verified**
+
+- The tools returned made-up data, not results from the engine. Only three questions were asked, and not through a browser.
+
 ## 10 November 2026: the agent server
 
 **Built**
