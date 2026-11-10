@@ -2,6 +2,40 @@
 
 What was built, what Usman decided or designed, and what an agent generated. Newest first.
 
+## 10 November 2026: working-time arithmetic and the synthetic generator
+
+**Built**
+
+- `packages/engine/src/worktime.ts`: calendar arithmetic through one idea, the count of working minutes before a moment. Adding work, snapping to a working period and measuring float are lookups and a binary search, never a loop over days. Tested against a minute-by-minute count.
+- `packages/gen`: builds a schedule network (phases, areas, disciplines, three calendars), schedules it, statuses it, and scripts a second update with a known slip. Writes XER in chunks.
+- `tools/gen-xer`: the command line wrapper. The 1K rail pair is committed; 100K, 350K and 1M generate locally.
+- 68 unit tests in total. The generated files parse with no warnings at every size.
+
+**Usman decided or designed**
+
+- The generator's brief in the original spec: paired updates, `expected.json`, sectors, sizes, determinism, and a scripted slip on a known driving chain.
+- To install the GitHub CLI and enable pnpm, and to continue phase 1.
+
+**The agent (Claude) generated**
+
+- All of the code and tests in this entry.
+- The scheduling conventions in D17, chosen without asking. They decide what the engine's CPM will be held to, so they are worth a read.
+- The shape of the synthetic programme: how activity count maps to phases, areas and disciplines, the mix of relationship types, and the three calendars.
+
+**What went wrong and was fixed**
+
+- The first version linked activities across areas. At 100K the project ran past 80 years; after a first fix, added relationships in update 02 still caused slips of 600 to 700 working days that no scripted driver explained. Links are now local, and an added relationship only joins a sequence that already held.
+- A test claimed the slip equals the scripted growth exactly. It does not when drivers and the milestone use different calendars, so the test now allows a small difference and says why.
+- The calendar reader dropped a 24 hour day written as 00:00 to 00:00. Fixed, with a test.
+
+**Rough numbers, not for publishing** (Node, Apple M3, parser only, streamed from disk)
+
+- 100K: about 0.3s. 350K: about 0.9s. 1M: about 2.8s. The budgets for a full parse in the browser are 1.5s, 4s and 10s.
+
+**Still not done in phase 1**
+
+- The parse worker, the import screen (waiting on its low-fidelity flow), the browser cache, Storybook and tokens (waiting on colour values), real XER fixtures, the perf harness, the first deploy, and the research guide.
+
 ## 10 November 2026: spec, repository and the XER parser
 
 **Built**
