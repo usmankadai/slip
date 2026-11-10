@@ -11,6 +11,15 @@
 import { NONE, Status, stringAt, type ScheduleData } from '@slip/xer';
 import { prepareClocks, runCpm, type CpmResult } from './cpm.ts';
 import { diffSchedules, type ChangeName, type DiffDates, type DiffResult } from './diff.ts';
+import {
+  changedActivities,
+  invalidEdit,
+  isEditField,
+  milestoneMoves,
+  withEdits,
+  type EditField,
+  type EditPatch,
+} from './edits.ts';
 import { runHealth, type HealthCheck } from './health/health.ts';
 import { traceSlip, type TraceOptions, type TraceResult } from './trace.ts';
 import type { WorkClock } from './worktime.ts';
@@ -81,6 +90,21 @@ export type EngineRequest =
   | { type: 'health'; slot: Slot }
   /** Trace an activity of update B, by index or by activity code. */
   | ({ type: 'trace'; activity?: number; taskCode?: string } & TraceOptions)
+  /**
+   * Change one value on an activity of update B and reschedule. With `preview`, nothing is
+   * kept: the result shows what would happen. `id` lets a saved edit be replayed under its own id.
+   */
+  | {
+      type: 'applyEdit';
+      activity?: number;
+      taskCode?: string;
+      field: EditField;
+      to: number;
+      preview?: boolean;
+      id?: string;
+    }
+  | { type: 'revertEdit'; editId: string }
+  | { type: 'edits' }
   | {
       type: 'rows';
       slot: Slot;
@@ -141,6 +165,21 @@ export interface TraceSummary extends TraceResult {
   names: string[];
 }
 
+export interface EditResult {
+  /** The edit as applied. For a preview or a revert, the edit that was tried or removed. */
+  edit: EditPatch;
+  /** False for a preview: the schedule is as it was. */
+  applied: boolean;
+  /** Activities whose dates or float changed, in index order. */
+  changed: Int32Array;
+  projectFinishBefore: number;
+  projectFinishAfter: number;
+  /** Milestones whose date moved, the biggest move first, with their codes. At most 50. */
+  milestones: { activity: number; taskCode: string; finishBefore: number; finishAfter: number }[];
+  /** Edits in force after this request. */
+  editCount: number;
+}
+
 export type EngineResult =
   | { type: 'ping' }
   | ({ type: 'load' } & LoadResult)
@@ -148,6 +187,9 @@ export type EngineResult =
   | ({ type: 'diff' } & DiffSummary)
   | { type: 'health'; slot: Slot; checks: HealthSummary[] }
   | ({ type: 'trace' } & TraceSummary)
+  | ({ type: 'applyEdit' } & EditResult)
+  | ({ type: 'revertEdit' } & EditResult)
+  | { type: 'edits'; edits: EditPatch[] }
   | ({ type: 'rows' } & RowsResult);
 
 export type EngineErrorCode = 'not-loaded' | 'bad-request' | 'out-of-memory' | 'failed';
@@ -163,7 +205,12 @@ export class EngineError extends Error {
 }
 
 interface Loaded {
+  /** The schedule with edits applied. The same object as `base` while there are none. */
   data: ScheduleData;
+  /** The schedule exactly as imported. Never changed. */
+  base: ScheduleData;
+  /** Edits in force, oldest first. Only update B is edited. */
+  edits: EditPatch[];
   clocks: WorkClock[];
   cpm: CpmResult | null;
   /** Goes up whenever the schedule or its dates change. Cached views are tied to it. */
@@ -187,6 +234,7 @@ export class EngineSession {
   private readonly slots: Record<Slot, Loaded | null> = { a: null, b: null };
   private diff: DiffResult | null = null;
   private versionCounter = 0;
+  private editCounter = 0;
   /** Most recently used last. */
   private views: CachedView[] = [];
 
@@ -213,6 +261,12 @@ export class EngineSession {
           };
         case 'trace':
           return { type: 'trace', ...this.trace(request) };
+        case 'applyEdit':
+          return { type: 'applyEdit', ...this.applyEdit(request) };
+        case 'revertEdit':
+          return { type: 'revertEdit', ...this.revertEdit(request.editId) };
+        case 'edits':
+          return { type: 'edits', edits: this.need('b').edits.map((edit) => ({ ...edit })) };
         case 'rows':
           return { type: 'rows', ...this.rows(request) };
         default:
@@ -243,6 +297,8 @@ export class EngineSession {
         result.edgeLag,
       ].map((array) => array.buffer as ArrayBuffer);
     }
+    if (result.type === 'applyEdit' || result.type === 'revertEdit')
+      return [result.changed.buffer as ArrayBuffer];
     if (result.type !== 'rows') return [];
     const buffers = [result.indices.buffer as ArrayBuffer];
     for (const column of Object.values(result.numbers)) buffers.push(column.buffer as ArrayBuffer);
@@ -260,6 +316,8 @@ export class EngineSession {
     const version = ++this.versionCounter;
     this.slots[slot] = {
       data,
+      base: data,
+      edits: [],
       clocks: prepareClocks(data),
       cpm: null,
       version,
@@ -330,19 +388,7 @@ export class EngineSession {
   private trace(request: Extract<EngineRequest, { type: 'trace' }>): TraceSummary {
     const a = this.need('a');
     const b = this.need('b');
-    let target = request.activity ?? -1;
-    if (request.taskCode !== undefined) {
-      target = -1;
-      for (let j = 0; j < b.data.n; j++) {
-        if (stringAt(b.data.strings, b.data.taskCode[j]!) === request.taskCode) {
-          target = j;
-          break;
-        }
-      }
-    }
-    if (!Number.isInteger(target) || target < 0 || target >= b.data.n) {
-      throw new EngineError('bad-request', 'That activity is not in the current update.');
-    }
+    const target = this.findActivity(b.data, request.activity, request.taskCode);
     const limit = (value: number | undefined, most: number) =>
       value === undefined ? undefined : Math.max(1, Math.min(most, Math.floor(value) || 1));
     const result = traceSlip(
@@ -365,6 +411,112 @@ export class EngineSession {
       codes: Array.from(result.nodes, (j) => stringAt(b.data.strings, b.data.taskCode[j]!)),
       names: Array.from(result.nodes, (j) => stringAt(b.data.strings, b.data.taskName[j]!)),
     };
+  }
+
+  private findActivity(
+    data: ScheduleData,
+    activity: number | undefined,
+    taskCode: string | undefined,
+  ): number {
+    let found = activity ?? -1;
+    if (taskCode !== undefined) {
+      found = -1;
+      for (let j = 0; j < data.n; j++) {
+        if (stringAt(data.strings, data.taskCode[j]!) === taskCode) {
+          found = j;
+          break;
+        }
+      }
+    }
+    if (!Number.isInteger(found) || found < 0 || found >= data.n) {
+      throw new EngineError('bad-request', 'That activity is not in the current update.');
+    }
+    return found;
+  }
+
+  /**
+   * Puts a set of edits in force on update B (or only tries them, for a preview) and
+   * reports what moved. The comparison is always between two of our own CPM runs, never
+   * with the dates in the file, so the result shows the edit and nothing else.
+   */
+  private reschedule(edits: EditPatch[], subject: EditPatch, keep: boolean): EditResult {
+    const b = this.need('b');
+    const before = b.cpm ?? runCpm(b.data, b.clocks);
+    const data = withEdits(b.base, edits);
+    const after = runCpm(data, b.clocks);
+    const changed = changedActivities(before, after);
+    const milestones = milestoneMoves(data, before, after, changed).map((move) => ({
+      ...move,
+      taskCode: stringAt(data.strings, data.taskCode[move.activity]!),
+    }));
+    if (keep) {
+      b.data = data;
+      b.edits = edits;
+      b.cpm = after;
+      b.version = ++this.versionCounter;
+      b.columnCache.clear();
+      b.health = null;
+      this.diff = null;
+      this.views = [];
+    } else if (!b.cpm) {
+      // A preview still leaves update B on recalculated dates, so the next comparison is like for like.
+      b.cpm = before;
+      b.version = ++this.versionCounter;
+      b.columnCache.clear();
+      b.health = null;
+      this.diff = null;
+      this.views = [];
+    }
+    return {
+      edit: { ...subject },
+      applied: keep,
+      changed,
+      projectFinishBefore: before.projectFinish,
+      projectFinishAfter: after.projectFinish,
+      milestones,
+      editCount: b.edits.length,
+    };
+  }
+
+  private applyEdit(request: Extract<EngineRequest, { type: 'applyEdit' }>): EditResult {
+    const b = this.need('b');
+    if (!isEditField(request.field))
+      throw new EngineError('bad-request', 'That field cannot be edited.');
+    const activity = this.findActivity(b.data, request.activity, request.taskCode);
+    const problem = invalidEdit(b.data, activity, request.field, request.to);
+    if (problem) throw new EngineError('bad-request', problem);
+    if (
+      request.id !== undefined &&
+      (typeof request.id !== 'string' || b.edits.some((edit) => edit.id === request.id))
+    ) {
+      throw new EngineError('bad-request', 'That edit id is already in use.');
+    }
+    const column = {
+      originalDuration: b.data.originalDurationMin,
+      remainingDuration: b.data.remainingDurationMin,
+      constraintType: b.data.constraintType,
+      constraintDate: b.data.constraintDate,
+    }[request.field];
+    const patch: EditPatch = {
+      id: request.id ?? `edit-${++this.editCounter}`,
+      activity,
+      taskCode: stringAt(b.data.strings, b.data.taskCode[activity]!),
+      field: request.field,
+      from: column[activity]!,
+      to: request.to,
+    };
+    return this.reschedule([...b.edits, patch], patch, request.preview !== true);
+  }
+
+  private revertEdit(editId: string): EditResult {
+    const b = this.need('b');
+    const edit = b.edits.find((entry) => entry.id === editId);
+    if (!edit) throw new EngineError('bad-request', 'There is no such edit to revert.');
+    return this.reschedule(
+      b.edits.filter((entry) => entry.id !== editId),
+      edit,
+      true,
+    );
   }
 
   private diffSummary(): DiffSummary {

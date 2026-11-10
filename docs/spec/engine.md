@@ -86,4 +86,13 @@ Counts exclude completed activities, LOE and WBS summary tasks where DCMA guidan
 - **DCMA checks** (`health/health.ts`), with the counting rules in `packages/engine/src/health/README.md`. Check 10 (resources) is not assessed because resource assignments are not read yet; check 12 is reported only.
 - Both are available through the engine session: `trace` (by activity index or code) and `health` (per update). The activities behind a check come from a `rows` request with the `healthCheck` filter.
 - Rough timings in Node at 1M activities, not from the perf suite: trace under 0.1s, health about 0.05s per update.
-- Not yet: edits and rerunning CPM for changed indices only, agent queries, recovery after a crash, and validation against real exports.
+- **Edits** (`edits.ts`), on the current update only. Requests: `applyEdit` (by activity index or code), `revertEdit` and `edits`. How they behave:
+  - **Fields:** original duration, remaining duration, constraint type and constraint date. Relationship edits (add, remove, change lag) are not built.
+  - **The imported columns are never changed.** The edited schedule is the original plus fresh copies of the four editable columns with every edit applied in order. A revert rebuilds those copies from the original and the edits that remain.
+  - **Preview:** `applyEdit` with `preview: true` reschedules, reports, and keeps nothing. This is what a proposed-edit card shows before approval.
+  - **What comes back:** the activities whose dates or float changed, the project finish before and after, and up to 50 milestones that moved, biggest first.
+  - **Like for like:** the comparison is always between two of our own CPM runs, never with the dates in the file, so the result shows the edit and nothing else. From the first edit or preview, update B is shown on recalculated dates.
+  - **Refused, with a reason:** a finished activity, a negative or absurd duration, a duration on a milestone, remaining duration on work that has not started, an unknown constraint type, an unknown field.
+  - **Replay:** an edit can be applied under a given id, so saved edits can be put back after a reload.
+  - **CPM is rerun in full**, not incrementally. At 1M activities an edit takes about 0.5s in Node, so the incremental version is not needed yet.
+- Not yet: relationship edits, agent queries, recovery after a crash, and validation against real exports.
