@@ -2,6 +2,29 @@
 
 What was built, what Usman decided or designed, and what an agent generated. Newest first.
 
+## 10 November 2026: edits in the engine
+
+**Built**
+
+- Apply, preview, revert and list edits on the current update: durations and constraints. An edit reschedules and reports which activities moved and which milestones, biggest move first.
+- A preview does everything an edit does and keeps nothing, which is what the proposed-edit card needs to show before a planner approves.
+- Rough timings in Node: an edit takes about 0.05s at 100K, 0.16s at 350K and 0.5s at 1M.
+
+**Usman decided or designed**
+
+- That imported data is never changed and edits are an overlay; that every edit reruns CPM; and that the agent may only propose edits, which a person approves. All from the original spec.
+- To have this built next, ahead of the screens.
+
+**The agent (Claude) generated**
+
+- All code and tests in this entry.
+- Choices made without asking: which four fields can be edited; that relationship edits wait; what an edit is refused for; that the comparison is between two of our own CPM runs; rerunning CPM in full, because it is fast enough; and returning up to 50 moved milestones.
+
+**Not verified**
+
+- Timings are from Node, not the perf suite or a worker.
+- Nothing shows edits yet: there is no proposed-edit card and no audit log entry is written, because neither exists.
+
 ## 10 November 2026: slip trace and DCMA checks
 
 **Built**

@@ -1,5 +1,6 @@
 export * from './cpm.ts';
 export * from './diff.ts';
+export * from './edits.ts';
 export * from './health/health.ts';
 export * from './queue.ts';
 export * from './session.ts';
