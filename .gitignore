@@ -1,0 +1,19 @@
+node_modules/
+dist/
+coverage/
+storybook-static/
+test-results/
+playwright-report/
+.vercel/
+.DS_Store
+*.tsbuildinfo
+
+# Secrets
+.env
+.env.*
+!.env.example
+
+# Generated fixtures are regenerated with gen-xer; only the 1K pair is committed
+fixtures/synthetic/*
+!fixtures/synthetic/.gitkeep
+!fixtures/synthetic/*-1k/
