@@ -529,6 +529,7 @@ export class XerParser {
       },
       meta: {
         formatVersion: FORMAT_VERSION,
+        sourceHash: '',
         epoch: EPOCH,
         projectId: this.selectedProject,
         projectName: project?.name ?? '',
