@@ -1,0 +1,16 @@
+{
+  "name": "@slip/perf",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "ci": "PERF_MODE=ci playwright test",
+    "local": "PERF_MODE=local playwright test"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.65.0",
+    "@types/node": "^24.19.2",
+    "typescript": "^6.0.3"
+  }
+}

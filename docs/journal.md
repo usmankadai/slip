@@ -2,6 +2,30 @@
 
 What was built, what Usman decided or designed, and what an agent generated. Newest first.
 
+## 10 November 2026: performance suite
+
+**Built**
+
+- `tools/perf`: a Playwright suite against a release build. It imports a synthetic file cold and from the cache, several times, and checks the medians against the budgets in the spec.
+- A CI job for the 100K subset, and a writer that updates `docs/perf.md` from a local run.
+- First suite results: a full import of one file takes 0.36s at 100K, 1.24s at 350K and 3.66s at 1M; reopening from the cache takes 0.12s, 0.41s and 1.16s. No long tasks on the main thread. All within budget.
+
+**Usman decided or designed**
+
+- The budgets themselves, the rule that they are never loosened to pass, and where they run (strict locally, loose in CI).
+- A change to the workflow: the agent opens pull requests, and he merges them and deletes the branches.
+
+**The agent (Claude) generated**
+
+- The suite, the page hook it drives, the results writer and the CI job.
+- The planner interview guide draft (its own pull request).
+
+**Limits of these numbers**
+
+- Memory is the main thread only, and there is no engine worker yet, so the memory row will rise.
+- "Reopen from cache" stops when the schedule is in hand, not when rows are on screen.
+- Chromium only.
+
 ## 10 November 2026: import worker and browser cache
 
 **Built**
