@@ -6,15 +6,7 @@ import {
   type EngineRequest,
   type EngineResult,
 } from '@slip/engine';
-import {
-  ConstraintType,
-  NONE,
-  Status,
-  TaskType,
-  formatXerDate,
-  parseXerDate,
-  parseXerText,
-} from '@slip/xer';
+import { ConstraintType, NONE, Status, TaskType, formatXerDate, parseXerText } from '@slip/xer';
 import { generatePair, xerText } from '../src/index.ts';
 
 const pair = generatePair({ activities: 1000, seed: 42, sector: 'rail' });
