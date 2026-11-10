@@ -95,4 +95,7 @@ Counts exclude completed activities, LOE and WBS summary tasks where DCMA guidan
   - **Refused, with a reason:** a finished activity, a negative or absurd duration, a duration on a milestone, remaining duration on work that has not started, an unknown constraint type, an unknown field.
   - **Replay:** an edit can be applied under a given id, so saved edits can be put back after a reload.
   - **CPM is rerun in full**, not incrementally. At 1M activities an edit takes about 0.5s in Node, so the incremental version is not needed yet.
-- Not yet: relationship edits, agent queries, recovery after a crash, and validation against real exports.
+- **For the agent's tools and the activity drawer:** `info` (what is loaded, with each calendar's day length) and `activity` (one activity by exact code in both updates, with relationships and what changed). `rows` can filter by activity type. `applyEdit` takes a second value with `and`, so a constraint's type and date are applied, previewed and reverted together.
+- **Working-day columns:** `startDeltaDays`, `finishDeltaDays`, `durationDeltaDays` and `totalFloatDays`, in hundredths of a working day on the activity's own calendar. Rank and sort by these, not by the minute columns: a day is 480 minutes on one calendar and 1,440 on another, so minutes put a 28 day slip on a 24 hour calendar ahead of a 67 day slip on an 8 hour one.
+- The spec's `query` request for agent tools is not needed: the tools are built from the requests above.
+- Not yet: relationship edits, recovery after a crash, and validation against real exports.

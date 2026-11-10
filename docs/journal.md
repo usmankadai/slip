@@ -2,6 +2,32 @@
 
 What was built, what Usman decided or designed, and what an agent generated. Newest first.
 
+## 10 November 2026: the agent's tools against the engine
+
+**Built**
+
+- The six tools now run against the real engine: search, activity detail, slip trace, health, the comparison summary, and proposing an edit. Each returns a few kilobytes of what was asked for, and the list of activity codes an answer may cite.
+- Engine additions the tools needed: what is loaded, one activity in both updates, a filter by activity type, and applying a constraint's type and date as one edit.
+- Checked against generated pairs: the trace tool names the scripted drivers first with the right days; the comparison matches the generator's counts; a proposal reports its effect and leaves the schedule untouched.
+
+**Usman decided or designed**
+
+- The six tools and what each is for, the limits on results, and that proposing never applies, from the original spec.
+
+**The agent (Claude) generated**
+
+- All code and tests in this entry.
+- Choices made without asking: the exact shape and field names of each tool's result; giving the model working days and not minutes; cutting relationships from an activity's detail until it fits the size limit.
+
+**What went wrong and was fixed**
+
+- Sorting "largest slip first" compared minutes. A 28 day slip on a 24 hour calendar outranked a 67 day slip on an 8 hour one. The engine now has working-day columns for ranking, and the tools and the perf suite use them. This would have been wrong in the grid too.
+- A test assumed the completion milestone would be first among moved milestones. Another milestone ties with it; the test now checks the order and that completion is present.
+
+**Not verified**
+
+- The tools have not yet been driven by the live model. The earlier live run used made-up results.
+
 ## 10 November 2026: first live run of the agent
 
 **Done**

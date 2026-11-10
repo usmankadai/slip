@@ -14,6 +14,7 @@
     "@slip/xer": "workspace:*"
   },
   "devDependencies": {
+    "@slip/agent": "workspace:*",
     "typescript": "^6.0.3"
   }
 }
