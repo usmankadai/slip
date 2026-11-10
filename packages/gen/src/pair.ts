@@ -185,7 +185,22 @@ export function generatePair(options: GenOptions): Pair {
   const path = drivingPath(net1, clocks, links, schedule1, net1.completion);
   const onPath = new Uint8Array(n1);
   for (const i of path) onPath[i] = 1;
-  const candidates = path.filter((i) => isTask(i) && future(i) && net1.calendar[i] !== 2);
+  // Growing an activity only delays the milestone if its finish is what drives the next
+  // activity on the chain. One tied start to start would absorb the growth.
+  const drivesByFinish = new Uint8Array(n1);
+  for (let k = 1; k < path.length; k++) {
+    const pred = path[k]!;
+    const succ = path[k - 1]!;
+    for (let at = links.predOffsets[succ]!; at < links.predOffsets[succ + 1]!; at++) {
+      const r = links.predRels[at]!;
+      const type = net1.relType[r]!;
+      if (net1.relPred[r] === pred && (type === RelType.FS || type === RelType.FF))
+        drivesByFinish[pred] = 1;
+    }
+  }
+  const candidates = path.filter(
+    (i) => isTask(i) && future(i) && net1.calendar[i] !== 2 && drivesByFinish[i] === 1,
+  );
   const driverCount = Math.min(
     candidates.length,
     Math.max(3, Math.round(Math.log10(options.activities)) + 1),

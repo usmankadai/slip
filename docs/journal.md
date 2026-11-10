@@ -2,6 +2,39 @@
 
 What was built, what Usman decided or designed, and what an agent generated. Newest first.
 
+## 10 November 2026: slip trace and DCMA checks
+
+**Built**
+
+- The slip trace: from a milestone back through its driving predecessors, with a ranked list of what each activity on that path added. On generated pairs it ranks exactly the scripted drivers first, with the scripted growth, and the contributions add up to the slip.
+- The DCMA 14-point checks for one update, with the counting rules written out beside the code. Thirteen are assessed; resources are not, because assignments are not read yet.
+- Both are available from the engine worker. The activities behind a failed check are a filter on the grid's row request.
+- Rough timings at 1M activities in Node: trace under 0.1s, health about 0.05s per update.
+
+**Usman decided or designed**
+
+- The trace and health features, the idea of driving predecessors, attributing slip to an activity's own change against what it inherited, and the DCMA thresholds, from the original spec.
+- To build these engine pieces now, ahead of the screens that will show them.
+
+**The agent (Claude) generated**
+
+- All code and tests in this entry, and the counting rules document.
+- Choices made without asking: what counts as driving, the contribution kinds, that own duration counts only when the finish drives, and every departure listed in the health rules (how the first and last activities are treated, what check 12 reports, how check 13 picks its float).
+
+**What went wrong and was fixed**
+
+- The trace showed the generator was wrong. One scripted driver was tied to its successor start to start, so its extra duration delayed nothing: 67 days of scripted growth gave a 49 day slip. The generator now only scripts growth on activities that drive from their finish, and the fixtures were regenerated.
+- Two test assumptions were wrong and were corrected, not the code: missing-logic counts fall as work completes, and update 01 already has some negative float.
+
+**Worth Usman's attention**
+
+- The trace view is one of the hard design problems in the design spec. The engine now returns a ranked list, the driving network and why each branch ends, so any of the layouts being considered can be built from it.
+- On the synthetic files, checks 1, 2, 3, 6 and 7 fail. That is the generator's doing (open ends, leads, lags, high float from open ends) and is useful for a demo, but it is not evidence about real schedules.
+
+**Not verified**
+
+- Nothing has been compared with a real P6 export or with another DCMA tool.
+
 ## 10 November 2026: the engine worker
 
 **Built**

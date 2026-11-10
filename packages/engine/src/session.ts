@@ -11,6 +11,8 @@
 import { NONE, Status, stringAt, type ScheduleData } from '@slip/xer';
 import { prepareClocks, runCpm, type CpmResult } from './cpm.ts';
 import { diffSchedules, type ChangeName, type DiffDates, type DiffResult } from './diff.ts';
+import { runHealth, type HealthCheck } from './health/health.ts';
+import { traceSlip, type TraceOptions, type TraceResult } from './trace.ts';
 import type { WorkClock } from './worktime.ts';
 
 export type Slot = 'a' | 'b';
@@ -62,6 +64,8 @@ export interface FilterSpec {
   critical?: boolean;
   /** Only activities whose code or name contains this text. Case is ignored for A to Z. */
   text?: string;
+  /** Only the activities counted against this DCMA check (1 to 14). */
+  healthCheck?: number;
 }
 
 export interface SortSpec {
@@ -74,6 +78,9 @@ export type EngineRequest =
   | { type: 'load'; slot: Slot; data: ScheduleData }
   | { type: 'cpm'; slot: Slot }
   | { type: 'diff' }
+  | { type: 'health'; slot: Slot }
+  /** Trace an activity of update B, by index or by activity code. */
+  | ({ type: 'trace'; activity?: number; taskCode?: string } & TraceOptions)
   | {
       type: 'rows';
       slot: Slot;
@@ -125,11 +132,22 @@ export interface RowsResult {
   numbers: Partial<Record<NumberColumn, Int32Array>>;
 }
 
+/** A health check without its list of activities; ask for those with a `rows` request and the `healthCheck` filter. */
+export type HealthSummary = Omit<HealthCheck, 'offenders'>;
+
+export interface TraceSummary extends TraceResult {
+  /** Activity code and name for each entry of `nodes`, so a small view needs no second request. */
+  codes: string[];
+  names: string[];
+}
+
 export type EngineResult =
   | { type: 'ping' }
   | ({ type: 'load' } & LoadResult)
   | ({ type: 'cpm' } & CpmSummary)
   | ({ type: 'diff' } & DiffSummary)
+  | { type: 'health'; slot: Slot; checks: HealthSummary[] }
+  | ({ type: 'trace' } & TraceSummary)
   | ({ type: 'rows' } & RowsResult);
 
 export type EngineErrorCode = 'not-loaded' | 'bad-request' | 'out-of-memory' | 'failed';
@@ -152,6 +170,8 @@ interface Loaded {
   version: number;
   /** Whole-schedule number columns built for sorting, by column. */
   columnCache: Map<NumberColumn, Int32Array>;
+  /** DCMA checks for the current version, once asked for. */
+  health: HealthCheck[] | null;
 }
 
 interface CachedView {
@@ -181,6 +201,18 @@ export class EngineSession {
           return { type: 'cpm', ...this.cpm(request.slot) };
         case 'diff':
           return { type: 'diff', ...this.diffSummary() };
+        case 'health':
+          return {
+            type: 'health',
+            slot: request.slot,
+            checks: this.health(request.slot).map((check) => {
+              const summary: Partial<HealthCheck> = { ...check };
+              delete summary.offenders;
+              return summary as HealthSummary;
+            }),
+          };
+        case 'trace':
+          return { type: 'trace', ...this.trace(request) };
         case 'rows':
           return { type: 'rows', ...this.rows(request) };
         default:
@@ -200,6 +232,17 @@ export class EngineSession {
 
   /** Buffers in a result that can be transferred instead of copied. */
   static transferList(result: EngineResult): ArrayBuffer[] {
+    if (result.type === 'trace') {
+      return [
+        result.nodes,
+        result.depth,
+        result.end,
+        result.edgePred,
+        result.edgeSucc,
+        result.edgeType,
+        result.edgeLag,
+      ].map((array) => array.buffer as ArrayBuffer);
+    }
     if (result.type !== 'rows') return [];
     const buffers = [result.indices.buffer as ArrayBuffer];
     for (const column of Object.values(result.numbers)) buffers.push(column.buffer as ArrayBuffer);
@@ -221,6 +264,7 @@ export class EngineSession {
       cpm: null,
       version,
       columnCache: new Map(),
+      health: null,
     };
     this.diff = null;
     this.views = [];
@@ -233,6 +277,7 @@ export class EngineSession {
     loaded.cpm = result;
     loaded.version = ++this.versionCounter;
     loaded.columnCache.clear();
+    loaded.health = null;
     this.diff = null;
     this.views = [];
     let critical = 0;
@@ -274,6 +319,52 @@ export class EngineSession {
       this.diff = diffSchedules(a.data, b.data, b.clocks, this.dates(a), this.dates(b));
     }
     return this.diff;
+  }
+
+  private health(slot: Slot): HealthCheck[] {
+    const loaded = this.need(slot);
+    loaded.health ??= runHealth(loaded.data, loaded.clocks, this.dates(loaded));
+    return loaded.health;
+  }
+
+  private trace(request: Extract<EngineRequest, { type: 'trace' }>): TraceSummary {
+    const a = this.need('a');
+    const b = this.need('b');
+    let target = request.activity ?? -1;
+    if (request.taskCode !== undefined) {
+      target = -1;
+      for (let j = 0; j < b.data.n; j++) {
+        if (stringAt(b.data.strings, b.data.taskCode[j]!) === request.taskCode) {
+          target = j;
+          break;
+        }
+      }
+    }
+    if (!Number.isInteger(target) || target < 0 || target >= b.data.n) {
+      throw new EngineError('bad-request', 'That activity is not in the current update.');
+    }
+    const limit = (value: number | undefined, most: number) =>
+      value === undefined ? undefined : Math.max(1, Math.min(most, Math.floor(value) || 1));
+    const result = traceSlip(
+      a.data,
+      b.data,
+      this.ensureDiff(),
+      a.clocks,
+      b.clocks,
+      this.dates(a),
+      this.dates(b),
+      target,
+      {
+        maxNodes: limit(request.maxNodes, 5000),
+        maxDepth: limit(request.maxDepth, 100_000),
+        maxContributors: limit(request.maxContributors, 1000),
+      },
+    );
+    return {
+      ...result,
+      codes: Array.from(result.nodes, (j) => stringAt(b.data.strings, b.data.taskCode[j]!)),
+      names: Array.from(result.nodes, (j) => stringAt(b.data.strings, b.data.taskName[j]!)),
+    };
   }
 
   private diffSummary(): DiffSummary {
@@ -402,12 +493,20 @@ export class EngineSession {
     if (flagMask !== 0 && !flags) return new Int32Array(0); // nothing to compare against
     const statuses = filter.status && filter.status.length > 0 ? new Set(filter.status) : null;
     const float = filter.critical ? this.dates(loaded).totalFloat : null;
+    let inCheck: Uint8Array | null = null;
+    if (filter.healthCheck !== undefined) {
+      const check = this.health(slot).find((entry) => entry.id === filter.healthCheck);
+      if (!check) throw new EngineError('bad-request', 'Unknown health check.');
+      inCheck = new Uint8Array(n);
+      for (const i of check.offenders) inCheck[i] = 1;
+    }
     const needle = filter.text ? asciiLower(new TextEncoder().encode(filter.text)) : null;
 
     const out = new Int32Array(n);
     let count = 0;
     for (let i = 0; i < n; i++) {
       if (flags && (flags[i]! & flagMask) === 0) continue;
+      if (inCheck && !inCheck[i]) continue;
       if (statuses && !statuses.has(data.status[i]!)) continue;
       if (float && (float[i] === NONE || float[i]! > 0 || data.status[i] === Status.Complete))
         continue;

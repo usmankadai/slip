@@ -80,4 +80,10 @@ Counts exclude completed activities, LOE and WBS summary tasks where DCMA guidan
 - **Rows.** Filters: changed only, any of a set of change kinds, status, critical, and text in the code or name. Sort by any column. Cells are computed only for the rows and columns requested.
 - Diff additions to this spec: a `DuplicateCode` flag for second and later activities with a code already seen (left out of matching, neither added nor removed); deltas are in working minutes on the activity's own calendar; a changed relationship flags the activities at both ends; critical means total float of zero or less.
 - Timings from the perf suite are in [docs/perf.md](../perf.md). At 1M activities in a worker: CPM about 0.4s and diff about 1.2s, against budgets of 3s each.
-- Not yet: slip trace, DCMA, edits and rerunning CPM for changed indices only, agent queries, recovery after a crash, and validation against real exports.
+- **Slip trace** (`trace.ts`). Walks back from an activity through its driving predecessors and stops at finished work, the data date, a constraint or an activity with no predecessor, saying which. Each activity on that network is then asked what it added of its own; the contributors are ranked in working days. Two refinements to the description above:
+  - A relationship drives when it alone reproduces the successor's finish. That is the same idea as zero relationship float, and also covers finish to finish and start to finish.
+  - An activity's own duration only counts when its finish is what drives the next activity. One tied start to start can take longer without delaying anything.
+- **DCMA checks** (`health/health.ts`), with the counting rules in `packages/engine/src/health/README.md`. Check 10 (resources) is not assessed because resource assignments are not read yet; check 12 is reported only.
+- Both are available through the engine session: `trace` (by activity index or code) and `health` (per update). The activities behind a check come from a `rows` request with the `healthCheck` filter.
+- Rough timings in Node at 1M activities, not from the perf suite: trace under 0.1s, health about 0.05s per update.
+- Not yet: edits and rerunning CPM for changed indices only, agent queries, recovery after a crash, and validation against real exports.
