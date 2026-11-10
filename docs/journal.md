@@ -2,6 +2,30 @@
 
 What was built, what Usman decided or designed, and what an agent generated. Newest first.
 
+## 10 November 2026: the engine worker
+
+**Built**
+
+- `EngineSession`: holds both schedules and answers requests for CPM, the diff, and the cells of a visible range of rows under a filter and a sort.
+- `RequestQueue`: runs one job per turn, cancels waiting requests, and lets a newer request replace an older one for the same view.
+- The worker and its client in the web app. Schedules are transferred in, not copied.
+- The perf suite now times the engine in a real worker. At 1M activities: CPM 0.38s, diff 1.18s, first rows of "changed, worst slip first" 0.07s, text search 0.06s, sort by code 0.22s, with no long tasks on the main thread.
+
+**Usman decided or designed**
+
+- The worker design in the spec: schedules live in the engine worker, results come back small, cells are computed only when visible, and filter and sort results are cached.
+- To carry on with phase 2, to stop crediting the agent in git, and to rewrite the earlier history to match.
+
+**The agent (Claude) generated**
+
+- All code and tests in this entry, and decision D19.
+- Choices made without asking: cancel and supersede apply to waiting requests only; one schedule per `load`; the filter set; a cap of 2,000 rows per request; sorting and searching on bytes without decoding strings.
+
+**Not verified**
+
+- "Next rows of the same view" took 0.12s at 1M in the one run measured, slower than the first rows. It should be near zero from the cache. A garbage collection after the diff is the likely cause, but that was not confirmed.
+- Chromium only. No real P6 export yet.
+
 ## 10 November 2026: CPM and the diff of two updates
 
 **Built**

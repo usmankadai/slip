@@ -57,6 +57,13 @@ for (const activities of mode.sizes) {
     for (const result of warm)
       expect(result.fromCache, 'a reopen must come from the cache').toBe(true);
 
+    // Hand both schedules to the engine worker and time its main operations.
+    const engine = await page.evaluate(() => window.slipPerf!.engine());
+    expect(engine.activities, 'the engine must see every activity').toBeGreaterThanOrEqual(
+      activities,
+    );
+    expect(engine.differsFromFile, 'recalculated dates must match a synthetic file').toBe(0);
+
     const everyTask = [...cold, ...warm].flatMap((result) => result.longTasks);
     const result: SizeResult = {
       activities,
@@ -73,6 +80,14 @@ for (const activities of mode.sizes) {
       heapMb: heapBytes / 1e6,
       bufferMb: bufferBytes / 1e6,
       memoryMb: (heapBytes + bufferBytes) / 1e6,
+      engineLoadMs: engine.loadMs,
+      cpmMs: engine.cpmMs,
+      diffMs: engine.diffMs,
+      firstRowsMs: engine.firstRowsMs,
+      scrollRowsMs: engine.scrollRowsMs,
+      searchMs: engine.searchMs,
+      sortByCodeMs: engine.sortByCodeMs,
+      engineLongTasks: engine.longTasks.length,
     };
     record(result);
     await page.evaluate(() => window.slipPerf!.reset());
@@ -86,5 +101,10 @@ for (const activities of mode.sizes) {
       .toBeLessThan(budget.reopenMs * mode.timeFactor);
     expect.soft(result.longTasks, 'main thread long tasks').toBeLessThanOrEqual(budget.longTasks);
     expect.soft(result.memoryMb, 'memory with both updates loaded').toBeLessThan(budget.memoryMb);
+    expect.soft(result.cpmMs, 'CPM in the worker').toBeLessThan(budget.cpmMs * mode.timeFactor);
+    expect.soft(result.diffMs, 'diff in the worker').toBeLessThan(budget.diffMs * mode.timeFactor);
+    expect
+      .soft(result.engineLongTasks, 'main thread long tasks while the engine works')
+      .toBeLessThanOrEqual(budget.longTasks);
   });
 }

@@ -12,12 +12,37 @@ export interface Budget {
   longTasks: number;
   /** "JS heap + typed array memory after import (both updates)". A starting estimate; see the spec. */
   memoryMb: number;
+  /** "CPM run (worker)". */
+  cpmMs: number;
+  /** "Diff of two updates". */
+  diffMs: number;
 }
 
 export const BUDGETS: Record<number, Budget> = {
-  100_000: { fullImportMs: 1500, reopenMs: 300, longTasks: 0, memoryMb: 250 },
-  350_000: { fullImportMs: 4000, reopenMs: 600, longTasks: 0, memoryMb: 700 },
-  1_000_000: { fullImportMs: 10000, reopenMs: 1500, longTasks: 0, memoryMb: 1800 },
+  100_000: {
+    fullImportMs: 1500,
+    reopenMs: 300,
+    longTasks: 0,
+    memoryMb: 250,
+    cpmMs: 300,
+    diffMs: 300,
+  },
+  350_000: {
+    fullImportMs: 4000,
+    reopenMs: 600,
+    longTasks: 0,
+    memoryMb: 700,
+    cpmMs: 1000,
+    diffMs: 1000,
+  },
+  1_000_000: {
+    fullImportMs: 10000,
+    reopenMs: 1500,
+    longTasks: 0,
+    memoryMb: 1800,
+    cpmMs: 3000,
+    diffMs: 3000,
+  },
 };
 
 export interface Mode {
@@ -61,6 +86,15 @@ export interface SizeResult {
   heapMb: number;
   bufferMb: number;
   memoryMb: number;
+  /** Engine worker, single run, timed from the main thread. */
+  engineLoadMs: number;
+  cpmMs: number;
+  diffMs: number;
+  firstRowsMs: number;
+  scrollRowsMs: number;
+  searchMs: number;
+  sortByCodeMs: number;
+  engineLongTasks: number;
 }
 
 export const RESULTS_FILE = 'test-results/perf-results.json';

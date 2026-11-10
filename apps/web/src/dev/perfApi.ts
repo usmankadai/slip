@@ -5,6 +5,7 @@
 import { getTransferList } from '@slip/xer';
 import { clearCache } from '../storage/scheduleCache.ts';
 import { generateSchedules, importSchedule, type ImportResult } from '../workers/client.ts';
+import { EngineClient } from '../workers/engineClient.ts';
 import type { SlipPerfApi } from './perfTypes.ts';
 
 export function installPerfApi(): void {
@@ -49,6 +50,91 @@ export function installPerfApi(): void {
         bufferBytes: getTransferList(data).reduce((total, buffer) => total + buffer.byteLength, 0),
         longTasks: longTasks.slice(),
       };
+    },
+    async engine() {
+      const [a, b] = held;
+      if (!a || !b) throw new Error('Import both files first.');
+      const engine = new EngineClient();
+      const timed = async <T>(work: () => Promise<T>): Promise<[T, number]> => {
+        const started = performance.now();
+        const result = await work();
+        return [result, performance.now() - started];
+      };
+      try {
+        await engine.ping();
+        longTasks.length = 0;
+        const [, loadMs] = await timed(() =>
+          Promise.all([engine.load('a', a.data), engine.load('b', b.data)]),
+        );
+        const [cpm, cpmMs] = await timed(() => engine.request({ type: 'cpm', slot: 'b' }));
+        const [diff, diffMs] = await timed(() => engine.request({ type: 'diff' }));
+        const view = {
+          filter: { changedOnly: true },
+          sort: { column: 'finishDelta', direction: 'desc' },
+        } as const;
+        const columns = [
+          'code',
+          'name',
+          'start',
+          'finish',
+          'finishDelta',
+          'totalFloat',
+          'flags',
+        ] as const;
+        const [, firstRowsMs] = await timed(() =>
+          engine.request({
+            type: 'rows',
+            slot: 'b',
+            range: [0, 60],
+            columns: [...columns],
+            ...view,
+          }),
+        );
+        const [, scrollRowsMs] = await timed(() =>
+          engine.request({
+            type: 'rows',
+            slot: 'b',
+            range: [5000, 5060],
+            columns: [...columns],
+            ...view,
+          }),
+        );
+        const [, searchMs] = await timed(() =>
+          engine.request({
+            type: 'rows',
+            slot: 'b',
+            range: [0, 60],
+            columns: ['code', 'name'],
+            filter: { text: 'signal gantry' },
+          }),
+        );
+        const [, sortByCodeMs] = await timed(() =>
+          engine.request({
+            type: 'rows',
+            slot: 'b',
+            range: [0, 60],
+            columns: ['code'],
+            sort: { column: 'code', direction: 'desc' },
+          }),
+        );
+        await new Promise((resolve) => setTimeout(resolve, 50));
+        return {
+          loadMs,
+          cpmMs,
+          diffMs,
+          firstRowsMs,
+          scrollRowsMs,
+          searchMs,
+          sortByCodeMs,
+          changed: diff.changed,
+          activities: diff.activitiesB,
+          differsFromFile: cpm.differsFromFile,
+          longTasks: longTasks.slice(),
+        };
+      } finally {
+        engine.dispose();
+        held.length = 0;
+      }
     },
     clearCache,
     reset() {
