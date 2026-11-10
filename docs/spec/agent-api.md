@@ -68,5 +68,10 @@ The client keeps the set of task codes that appeared in tool results for the cur
 - How it differs from the description above is in [D20](../decisions/D20-agent-server.md). In short: the server sends `text-delta`, `tool-request`, `done` and `error`; steps and blocks are built in the browser.
 - Environment variables are listed in `.env.example`.
 - A first live run is written up in [D20](../decisions/D20-agent-server.md): the tool loop, grounding, the planted instruction, proposals and caching all held. It used made-up tool results, not the engine.
-- Not yet: the browser side (running tools against the engine, the panel, the audit entries), scripted mode, the evals, and deployment to Vercel.
+- **The tools run against the engine** (`packages/agent/src/run.ts`, imported as `@slip/agent/run`). `runTool(engine, name, input)` checks the input again, asks the engine, and returns the JSON for the model, the activity codes it contains (the only ones an answer may cite), and for `propose_edit` a proposal for the planner. It works against the engine worker in the browser and against a session in tests.
+  - Every result is within the limits: at most 50 rows and 8 KB. `get_activity` shows fewer relationships until it fits.
+  - `propose_edit` previews the edit in the engine and keeps nothing. A constraint's type and date are tried together.
+  - Durations, slips and float are given to the model in working days; dates as "YYYY-MM-DD HH:MM".
+  - The engine's own refusals (unknown activity, update not loaded, an edit that makes no sense) go to the model as error results. Anything else is a fault and is not shown to the model.
+- Not yet: wiring this into the browser (the panel, the audit entries), scripted mode, the evals, and deployment to Vercel.
 

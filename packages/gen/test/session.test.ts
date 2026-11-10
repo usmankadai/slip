@@ -402,3 +402,110 @@ describe('EngineSession: health and trace', () => {
     }
   });
 });
+
+describe('EngineSession: measures in working days', () => {
+  it('ranks slips by working days, so calendars with longer days do not jump the queue', () => {
+    const session = loaded();
+    const rows = ask(session, {
+      type: 'rows',
+      slot: 'b',
+      range: [0, 2000],
+      columns: ['finishDelta', 'finishDeltaDays', 'calendar'],
+      filter: { changedOnly: true },
+      sort: { column: 'finishDeltaDays', direction: 'desc' },
+    });
+    const info = ask(session, { type: 'info' }).b!;
+    const days = Array.from(rows.numbers.finishDeltaDays!).filter((value) => value !== NONE);
+    expect(days).toEqual([...days].sort((x, y) => y - x));
+    // Each value is the minutes divided by that activity's own day length, in hundredths.
+    for (let k = 0; k < 50; k++) {
+      const minutes = rows.numbers.finishDelta![k]!;
+      if (minutes === NONE) continue;
+      expect(rows.numbers.finishDeltaDays![k]).toBe(
+        Math.round((minutes * 100) / info.calendarDayMinutes[rows.numbers.calendar![k]!]!),
+      );
+    }
+    // The generated schedule has a 24 hour calendar, so sorting by minutes gives a different order.
+    const byMinutes = ask(session, {
+      type: 'rows',
+      slot: 'b',
+      range: [0, 200],
+      columns: ['finishDeltaDays'],
+      filter: { changedOnly: true },
+      sort: { column: 'finishDelta', direction: 'desc' },
+    });
+    const first = Array.from(byMinutes.numbers.finishDeltaDays!);
+    expect(first).not.toEqual([...first].sort((x, y) => y - x));
+  });
+
+  it('reports what is loaded, and one activity in both updates', () => {
+    const session = loaded();
+    const info = ask(session, { type: 'info' });
+    expect(info.a).toMatchObject({
+      activities: expected.update01.activities,
+      recalculated: false,
+      edits: 0,
+    });
+    expect(info.b!.calendarDayMinutes).toEqual([480, 480, 1440, 480]);
+    expect(ask(new EngineSession(), { type: 'info' })).toEqual({ type: 'info', a: null, b: null });
+
+    const activity = ask(session, { type: 'activity', taskCode: expected.milestone.code });
+    expect(activity.finishDelta).toBe(expected.milestone.slipMinutes);
+    expect(formatXerDate(activity.previous!.finish)).toBe(expected.milestone.finish01);
+    expect(formatXerDate(activity.current!.finish)).toBe(expected.milestone.finish02);
+    expect(activity.current!.predecessors.length).toBe(activity.current!.predecessorCount);
+    expect(ask(session, { type: 'activity', taskCode: 'NO-SUCH' })).toMatchObject({
+      previous: null,
+      current: null,
+      flags: 0,
+    });
+    expect(() => session.handle({ type: 'activity', taskCode: '' })).toThrowError(EngineError);
+  });
+
+  it('filters by activity type', () => {
+    const rows = ask(loaded(), {
+      type: 'rows',
+      slot: 'b',
+      range: [0, 2000],
+      columns: ['type'],
+      filter: { types: [4] },
+    });
+    expect(rows.total).toBeGreaterThan(1);
+    expect(rows.numbers.type!.every((type) => type === 4)).toBe(true);
+  });
+
+  it('applies and reverts a constraint type and date as one edit', () => {
+    const session = loaded();
+    const code = expected.drivers[0]!.code;
+    const result = ask(session, {
+      type: 'applyEdit',
+      taskCode: code,
+      field: 'constraintType',
+      to: 2,
+      and: { field: 'constraintDate', to: 15_000_000 },
+    });
+    expect(result.editCount).toBe(2);
+    const detail = ask(session, { type: 'activity', taskCode: code }).current!;
+    expect(detail).toMatchObject({ constraintType: 2, constraintDate: 15_000_000 });
+    expect(ask(session, { type: 'revertEdit', editId: result.edit.id }).editCount).toBe(0);
+    expect(ask(session, { type: 'activity', taskCode: code }).current!.constraintType).toBe(0);
+    expect(() =>
+      session.handle({
+        type: 'applyEdit',
+        taskCode: code,
+        field: 'constraintType',
+        to: 2,
+        and: { field: 'constraintType', to: 3 },
+      }),
+    ).toThrowError(/different editable field/);
+    expect(() =>
+      session.handle({
+        type: 'applyEdit',
+        taskCode: code,
+        field: 'constraintType',
+        to: 2,
+        and: { field: 'originalDuration', to: -5 },
+      }),
+    ).toThrowError(/zero or more/);
+  });
+});

@@ -10,6 +10,13 @@
  */
 import { NONE, Status, stringAt, type ScheduleData } from '@slip/xer';
 import { prepareClocks, runCpm, type CpmResult } from './cpm.ts';
+import {
+  describeActivity,
+  indexOfCode,
+  scheduleInfo,
+  type ActivityDetail,
+  type ScheduleInfo,
+} from './describe.ts';
 import { diffSchedules, type ChangeName, type DiffDates, type DiffResult } from './diff.ts';
 import {
   changedActivities,
@@ -50,6 +57,13 @@ export const NUMBER_COLUMNS = [
   'constraintDate',
   'calendar',
   'flags',
+  // The same four measures in hundredths of a working day on the activity's own calendar.
+  // Minutes cannot be compared across calendars: a day is 480 of them on one and 1,440 on
+  // another. Sort and rank by these.
+  'startDeltaDays',
+  'finishDeltaDays',
+  'durationDeltaDays',
+  'totalFloatDays',
 ] as const;
 
 export type TextColumn = (typeof TEXT_COLUMNS)[number];
@@ -73,6 +87,8 @@ export interface FilterSpec {
   critical?: boolean;
   /** Only activities whose code or name contains this text. Case is ignored for A to Z. */
   text?: string;
+  /** Only activities of these TaskType values, for example milestones. */
+  types?: number[];
   /** Only the activities counted against this DCMA check (1 to 14). */
   healthCheck?: number;
 }
@@ -100,11 +116,20 @@ export type EngineRequest =
       taskCode?: string;
       field: EditField;
       to: number;
+      /**
+       * A second value on the same activity that belongs with the first, applied and reverted
+       * together. A constraint is a type and a date; neither means much alone.
+       */
+      and?: { field: EditField; to: number };
       preview?: boolean;
       id?: string;
     }
   | { type: 'revertEdit'; editId: string }
   | { type: 'edits' }
+  /** What is loaded: project, data date, counts and calendars, per update. */
+  | { type: 'info' }
+  /** One activity by exact code, in both updates, with its relationships and what changed. */
+  | { type: 'activity'; taskCode: string }
   | {
       type: 'rows';
       slot: Slot;
@@ -190,6 +215,20 @@ export type EngineResult =
   | ({ type: 'applyEdit' } & EditResult)
   | ({ type: 'revertEdit' } & EditResult)
   | { type: 'edits'; edits: EditPatch[] }
+  | { type: 'info'; a: ScheduleInfo | null; b: ScheduleInfo | null }
+  | {
+      type: 'activity';
+      taskCode: string;
+      previous: ActivityDetail | null;
+      current: ActivityDetail | null;
+      /** Change bits for the activity in the current update; 0 if unchanged or not comparable. */
+      flags: number;
+      /** Finish slip in working minutes on its own calendar, or NONE. */
+      finishDelta: number;
+      startDelta: number;
+      durationDelta: number;
+      floatDelta: number;
+    }
   | ({ type: 'rows' } & RowsResult);
 
 export type EngineErrorCode = 'not-loaded' | 'bad-request' | 'out-of-memory' | 'failed';
@@ -265,6 +304,10 @@ export class EngineSession {
           return { type: 'applyEdit', ...this.applyEdit(request) };
         case 'revertEdit':
           return { type: 'revertEdit', ...this.revertEdit(request.editId) };
+        case 'info':
+          return { type: 'info', a: this.info('a'), b: this.info('b') };
+        case 'activity':
+          return { type: 'activity', ...this.activity(request.taskCode) };
         case 'edits':
           return { type: 'edits', edits: this.need('b').edits.map((edit) => ({ ...edit })) };
         case 'rows':
@@ -491,21 +534,48 @@ export class EngineSession {
     ) {
       throw new EngineError('bad-request', 'That edit id is already in use.');
     }
-    const column = {
+    const columns = {
       originalDuration: b.data.originalDurationMin,
       remainingDuration: b.data.remainingDurationMin,
       constraintType: b.data.constraintType,
       constraintDate: b.data.constraintDate,
-    }[request.field];
+    };
+    const taskCode = stringAt(b.data.strings, b.data.taskCode[activity]!);
     const patch: EditPatch = {
       id: request.id ?? `edit-${++this.editCounter}`,
       activity,
-      taskCode: stringAt(b.data.strings, b.data.taskCode[activity]!),
+      taskCode,
       field: request.field,
-      from: column[activity]!,
+      from: columns[request.field][activity]!,
       to: request.to,
     };
-    return this.reschedule([...b.edits, patch], patch, request.preview !== true);
+    const patches = [patch];
+    if (request.and !== undefined) {
+      const second = request.and;
+      if (
+        second === null ||
+        typeof second !== 'object' ||
+        !isEditField(second.field) ||
+        second.field === request.field
+      ) {
+        throw new EngineError(
+          'bad-request',
+          'The second value must be a different editable field.',
+        );
+      }
+      const secondProblem = invalidEdit(b.data, activity, second.field, second.to);
+      if (secondProblem) throw new EngineError('bad-request', secondProblem);
+      // Its id ties it to the first, so reverting one reverts both.
+      patches.push({
+        id: `${patch.id}:and`,
+        activity,
+        taskCode,
+        field: second.field,
+        from: columns[second.field][activity]!,
+        to: second.to,
+      });
+    }
+    return this.reschedule([...b.edits, ...patches], patch, request.preview !== true);
   }
 
   private revertEdit(editId: string): EditResult {
@@ -513,10 +583,59 @@ export class EngineSession {
     const edit = b.edits.find((entry) => entry.id === editId);
     if (!edit) throw new EngineError('bad-request', 'There is no such edit to revert.');
     return this.reschedule(
-      b.edits.filter((entry) => entry.id !== editId),
+      b.edits.filter((entry) => entry.id !== editId && entry.id !== `${editId}:and`),
       edit,
       true,
     );
+  }
+
+  private dayMinutes(loaded: Loaded): (i: number) => number {
+    const fallback = loaded.clocks.length - 1;
+    const usual =
+      loaded.data.calendars.defaultIndex >= 0 ? loaded.data.calendars.defaultIndex : fallback;
+    return (i) => {
+      const index = loaded.data.calendarIndex[i]!;
+      return (
+        loaded.clocks[index >= 0 && index < fallback ? index : usual]!.calendar.dayMinutes || 480
+      );
+    };
+  }
+
+  private info(slot: Slot): ScheduleInfo | null {
+    const loaded = this.slots[slot];
+    if (!loaded) return null;
+    return scheduleInfo(
+      loaded.data,
+      loaded.clocks.map((clock) => clock.calendar.dayMinutes || 480),
+      loaded.cpm !== null,
+      loaded.edits.length,
+    );
+  }
+
+  private activity(taskCode: unknown) {
+    if (typeof taskCode !== 'string' || taskCode.length === 0 || taskCode.length > 200) {
+      throw new EngineError('bad-request', 'An activity code is needed.');
+    }
+    const a = this.slots.a;
+    const b = this.slots.b;
+    if (!a && !b) throw new EngineError('not-loaded', 'No schedule is loaded.');
+    const inB = b ? indexOfCode(b.data, taskCode) : -1;
+    const diff = a && b ? this.ensureDiff() : null;
+    // Prefer the match the diff made, so duplicates resolve the same way everywhere.
+    const inA = a ? (diff && inB >= 0 ? diff.matchA[inB]! : indexOfCode(a.data, taskCode)) : -1;
+    const comparable = diff !== null && inB >= 0 && inA >= 0;
+    return {
+      taskCode,
+      previous:
+        a && inA >= 0 ? describeActivity(a.data, this.dates(a), this.dayMinutes(a), inA) : null,
+      current:
+        b && inB >= 0 ? describeActivity(b.data, this.dates(b), this.dayMinutes(b), inB) : null,
+      flags: diff && inB >= 0 ? diff.flags[inB]! : 0,
+      finishDelta: comparable ? diff.finishDelta[inB]! : NONE,
+      startDelta: comparable ? diff.startDelta[inB]! : NONE,
+      durationDelta: comparable ? diff.durationDelta[inB]! : NONE,
+      floatDelta: comparable ? diff.floatDelta[inB]! : NONE,
+    };
   }
 
   private diffSummary(): DiffSummary {
@@ -574,6 +693,21 @@ export class EngineSession {
       const actual = column === 'start' ? data.actualStart : data.actualFinish;
       const early = column === 'start' ? dates.earlyStart : dates.earlyFinish;
       for (let i = 0; i < n; i++) out[i] = actual[i] !== NONE ? actual[i]! : early[i]!;
+      return out;
+    }
+    const inDays: Partial<Record<NumberColumn, NumberColumn>> = {
+      startDeltaDays: 'startDelta',
+      finishDeltaDays: 'finishDelta',
+      durationDeltaDays: 'durationDelta',
+      totalFloatDays: 'totalFloat',
+    };
+    const minutesColumn = inDays[column];
+    if (minutesColumn) {
+      const minutes = this.numberColumn(slot, minutesColumn);
+      const dayMinutes = this.dayMinutes(loaded);
+      for (let i = 0; i < n; i++) {
+        if (minutes[i] !== NONE) out[i] = Math.round((minutes[i]! * 100) / dayMinutes(i));
+      }
       return out;
     }
     // Everything else compares with the previous update, so it only exists for update B.
@@ -645,6 +779,7 @@ export class EngineSession {
     if (flagMask !== 0 && !flags) return new Int32Array(0); // nothing to compare against
     const statuses = filter.status && filter.status.length > 0 ? new Set(filter.status) : null;
     const float = filter.critical ? this.dates(loaded).totalFloat : null;
+    const types = filter.types && filter.types.length > 0 ? new Set(filter.types) : null;
     let inCheck: Uint8Array | null = null;
     if (filter.healthCheck !== undefined) {
       const check = this.health(slot).find((entry) => entry.id === filter.healthCheck);
@@ -659,6 +794,7 @@ export class EngineSession {
     for (let i = 0; i < n; i++) {
       if (flags && (flags[i]! & flagMask) === 0) continue;
       if (inCheck && !inCheck[i]) continue;
+      if (types && !types.has(data.type[i]!)) continue;
       if (statuses && !statuses.has(data.status[i]!)) continue;
       if (float && (float[i] === NONE || float[i]! > 0 || data.status[i] === Status.Complete))
         continue;

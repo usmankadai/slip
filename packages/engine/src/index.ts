@@ -1,4 +1,5 @@
 export * from './cpm.ts';
+export * from './describe.ts';
 export * from './diff.ts';
 export * from './edits.ts';
 export * from './health/health.ts';

@@ -70,7 +70,7 @@ export function installPerfApi(): void {
         const [diff, diffMs] = await timed(() => engine.request({ type: 'diff' }));
         const view = {
           filter: { changedOnly: true },
-          sort: { column: 'finishDelta', direction: 'desc' },
+          sort: { column: 'finishDeltaDays', direction: 'desc' },
         } as const;
         const columns = [
           'code',
