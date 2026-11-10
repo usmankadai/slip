@@ -18,7 +18,9 @@
     "test:watch": "vitest",
     "check": "pnpm format:check && pnpm lint && pnpm typecheck && pnpm test && pnpm build && pnpm check:secrets",
     "gen-xer": "node tools/gen-xer/src/cli.ts",
-    "check:secrets": "node scripts/check-bundle-secrets.ts"
+    "check:secrets": "node scripts/check-bundle-secrets.ts",
+    "perf": "pnpm --filter @slip/perf run local",
+    "perf:ci": "pnpm --filter @slip/perf run ci"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",

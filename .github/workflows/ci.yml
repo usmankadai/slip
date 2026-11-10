@@ -2,7 +2,7 @@
 # blocks the change. Every job works without secrets.
 #
 # More jobs arrive with the features they check (see docs/spec/deployment.md):
-# end-to-end with axe, visual tests, the performance subset, eval replay.
+# end-to-end with axe, visual tests, eval replay.
 name: CI
 
 on:
@@ -52,3 +52,20 @@ jobs:
       - run: pnpm build
       # Fails if anything that looks like a secret reached the browser bundle.
       - run: pnpm check:secrets
+
+  perf:
+    name: Performance budgets (100K subset)
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v5
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 24
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm --filter @slip/perf exec playwright install --with-deps chromium
+      # Builds the app, serves it with vite preview, and checks the 100K budgets
+      # at twice the local thresholds. Shared runners are too noisy for more (D14).
+      - run: pnpm perf:ci

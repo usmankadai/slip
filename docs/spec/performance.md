@@ -28,3 +28,12 @@ Shared CI runners are slow and noisy, so absolute numbers measured there are not
 
 ## Performance HUD
 A toggle (`Shift+P`) shows a small overlay: activity count for A and B, frame time (p50 and p95 over the last 2s), last worker round trip, and memory. It is off by default and is part of the demo: it lets a reviewer see the numbers on their own machine. Port it from pulse; it must cost nothing when hidden.
+
+## What is built (10 November 2026)
+
+- `tools/perf`: a Playwright suite that builds the app, serves it with `vite preview`, and drives the real import path through `window.slipPerf` (only present when the page is opened with `?perf`).
+- `pnpm perf` runs 100K, 350K and 1M at the table values, median of 5, and rewrites the "Latest suite run" section of [docs/perf.md](../perf.md). `pnpm perf:ci` runs 100K at twice the time budgets, median of 3, and is a CI job.
+- Measured so far: full import of one file, reopening it from the cache, main thread long tasks, and memory with both updates loaded. The reopen figure is to holding the schedule, because there are no rows to show yet.
+- **Memory is measured on the main thread only** (JS heap after a forced collection, plus the typed arrays of both schedules). It will grow when the engine worker holds schedules and derived results, so the budget row is still the starting estimate. Set the real budget once the engine exists.
+- Not measured yet: first rows visible, CPM, diff, scroll frame times, the bundle-size budget, and the HUD.
+

@@ -7,7 +7,15 @@ import prettier from 'eslint-config-prettier';
 const PURE_PACKAGES = ['packages/xer/**/*.ts', 'packages/engine/**/*.ts', 'packages/gen/**/*.ts'];
 
 export default tseslint.config(
-  { ignores: ['**/dist/**', '**/node_modules/**', '**/coverage/**', 'fixtures/**'] },
+  {
+    ignores: [
+      '**/dist/**',
+      '**/node_modules/**',
+      '**/coverage/**',
+      '**/test-results/**',
+      'fixtures/**',
+    ],
+  },
   js.configs.recommended,
   ...tseslint.configs.strict,
   {
@@ -45,7 +53,7 @@ export default tseslint.config(
     },
   },
   {
-    files: ['*.config.{js,ts}', '**/*.config.{js,ts}', 'scripts/**/*.ts'],
+    files: ['*.config.{js,ts}', '**/*.config.{js,ts}', 'scripts/**/*.ts', 'tools/**/*.ts'],
     languageOptions: { globals: globals.node },
   },
   prettier,
