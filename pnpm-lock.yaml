@@ -35,6 +35,9 @@ importers:
 
   apps/web:
     dependencies:
+      '@slip/gen':
+        specifier: workspace:*
+        version: link:../../packages/gen
       '@slip/xer':
         specifier: workspace:*
         version: link:../../packages/xer
