@@ -2,6 +2,26 @@
 
 What was built, what Usman decided or designed, and what an agent generated. Newest first.
 
+## 10 November 2026: security headers and the secrets check
+
+**Built**
+
+- One list of security headers, served by the preview server and repeated in `vercel.json`, with a test that keeps them identical.
+- A check that fails the build if a key, or the name of a server-only variable, reaches the browser bundle.
+- `vercel.json`, ready for the first deploy: build settings, headers and cache rules.
+
+**Usman decided or designed**
+
+- The security position in the spec: a strict policy with nothing inline, secrets on the server only, and never weakening the policy to make something work.
+- The original versions of the headers file, its test and the secrets check, which he wrote for parity. They are ported here with their tests.
+
+**The agent (Claude) generated**
+
+- The port, the extra assertions (no wildcards, cache rules) and the Redis token pattern.
+
+**Not verified**
+
+- Nothing is deployed yet, so `vercel.json` is untested on Vercel. The headers were checked on the local preview server only.
 ## 10 November 2026: performance suite
 
 **Built**

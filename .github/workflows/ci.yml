@@ -50,6 +50,8 @@ jobs:
           cache: pnpm
       - run: pnpm install --frozen-lockfile
       - run: pnpm build
+      # Fails if anything that looks like a secret reached the browser bundle.
+      - run: pnpm check:secrets
 
   perf:
     name: Performance budgets (100K subset)
