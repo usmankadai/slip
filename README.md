@@ -20,3 +20,13 @@ pnpm dev
 - [docs/spec/](docs/spec/): the detailed spec
 - [docs/decisions/](docs/decisions/README.md): decisions and their reasons
 - `packages/xer`: the streaming XER parser and the columnar schedule format
+
+## The assistant
+
+The assistant is off by default. To run it live, copy `.env.example` to `.env`, set `AGENT_MODE=live`, `ANTHROPIC_API_KEY` and `ANTHROPIC_MODEL`, and start the server:
+
+```bash
+pnpm --filter @slip/api dev
+```
+
+Set a spending limit on the API key in the Anthropic console. The server limits questions per visitor and model calls per day, but the limit on the key is the final backstop.

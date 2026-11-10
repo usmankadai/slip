@@ -2,6 +2,33 @@
 
 What was built, what Usman decided or designed, and what an agent generated. Newest first.
 
+## 10 November 2026: the agent server
+
+**Built**
+
+- A shared package with the agent's six tools, the checks on what the model sends, limits on tool results, and the citation check.
+- The server: one streaming endpoint, request validation, a per-visitor limit, a daily cap, an origin check, and the call to Claude. It keeps no conversation state.
+- 45 tests, all against a fake model and a fake Redis.
+
+**Usman decided or designed**
+
+- The agent's design in the spec: tools not raw data, a stateless server with the tool loop in the browser, proposals not edits, citations checked not trusted, tool results treated as untrusted, scripted mode as the public default, and the limits.
+- The original server code in parity that this is adapted from.
+
+**The agent (Claude) generated**
+
+- All code and tests in this entry, the system prompt, the tool descriptions, and decision D20.
+- Choices made without asking: the shape of each tool's input; four events where the spec listed six; the model settings (after checking Anthropic's current guidance); allowing requests through when Redis is down.
+
+**Not verified**
+
+- The server has never been called with a real key. No money has been spent.
+- Nothing calls it yet, and it is not deployed.
+
+**Worth Usman's attention**
+
+- The system prompt and the tool descriptions decide how the assistant behaves. They are product copy as much as code, and worth reading: `apps/api/src/prompt.ts` and `packages/agent/src/tools.ts`.
+
 ## 10 November 2026: edits in the engine
 
 **Built**
