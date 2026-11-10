@@ -320,3 +320,85 @@ describe('EngineSession', () => {
     expect(EngineSession.transferList({ type: 'ping' })).toEqual([]);
   });
 });
+
+describe('EngineSession: health and trace', () => {
+  it('summarises the DCMA checks without the lists of activities', () => {
+    const session = loaded();
+    const health = ask(session, { type: 'health', slot: 'b' });
+    expect(health.checks.map((check) => check.id)).toEqual([
+      1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14,
+    ]);
+    expect(health.checks.every((check) => !('offenders' in check))).toBe(true);
+    // The generator writes leads, so check 2 must find some.
+    expect(health.checks[1]!.count).toBeGreaterThan(0);
+    expect(health.checks[1]!.pass).toBe(false);
+  });
+
+  it('lists the activities behind a check through a rows filter', () => {
+    const session = loaded();
+    const health = ask(session, { type: 'health', slot: 'b' });
+    for (const id of [1, 5, 12]) {
+      const check = health.checks.find((entry) => entry.id === id)!;
+      const rows = ask(session, {
+        type: 'rows',
+        slot: 'b',
+        range: [0, 2000],
+        columns: ['code'],
+        filter: { healthCheck: id },
+      });
+      expect(rows.total, `check ${id}`).toBe(check.count);
+    }
+    expect(() =>
+      session.handle({
+        type: 'rows',
+        slot: 'b',
+        range: [0, 5],
+        columns: ['code'],
+        filter: { healthCheck: 99 },
+      }),
+    ).toThrowError(EngineError);
+  });
+
+  it('compares health between the two updates', () => {
+    const session = loaded();
+    const before = ask(session, { type: 'health', slot: 'a' }).checks;
+    const after = ask(session, { type: 'health', slot: 'b' }).checks;
+    // A month of progress: fewer unfinished activities are assessed, and more baseline work is due.
+    const find = (checks: typeof before, id: number) => checks.find((check) => check.id === id)!;
+    expect(find(after, 1).population).toBeLessThan(find(before, 1).population);
+    expect(find(after, 11).population).toBeGreaterThan(find(before, 11).population);
+    // Update 02 has slipped against its dated milestones, so more activities carry negative float.
+    expect(find(after, 7).count).toBeGreaterThan(find(before, 7).count);
+  });
+
+  it('traces the completion milestone by code and names the scripted drivers', () => {
+    const session = loaded();
+    const trace = ask(session, { type: 'trace', taskCode: expected.milestone.code });
+    expect(trace.slipMinutes).toBe(expected.milestone.slipMinutes);
+    expect(trace.codes[0]).toBe(expected.milestone.code);
+    expect(trace.codes).toHaveLength(trace.nodes.length);
+    expect(trace.names).toHaveLength(trace.nodes.length);
+    const position = new Map(Array.from(trace.nodes, (j, at) => [j, at] as const));
+    const top = trace.contributors
+      .slice(0, expected.drivers.length)
+      .map((entry) => trace.codes[position.get(entry.activity)!]!);
+    expect(top.sort()).toEqual(expected.drivers.map((driver) => driver.code).sort());
+    expect(EngineSession.transferList(trace).length).toBe(7);
+  });
+
+  it('traces by index, clamps its limits, and refuses an unknown activity', () => {
+    const session = loaded();
+    const byCode = ask(session, { type: 'trace', taskCode: expected.milestone.code });
+    const byIndex = ask(session, { type: 'trace', activity: byCode.target, maxNodes: 3 });
+    expect(byIndex.nodes.length).toBe(3);
+    expect(byIndex.truncated).toBe(true);
+    for (const request of [
+      { type: 'trace', taskCode: 'NO-SUCH' },
+      { type: 'trace', activity: -4 },
+      { type: 'trace', activity: 1e9 },
+      { type: 'trace' },
+    ] as const) {
+      expect(() => session.handle(request as EngineRequest)).toThrowError(EngineError);
+    }
+  });
+});

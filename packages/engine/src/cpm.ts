@@ -107,12 +107,22 @@ export function prepareClocks(data: ScheduleData, spanDays = 365 * 60): WorkCloc
   });
 }
 
-function shift(clock: WorkClock, t: number, lag: number): number {
+/** Picks the prepared clock for an activity: its own calendar, else the project default, else the fallback. */
+export function clockPicker(data: ScheduleData, clocks: WorkClock[]): (i: number) => WorkClock {
+  const fallback = clocks.length - 1;
+  const usual = data.calendars.defaultIndex >= 0 ? data.calendars.defaultIndex : fallback;
+  return (i) => {
+    const index = data.calendarIndex[i]!;
+    return clocks[index >= 0 && index < fallback ? index : usual]!;
+  };
+}
+
+export function shift(clock: WorkClock, t: number, lag: number): number {
   return lag > 0 ? addWork(clock, t, lag) : lag < 0 ? subtractWork(clock, t, -lag) : t;
 }
 
 /** The earliest valid finish at or after t. */
-function finishOnOrAfter(clock: WorkClock, t: number): number {
+export function finishOnOrAfter(clock: WorkClock, t: number): number {
   const back = snapBackward(clock, t);
   return back >= t ? back : snapForward(clock, t);
 }

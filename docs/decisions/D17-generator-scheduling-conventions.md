@@ -29,7 +29,7 @@ The conventions the files follow, which the engine's CPM must reproduce:
 
 How update 02 is scripted:
 
-- Durations grow on several activities that lie on the chain driving `MS-COMPLETE`. `expected.json` lists them.
+- Durations grow on several activities that lie on the chain driving `MS-COMPLETE`. `expected.json` lists them. Only activities that drive the next one from their finish are chosen: growing one tied start to start would not delay the milestone. The slip trace found this; an earlier version scripted 67 days of growth for a 49 day slip.
 - All other changes (durations, deleted and added activities, constraints, logic) are kept off that chain, so the scripted growth is the main cause of the slip.
 - Added relationships join two activities in the same work package where the sequence already held. An earlier version linked activities up to 300 apart, which chained parallel areas together and produced slips of 600 to 700 working days that no driver explained.
 - Both updates use different `task_id` values on purpose, so matching has to go by activity code (D4).
