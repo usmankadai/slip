@@ -75,9 +75,9 @@ Counts exclude completed activities, LOE and WBS summary tasks where DCMA guidan
 
 ## What is built (10 November 2026)
 
-- **Working time** (`worktime.ts`), **CPM** (`cpm.ts`) and **diff** (`diff.ts`) in `packages/engine`, as pure functions over `ScheduleData`. They are not yet behind the engine worker or its message protocol.
-- CPM rules and known differences from P6 are in [D18](../decisions/D18-cpm-rules-and-simplifications.md).
+- **Working time, CPM and diff** in `packages/engine`, as pure functions over `ScheduleData`. CPM rules and known differences from P6 are in [D18](../decisions/D18-cpm-rules-and-simplifications.md).
+- **The engine worker.** `EngineSession` holds both schedules and answers `ping`, `load`, `cpm`, `diff` and `rows`; `RequestQueue` orders the work, with cancel and supersede for waiting requests. How this differs from the request list above, and why, is in [D19](../decisions/D19-engine-worker-protocol.md).
+- **Rows.** Filters: changed only, any of a set of change kinds, status, critical, and text in the code or name. Sort by any column. Cells are computed only for the rows and columns requested.
 - Diff additions to this spec: a `DuplicateCode` flag for second and later activities with a code already seen (left out of matching, neither added nor removed); deltas are in working minutes on the activity's own calendar; a changed relationship flags the activities at both ends; critical means total float of zero or less.
-- Rough timings in Node on an Apple M3, not from the perf suite: CPM about 0.12s at 350K and 0.36s at 1M; diff about 0.26s at 350K and 0.96s at 1M. Budgets are 1s and 3s for each.
-- Not yet: the engine worker and protocol, cancellation, rerunning after an edit and returning only changed indices, lazy rows, slip trace, DCMA, and validation against real exports.
-
+- Timings from the perf suite are in [docs/perf.md](../perf.md). At 1M activities in a worker: CPM about 0.4s and diff about 1.2s, against budgets of 3s each.
+- Not yet: slip trace, DCMA, edits and rerunning CPM for changed indices only, agent queries, recovery after a crash, and validation against real exports.

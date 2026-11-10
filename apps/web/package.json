@@ -10,6 +10,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@slip/engine": "workspace:*",
     "@slip/gen": "workspace:*",
     "@slip/xer": "workspace:*",
     "react": "^19.3.1",

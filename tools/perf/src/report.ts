@@ -50,6 +50,24 @@ function table(results: SizeResult[]): string {
       (r) =>
         `${megabytes(BUDGETS[r.activities]!.memoryMb)}, ${verdict(r.memoryMb < BUDGETS[r.activities]!.memoryMb)}`,
     ),
+    row('**CPM, one update, in the worker**', (r) => `**${seconds(r.cpmMs)}**`),
+    row(
+      'Budget',
+      (r) =>
+        `${seconds(BUDGETS[r.activities]!.cpmMs)}, ${verdict(r.cpmMs < BUDGETS[r.activities]!.cpmMs)}`,
+    ),
+    row('**Diff of two updates, in the worker**', (r) => `**${seconds(r.diffMs)}**`),
+    row(
+      'Budget',
+      (r) =>
+        `${seconds(BUDGETS[r.activities]!.diffMs)}, ${verdict(r.diffMs < BUDGETS[r.activities]!.diffMs)}`,
+    ),
+    row('Hand both schedules to the engine', (r) => seconds(r.engineLoadMs)),
+    row('First rows of "changed, worst slip first"', (r) => seconds(r.firstRowsMs)),
+    row('Next rows of the same view', (r) => seconds(r.scrollRowsMs)),
+    row('Text search over all codes and names', (r) => seconds(r.searchMs)),
+    row('Sort all activities by code', (r) => seconds(r.sortByCodeMs)),
+    row('Main thread long tasks while the engine works', (r) => String(r.engineLongTasks)),
     row('Generate the pair in the browser', (r) => seconds(r.generateMs)),
   ].join('\n');
 }
@@ -82,7 +100,7 @@ export default function report(): void {
     '',
     body,
     '',
-    'Not measured yet: first rows visible, CPM, diff, scroll frame times, Firefox and Safari.',
+    'CPM, diff and the row requests are single runs. Not measured yet: first rows on screen, scroll frame times, Firefox and Safari.',
     END,
   ].join('\n');
   const doc = readFileSync(DOC, 'utf8');
