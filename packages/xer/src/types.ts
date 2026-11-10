@@ -158,6 +158,8 @@ export interface ScheduleData {
 
   meta: {
     formatVersion: number;
+    /** SHA-256 of the source file as hex, or '' when the schedule did not come from a file. */
+    sourceHash: string;
     epoch: string;
     projectId: number;
     projectName: string;

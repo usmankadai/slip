@@ -2,6 +2,31 @@
 
 What was built, what Usman decided or designed, and what an agent generated. Newest first.
 
+## 10 November 2026: import worker and browser cache
+
+**Built**
+
+- A streaming SHA-256 and a binary cache format in `packages/xer`. A cached schedule decodes to views over one buffer, with no per-row work.
+- The import worker: hash, look in the cache, otherwise stream through the parser, pack, write to the Origin Private File System, and transfer the result. Progress events at most every 100ms; cancellable.
+- A generate worker that produces the same bytes as the CLI, so the browser demo can build its own fixtures.
+- A developer harness page to run all of this in a real browser. It is not a designed screen and says so.
+- First browser measurements in `docs/perf.md`: a full import of one file takes about 0.4s at 100K, 1.4s at 350K and 4.0s at 1M, with no long tasks on the main thread.
+
+**Usman decided or designed**
+
+- The workflow for the build: finish a step, open a pull request, squash and merge when checks pass, delete the branch, move on.
+- The requirements this implements, from the original spec: streaming import in a worker, progress in rows and bytes, transferable buffers, a browser cache keyed by file hash.
+
+**The agent (Claude) generated**
+
+- All code and tests in this entry, and the harness.
+- One departure from the spec, made without asking: the file is read twice on a cache miss (hash first, then parse), because a single pass cannot know the hash in time to skip the parse.
+
+**Not verified**
+
+- Only Chromium was tested. Firefox and Safari are untested.
+- The numbers are single runs on the development server, not the perf suite.
+
 ## 10 November 2026: working-time arithmetic and the synthetic generator
 
 **Built**
