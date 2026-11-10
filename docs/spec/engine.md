@@ -72,3 +72,12 @@ Run on both updates and return per-check `{ value, threshold, pass, offenders: I
 | 14 | BEI | ≥ 0.95 |
 
 Counts exclude completed activities, LOE and WBS summary tasks where DCMA guidance says so. Put the exact counting rules in `packages/engine/src/health/README.md` and unit test each check.
+
+## What is built (10 November 2026)
+
+- **Working time** (`worktime.ts`), **CPM** (`cpm.ts`) and **diff** (`diff.ts`) in `packages/engine`, as pure functions over `ScheduleData`. They are not yet behind the engine worker or its message protocol.
+- CPM rules and known differences from P6 are in [D18](../decisions/D18-cpm-rules-and-simplifications.md).
+- Diff additions to this spec: a `DuplicateCode` flag for second and later activities with a code already seen (left out of matching, neither added nor removed); deltas are in working minutes on the activity's own calendar; a changed relationship flags the activities at both ends; critical means total float of zero or less.
+- Rough timings in Node on an Apple M3, not from the perf suite: CPM about 0.12s at 350K and 0.36s at 1M; diff about 0.26s at 350K and 0.96s at 1M. Budgets are 1s and 3s for each.
+- Not yet: the engine worker and protocol, cancellation, rerunning after an edit and returning only changed indices, lazy rows, slip trace, DCMA, and validation against real exports.
+
