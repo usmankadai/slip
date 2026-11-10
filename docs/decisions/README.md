@@ -19,3 +19,4 @@ Part of the Slip spec. Start at [CLAUDE.md](../../CLAUDE.md).
 - **D14: Performance budgets are enforced loosely in CI and strictly on a recorded local machine.** Shared runners are too noisy for absolute numbers.
 - **D15: The generator runs in the browser.** Large fixtures cannot be committed or bundled, and generating on demand keeps the demo self-contained.
 - **D16: Visual identity.** Light, warm-neutral working surface; one violet accent kept outside the data colours; warm for late and blue for early; Inter and JetBrains Mono, self-hosted. Confirmed by Usman on 10 November 2026 from an agent-drafted proposal. Detail in [design.md](../spec/design.md).
+- **D17: The synthetic generator has its own simple scheduler.** It shares only the calendar arithmetic with the engine, so validating the engine against it is a real comparison. See [D17](D17-generator-scheduling-conventions.md).

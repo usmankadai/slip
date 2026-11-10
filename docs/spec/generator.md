@@ -21,3 +21,11 @@ Large XER files cannot be committed or bundled (a 1M-activity pair is expected t
 - The generator has two outputs: **XER text** (streamed, used by the CLI and by the "generate, then parse" demo path that exercises the real parser) and **direct `ScheduleData`** (skips text; used for a fast start). The import screen offers both and labels them honestly, so perf claims about parsing always come from the path that really parses.
 - Generated pairs are cached in OPFS like any other schedule.
 - The 1K pair is committed and bundled, so the app has something to show with zero wait and tests have a stable fixture.
+
+## What is built (10 November 2026)
+
+- `packages/gen` and the `gen-xer` CLI, deterministic by seed, for all four sectors.
+- Sizes at seed 42, rail, measured in Node on an Apple M3: 1K (0.3MB per file), 100K (27MB), 350K (93MB), 1M (267MB to 270MB). Generating the 1M pair takes about 3s and writing it about 3s.
+- The scheduling conventions the files follow are in [D17](../decisions/D17-generator-scheduling-conventions.md).
+- Not yet: the direct-to-`ScheduleData` output, `generate.worker.ts`, activity codes and resources, and the `highways`, `solar` and `flood` fixtures (the generator supports them; only `rail` has been generated).
+
