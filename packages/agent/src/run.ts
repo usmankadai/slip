@@ -521,8 +521,7 @@ async function proposeEdit(
         code: move.taskCode,
         finish_before: date(move.finishBefore),
         finish_after: date(move.finishAfter),
-        change_calendar_days:
-          Math.round(((move.finishAfter - move.finishBefore) / 1440) * 100) / 100,
+        change_working_days: move.workingDays,
       })),
     },
   };

@@ -2,6 +2,25 @@
 
 What was built, what Usman decided or designed, and what an agent generated. Newest first.
 
+## 10 November 2026: live run with the real engine
+
+**Done**
+
+- Three real questions with the real tools on the committed 1K pair, checked against `expected.json`. The slip, all four drivers and every citation were right; a planted instruction was ignored and reported; a proposal changed nothing. Written up in decision D20. Cost about $0.13.
+- Two fixes from what it showed: a proposal's effect is now in working days, and the prompt tells the model not to name its tools to the planner.
+
+**Usman decided or designed**
+
+- To run it, and to pay for it.
+
+**The agent (Claude) generated**
+
+- The test script (a throwaway, not committed), the two fixes and the write-up.
+
+**Not verified**
+
+- The prompt change has not been re-run live. Answers are still long; that is waiting for the eval set and a decision on how short they should be.
+
 ## 10 November 2026: the agent's tools against the engine
 
 **Built**
