@@ -28,3 +28,12 @@ Do not write "the schedule never leaves the browser" anywhere without the live-m
 - **Input limits:** the import rejects files over a stated size cap (start at 2GB) and non-XER content, with a clear error ([import robustness](import-robustness.md)).
 - **Dependencies:** `pnpm audit` runs in CI and fails on high or critical findings in production dependencies. Dependabot is on.
 - **Logs:** no log line, on client or server, contains activity names, questions or tool results.
+
+## What is built (10 November 2026)
+
+- `config/securityHeaders.ts` is the one list of headers. `vite preview` serves it, `vercel.json` repeats it, and a unit test fails if they differ. The same test checks that the policy allows nothing inline, nothing evaluated and no wildcards.
+- `pnpm check:secrets` scans the built bundle for key patterns and the names of server-only variables. It is part of `pnpm check` and of the CI build job.
+- `vercel.json` also sets the cache rules from [persistence](persistence.md): hashed assets for a year, the page itself never.
+- Checked by hand in Chromium against the release build: the import and generate workers and the browser cache all work under the policy, with no violations reported.
+- Not yet: an automated end-to-end test that fails on any policy violation (it arrives with the end-to-end suite), `pnpm audit` in CI, Dependabot, and the CSV, PDF and Markdown export rules.
+
