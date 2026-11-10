@@ -16,10 +16,12 @@ interface ScheduleData {
   calendarIndex: Int16Array;
   type: Uint8Array;                // enum TaskType
   status: Uint8Array;              // enum Status
-  // time, stored as minutes since project epoch (Int32 covers ~4000 years)
+  // time, stored as minutes since a fixed epoch, 2000-01-01 00:00 wall-clock (Int32 covers ~4000 years).
+  // NONE (-2147483648) means "no value" in every date, duration and float column.
   earlyStart: Int32Array;  earlyFinish: Int32Array;
   lateStart: Int32Array;   lateFinish: Int32Array;
-  actualStart: Int32Array; actualFinish: Int32Array;   // -1 = none
+  actualStart: Int32Array; actualFinish: Int32Array;
+  targetStart: Int32Array; targetFinish: Int32Array;   // planned dates, used as the baseline
   originalDurationMin: Int32Array; remainingDurationMin: Int32Array;
   totalFloatMin: Int32Array; freeFloatMin: Int32Array;
   constraintType: Uint8Array; constraintDate: Int32Array;
@@ -31,7 +33,10 @@ interface ScheduleData {
   strings: StringTable;            // one Uint8Array of UTF-8 bytes + Int32Array offsets
   calendars: CalendarTable;
   meta: {
-    dataDate: number; projectName: string; epoch: string; warnings: string[];
+    dataDate: number; projectName: string; epoch: string;
+    warnings: ImportWarning[];     // { kind, count, examples (up to 20) }
+    projects: ProjectInfo[];       // every project in the file
+    incomplete: boolean;           // the file ended without %E
     formatVersion: number;         // bump when the layout changes; invalidates the OPFS cache
     sourceHash: string;            // SHA-256 of the source file, computed while streaming
     schedulingOptions: SchedulingOptions;
