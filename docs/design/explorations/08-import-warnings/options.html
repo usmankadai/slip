@@ -1,0 +1,190 @@
+<!doctype html>
+<html lang="en-GB">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Import warnings: options</title>
+    <style>
+      /* A record of what was looked at. The product reads these values from packages/ui/src/tokens.css. */
+      :root {
+        --s0: #fbfaf7; --s1: #f4f2ec; --s2: #ebe8e0; --s3: #dedacf;
+        --t1: #1c1b18; --t2: #55524a; --t3: #6c685d;
+        --b1: #e2ded3; --b2: #898477; --accent: #5b3fd6;
+      }
+      * { box-sizing: border-box; }
+      body { margin: 0; background: var(--s0); color: var(--t1); font: 13px/20px Inter, system-ui, -apple-system, 'Segoe UI', sans-serif; font-variant-numeric: tabular-nums; }
+      header, main { max-width: 1180px; margin: 0 auto; padding: 0 32px; }
+      header { padding-top: 24px; }
+      main { padding-bottom: 64px; }
+      h1 { font-size: 20px; line-height: 28px; margin: 0 0 4px; }
+      h2 { font-size: 16px; line-height: 24px; margin: 40px 0 8px; }
+      p { margin: 0 0 8px; color: var(--t2); max-width: 760px; }
+      .controls { position: sticky; top: 0; z-index: 2; background: var(--s0); border-bottom: 1px solid var(--b1); padding: 8px 0; margin: 16px 0 0; display: flex; gap: 8px; align-items: center; }
+      .controls button { font: inherit; padding: 2px 10px; border: 1px solid var(--b2); border-radius: 4px; background: var(--s0); color: var(--t1); cursor: pointer; }
+      .controls button[aria-pressed='true'] { background: var(--t1); color: var(--s0); border-color: var(--t1); }
+      .option { display: grid; grid-template-columns: minmax(0, 1fr) 300px; gap: 24px; align-items: start; }
+      .stage { min-width: 0; overflow-x: auto; }
+      .notes { margin: 0; font-size: 12px; line-height: 16px; }
+      .notes dt { font-weight: 600; margin-top: 8px; }
+      .notes dt:first-child { margin-top: 0; }
+      .notes dd { margin: 0; color: var(--t2); }
+
+      .slot { width: 520px; border: 1px solid var(--b1); border-radius: 6px; background: var(--s0); }
+      .slot.wide { width: 100%; min-width: 760px; }
+      .slot-head { padding: 12px; border-bottom: 1px solid var(--b1); }
+      .label { font-size: 11px; line-height: 16px; color: var(--t3); }
+      .project { font-size: 14px; font-weight: 600; }
+      .facts { font-size: 12px; line-height: 16px; color: var(--t2); }
+      .report { padding: 8px 12px 12px; }
+      .report-title { display: flex; justify-content: space-between; align-items: baseline; font-weight: 600; padding: 4px 0; }
+      .link { color: var(--accent); font-weight: 500; font-size: 12px; text-decoration: underline; }
+      .group { font-size: 11px; line-height: 16px; font-weight: 600; color: var(--t2); padding: 8px 0 2px; display: flex; justify-content: space-between; border-bottom: 1px solid var(--b2); }
+      .w { display: grid; grid-template-columns: 16px 1fr auto; gap: 0 6px; padding: 5px 0; border-bottom: 1px solid var(--b1); font-size: 12px; line-height: 16px; }
+      .w:last-child { border-bottom: 0; }
+      .w .caret { color: var(--t3); }
+      .w .n { text-align: right; font-weight: 600; }
+      .w .did, .w .share { grid-column: 2 / 4; color: var(--t2); }
+      .w .share { color: var(--t3); font-size: 11px; }
+      .w .ex { grid-column: 2 / 4; margin: 4px 0 2px; padding: 4px 8px; background: var(--s1); font: 11px/16px 'JetBrains Mono', ui-monospace, monospace; color: var(--t2); }
+      .mark { display: inline-block; width: 7px; height: 7px; background: var(--t1); margin-right: 6px; }
+      .sentence { padding: 4px 0; }
+      .sentence b { font-weight: 600; }
+      table { border-collapse: collapse; width: 100%; font-size: 12px; line-height: 16px; }
+      th, td { text-align: left; padding: 5px 8px; border-bottom: 1px solid var(--b1); vertical-align: top; }
+      th { background: var(--s2); color: var(--t2); font-weight: 500; }
+      td.n, th.n { text-align: right; }
+      td.code { font: 11px/16px 'JetBrains Mono', ui-monospace, monospace; color: var(--t2); }
+      .drawer-cap { display: flex; justify-content: space-between; padding: 8px 12px; border-bottom: 1px solid var(--b1); font-weight: 600; }
+      .gap { height: 12px; }
+      @media (max-width: 900px) { .option { grid-template-columns: 1fr; } }
+    </style>
+  </head>
+  <body>
+    <header>
+      <h1>Exploration 08: import warnings</h1>
+      <p>Three ways to report what Slip had to repair or leave out while reading a file, drawn at the real width of an import slot (layout A). The same six kinds of warning are used in each; the kinds and what Slip does about them come from the import spec. The counts are made up to match a 350,000 activity schedule.</p>
+      <p>Warnings never block the comparison. None of the options uses the amber and red of the slip scale: in Slip, warm means late, and a warning is not a late activity.</p>
+      <div class="controls" id="controls">
+        <span>Case:</span>
+        <button data-case="large" aria-pressed="true">3,012 warnings, 6 kinds</button>
+        <button data-case="small" aria-pressed="false">12 warnings, 2 kinds</button>
+        <button data-case="none" aria-pressed="false">No warnings</button>
+      </div>
+    </header>
+    <main id="main"></main>
+
+    <script>
+      const KINDS = [
+        { id: 'rows', name: 'Rows with the wrong number of fields', effect: 'repair', of: 'rows', did: 'Short rows were padded and long rows cut to fit the table.', ex: ['TASK row 118,204: 58 fields, expected 61', 'TASK row 118,205: 58 fields, expected 61'] },
+        { id: 'unknown', name: 'Values Slip does not recognise', effect: 'repair', of: 'activities', did: 'Shown as Unknown. Nothing is calculated from them.', ex: ['P01-A001-TRK-0410: activity type TT_WBS2', 'P01-A001-TRK-0411: activity type TT_WBS2'] },
+        { id: 'dupes', name: 'Duplicate activity codes', effect: 'compare', of: 'activities', did: 'The first of each is compared with update A. The rest are kept but not compared.', ex: ['P02-A003-CIV-0160, 2 activities', 'P02-A003-CIV-0170, 3 activities'] },
+        { id: 'rels', name: 'Relationships to activities that are not in the file', effect: 'dates', of: 'relationships', did: 'Left out. Their successors may show earlier dates than in P6.', ex: ['P03-A005-ENB-0200 from a missing predecessor', 'P03-A005-ENB-0210 from a missing predecessor'] },
+        { id: 'cal', name: 'Activities with no calendar', effect: 'dates', of: 'activities', did: 'The project default calendar was used.', ex: ['P01-A001-TRK-0060', 'P01-A001-TRK-0070'] },
+        { id: 'loops', name: 'Logic loops', effect: 'dates', of: 'relationships', unit: 'loops', did: 'One relationship was removed from each loop so that dates could be calculated.', ex: ['P02-A003-CIV-0160 to P02-A003-CIV-0170 and back', 'P02-A002-CIV-0090, 0100, 0110 and back'] },
+      ];
+      const CASES = {
+        large: { rows: 2412, unknown: 321, dupes: 143, rels: 96, cal: 38, loops: 2 },
+        small: { rels: 9, cal: 3 },
+        none: {},
+      };
+      const TOTALS = { rows: 2104880, activities: 350412, relationships: 498864 };
+      const GROUPS = [
+        { id: 'dates', title: 'May change dates' },
+        { id: 'compare', title: 'Changes what is compared' },
+        { id: 'repair', title: 'Repaired while reading, no effect on dates' },
+      ];
+      const fmt = (n) => n.toLocaleString('en-GB');
+      const share = (kind, count) => {
+        const pct = (count / TOTALS[kind.of]) * 100;
+        const shown = pct < 0.01 ? 'under 0.01%' : `${pct.toFixed(2)}%`;
+        return `${shown} of ${fmt(TOTALS[kind.of])} ${kind.of}`;
+      };
+      const present = (counts) => KINDS.filter((kind) => counts[kind.id]).map((kind) => ({ ...kind, count: counts[kind.id] }));
+      const total = (list) => list.reduce((sum, kind) => sum + kind.count, 0);
+      const plural = (n, word) => `${fmt(n)} ${word}${n === 1 ? '' : 's'}`;
+      const headline = (list) => `${plural(total(list), 'warning')} of ${list.length} kind${list.length === 1 ? '' : 's'}`;
+
+      const head = `<div class="slot-head"><div class="label">Update B, later</div><div class="project">Northern Rail Upgrade, Phase 2</div><div class="facts">Data date 1 July 2026 · 350,412 activities · 498,864 relationships</div></div>`;
+      const none = `<div class="report"><div class="report-title"><span>Import report</span></div><div class="sentence">No warnings. Every row was read as written.</div></div>`;
+
+      const row = (kind, { open = false, did = false, withShare = false, mark = false } = {}) => `
+        <div class="w">
+          <span class="caret">${open ? '▾' : '▸'}</span>
+          <span>${mark ? '<span class="mark" aria-hidden="true"></span>' : ''}${kind.name}</span>
+          <span class="n">${fmt(kind.count)}${kind.unit ? ` ${kind.unit}` : ''}</span>
+          ${did || open ? `<span class="did">${kind.did}</span>` : ''}
+          ${withShare ? `<span class="share">${share(kind, kind.count)}</span>` : ''}
+          ${open ? `<div class="ex">${kind.ex.join('<br />')}<br />and ${fmt(Math.max(kind.count - 2, 0))} more, 20 shown at most</div>` : ''}
+        </div>`;
+
+      const OPTIONS = [
+        {
+          title: 'A. One list, largest first',
+          render: (list) => {
+            if (!list.length) return `<div class="slot">${head}${none}</div>`;
+            const sorted = [...list].sort((a, b) => b.count - a.count);
+            return `<div class="slot">${head}<div class="report"><div class="report-title"><span>Import report: ${headline(list)}</span><span class="link">Export</span></div>${sorted.map((kind, index) => row(kind, { open: index === 0 })).join('')}</div></div>`;
+          },
+          notes: [
+            ['Leads with', 'The biggest number.'],
+            ['Does well', 'Simplest to read and to build. Nothing is judged on the planner\'s behalf: every kind is treated alike.'],
+            ['Costs', 'The biggest number is the least important one. 2,412 padded rows sit at the top and two logic loops, which change dates, sit at the bottom. This is the alarming and burying the problem statement warns of, both at once.'],
+          ],
+        },
+        {
+          title: 'B. Grouped by what it means for the answer',
+          render: (list) => {
+            if (!list.length) return `<div class="slot">${head}${none}</div>`;
+            const groups = GROUPS.map((group) => ({ ...group, kinds: list.filter((kind) => kind.effect === group.id) })).filter((group) => group.kinds.length);
+            return `<div class="slot">${head}<div class="report"><div class="report-title"><span>Import report: ${headline(list)}</span><span class="link">Export</span></div>${groups
+              .map((group) => `<div class="group"><span>${group.title}</span><span>${fmt(total(group.kinds))}</span></div>${group.kinds.map((kind) => row(kind, { did: group.id !== 'repair', withShare: group.id !== 'repair', mark: group.id === 'dates' })).join('')}`)
+              .join('')}</div></div>`;
+          },
+          notes: [
+            ['Leads with', 'The warnings that could change a date, however few.'],
+            ['Does well', 'Answers "can I trust what loaded" directly. What Slip did about each kind is visible without opening anything. The share of the schedule gives each count its scale: 96 relationships is under 0.02% of them.'],
+            ['Costs', 'Slip is making a judgement about which warnings matter, and the grouping has to be right. Taller than A: it uses most of a slot. A square mark as well as the heading is used for the first group, since colour is not available.'],
+          ],
+        },
+        {
+          title: 'C. One sentence in the slot, the report in a drawer',
+          render: (list) => {
+            if (!list.length) return `<div class="slot">${head}${none}</div>`;
+            const dates = list.filter((kind) => kind.effect === 'dates');
+            const rest = total(list) - total(dates);
+            const sentence = !dates.length
+              ? 'None of them changes a date.'
+              : `<b>${plural(total(dates), 'warning')} may change dates.</b>${rest ? ` The other ${fmt(rest)} were repaired or set aside while reading.` : ''}`;
+            const order = GROUPS.flatMap((group) => list.filter((kind) => kind.effect === group.id).map((kind) => ({ ...kind, group: group.title })));
+            return `<div class="slot">${head}<div class="report"><div class="report-title"><span>Import report: ${headline(list)}</span><span class="link">Open the report</span></div><div class="sentence">${sentence}</div></div></div>
+              <div class="gap"></div>
+              <div class="slot wide"><div class="drawer-cap"><span>Import report, update B: ${headline(list)}</span><span class="link">Export</span></div>
+              <table><thead><tr><th>Kind</th><th class="n">Count</th><th>Share</th><th>Effect</th><th>What Slip did</th><th>First example</th></tr></thead><tbody>
+              ${order.map((kind) => `<tr><td>${kind.name}</td><td class="n">${fmt(kind.count)}</td><td>${share(kind, kind.count)}</td><td>${kind.group.replace(', no effect on dates', '')}</td><td>${kind.did}</td><td class="code">${kind.ex[0]}</td></tr>`).join('')}
+              </tbody></table></div>`;
+          },
+          notes: [
+            ['Leads with', 'One sentence that says how much of this matters.'],
+            ['Does well', 'Keeps the two slots even and short. The full-width table has room for every column, and is the same table that is exported and written to the audit log.'],
+            ['Costs', 'The detail is one click away, which is close to hiding warnings behind a summary; the spec says not to hide them behind a success tick. The sentence carries all the weight, so its wording has to be exactly right.'],
+          ],
+        },
+      ];
+
+      const main = document.getElementById('main');
+      function draw(which) {
+        const list = present(CASES[which]);
+        main.innerHTML = OPTIONS.map(
+          (option) => `<h2>${option.title}</h2><div class="option"><div class="stage">${option.render(list)}</div><dl class="notes">${option.notes.map(([term, text]) => `<dt>${term}</dt><dd>${text}</dd>`).join('')}</dl></div>`,
+        ).join('');
+      }
+      document.getElementById('controls').addEventListener('click', (event) => {
+        const button = event.target.closest('button');
+        if (!button) return;
+        for (const other of document.querySelectorAll('#controls button')) other.setAttribute('aria-pressed', String(other === button));
+        draw(button.dataset.case);
+      });
+      draw('large');
+    </script>
+  </body>
+</html>

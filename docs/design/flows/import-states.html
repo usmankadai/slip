@@ -1,0 +1,275 @@
+<!doctype html>
+<html lang="en-GB">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Flow: import, the states of layout A</title>
+    <link rel="stylesheet" href="wire.css" />
+    <style>
+      .frame { min-height: 0; }
+      .say { color: #222; }
+      .strip { display: grid; gap: 8px; }
+      .strip .box { grid-template-columns: 150px 1fr auto; align-items: center; gap: 12px; }
+      .strip .k { font-weight: 600; }
+      .bar2 { height: 6px; background: #ddd; }
+      .bar2 i { display: block; height: 100%; background: #222; }
+      .drop { border: 1.5px dashed #222; min-height: 150px; place-content: center; text-align: center; }
+      .mark { font-weight: 700; }
+      .open { background: repeating-linear-gradient(135deg, #f1f1f1 0 6px, #fff 6px 12px); }
+    </style>
+  </head>
+  <body>
+    <header>
+      <h1>Import: the states of layout A</h1>
+      <p>Layout A (two slots side by side) was chosen on 11 November 2026. This page draws every moment it has to handle, still as boxes and labels. Wording in quotation marks is proposed copy.</p>
+      <p class="question">
+        The planner's question: "Did my files load, and can I trust what loaded?"<br />
+        Rule from the spec: warnings never block. Only a file that cannot be read at all is an error.
+      </p>
+      <p>Drawn by Claude for Usman to review. Hatched boxes mark a choice that is still open; they are listed at the end.</p>
+    </header>
+
+    <main>
+      <h2>1. Empty: nothing loaded</h2>
+      <div class="option">
+        <div class="frame">
+          <div class="bar"><b>Slip</b><span class="right">What leaves the browser</span></div>
+          <div class="body">
+            <div class="cols c2">
+              <div class="box lead drop">
+                <div class="t"><span class="tag">1</span>Update A, earlier</div>
+                <div class="say">"Drop last month's XER file here"</div>
+                <div class="btn">Choose a file</div>
+              </div>
+              <div class="box lead drop">
+                <div class="t">Update B, later</div>
+                <div class="say">"Drop this month's XER file here"</div>
+                <div class="btn">Choose a file</div>
+              </div>
+            </div>
+            <div class="box quiet"><div>"Drop both files at once and Slip puts them in order by data date."</div></div>
+            <div class="cols c2">
+              <div class="btn off">Compare updates</div>
+              <div style="text-align: right"><span class="tag">2</span>"No files to hand? Generate a sample pair"</div>
+            </div>
+          </div>
+        </div>
+        <dl class="notes">
+          <dt>Next action</dt><dd>Two, in order: drop or choose files, or generate a sample pair. The sample pair is how a visitor without a schedule sees the product, so it is not hidden.</dd>
+          <dt>Both at once</dt><dd>Dropping two files anywhere on the screen fills both slots, ordered by data date. A planner should not have to remember which is which.</dd>
+          <dt>Not shown</dt><dd>The "do these two belong together" line. There is nothing to compare yet, so it is absent, not empty.</dd>
+        </dl>
+      </div>
+
+      <h2>2. Loading: files being read</h2>
+      <div class="option">
+        <div class="frame">
+          <div class="bar"><b>Slip</b><span class="right">What leaves the browser</span></div>
+          <div class="body">
+            <div class="cols c2">
+              <div class="box lead">
+                <div class="t">Update A, earlier</div>
+                <div class="big">Northern Rail Upgrade, Phase 2</div>
+                <div>rail-350k-a.xer · data date 1 June 2026</div>
+                <div class="bar2"><i style="width: 72%"></i></div>
+                <div><span class="tag">1</span>"Reading activities: 252,000 rows · 61 of 84 MB"</div>
+                <div class="box quiet"><div class="t">Import report</div><div>"2 kinds of warning so far"</div></div>
+                <div class="quiet">Cancel</div>
+              </div>
+              <div class="box lead">
+                <div class="t">Update B, later</div>
+                <div class="big quiet">Reading the file header</div>
+                <div>rail-350k-b.xer</div>
+                <div class="bar2"><i style="width: 4%"></i></div>
+                <div>"Starting: 3 of 86 MB"</div>
+                <div class="box quiet"><div class="t">Import report</div><div class="line m"></div></div>
+                <div class="quiet">Cancel</div>
+              </div>
+            </div>
+            <div class="box quiet"><div>"Checking that the two belong together once both are read."</div></div>
+            <div class="cols c2">
+              <div class="btn off">Compare updates (waits for both)</div>
+              <div class="quiet" style="text-align: right">Generate a sample pair</div>
+            </div>
+          </div>
+        </div>
+        <dl class="notes">
+          <dt>What appears when</dt><dd>File name at once. Project name and data date as soon as the project table is read, which is early in the file. Counts climb as rows are read.</dd>
+          <dt>Progress</dt><dd>A bar by bytes, with the table being read, rows and megabytes in words. Bytes are the honest measure: the total row count is not known until the end.</dd>
+          <dt>Warnings</dt><dd>The report counts kinds as they are found. It does not list examples until the file is done, so it does not jump about.</dd>
+          <dt>Cancel</dt><dd>Each slot can be cancelled on its own and returns to empty.</dd>
+        </dl>
+      </div>
+
+      <h2>3. Error: a file that cannot be read</h2>
+      <div class="option">
+        <div class="frame">
+          <div class="bar"><b>Slip</b><span class="right">What leaves the browser</span></div>
+          <div class="body">
+            <div class="cols c2">
+              <div class="box">
+                <div class="t">Update A, earlier</div>
+                <div class="big">Northern Rail Upgrade, Phase 2</div>
+                <div>Data date 1 June 2026 · 350,000 activities · 498,112 relationships</div>
+                <div class="box"><div class="t">Import report</div><div>"No warnings"</div></div>
+              </div>
+              <div class="box lead">
+                <div class="t"><span class="tag">1</span>Update B, later</div>
+                <div class="big">"This is not an XER file"</div>
+                <div class="say">"programme-june.xlsx does not start with the ERMHDR line that every P6 export has. Export the schedule from P6 as XER and try again."</div>
+                <div class="btn"><span class="tag">2</span>Choose another file</div>
+              </div>
+            </div>
+            <div class="cols c2">
+              <div class="btn off">Compare updates (needs update B)</div>
+              <div class="quiet" style="text-align: right">Generate a sample pair</div>
+            </div>
+          </div>
+        </div>
+        <dl class="notes">
+          <dt>Stays put</dt><dd>The error is in the slot of the file it is about. Update A is untouched and does not need loading again.</dd>
+          <dt>Three parts</dt><dd>What happened, how Slip knows, what to do next. The file name is repeated so the planner can see which file was wrong.</dd>
+          <dt>Other errors, same shape</dt><dd>An empty file ("This file is empty"), a file over the size limit ("This file is larger than Slip can read", with the limit), and a read that fails part way for a reason that is not the file ("Slip could not finish reading this file", with Try again).</dd>
+        </dl>
+      </div>
+
+      <h2>4. Populated: both read, nothing to flag</h2>
+      <div class="option">
+        <div class="frame">
+          <div class="bar"><b>Slip</b><span class="right">What leaves the browser</span></div>
+          <div class="body">
+            <div class="cols c2">
+              <div class="box">
+                <div class="t">Update A, earlier</div>
+                <div class="big">Northern Rail Upgrade, Phase 2</div>
+                <div>Data date 1 June 2026 · 350,000 activities · 498,112 relationships</div>
+                <div class="box quiet"><div class="t">Import report</div><div>"No warnings"</div></div>
+                <div class="quiet">rail-350k-a.xer · Replace</div>
+              </div>
+              <div class="box">
+                <div class="t">Update B, later</div>
+                <div class="big">Northern Rail Upgrade, Phase 2</div>
+                <div>Data date 1 July 2026 · 350,412 activities · 498,960 relationships</div>
+                <div class="box quiet"><div class="t">Import report</div><div>"No warnings"</div></div>
+                <div class="quiet">rail-350k-b.xer · Replace</div>
+              </div>
+            </div>
+            <div class="box"><div class="say"><span class="tag">1</span>"Same project, one month apart. 349,870 activities are in both updates."</div></div>
+            <div class="cols c2">
+              <div class="btn"><span class="tag">2</span>Compare updates</div>
+              <div class="quiet" style="text-align: right">Generate a sample pair</div>
+            </div>
+          </div>
+        </div>
+        <dl class="notes">
+          <dt>What leads now</dt><dd>The sentence that says the pair is sound, then the button. The slots step back: lighter borders, no tags.</dd>
+          <dt>"No warnings" is said</dt><dd>The report stays in each slot and says it found nothing. An absent report would look the same as one not yet run.</dd>
+          <dt>No tick</dt><dd>There is no success mark. The facts are the confirmation.</dd>
+        </dl>
+      </div>
+
+      <h2>5. Populated, with warnings in a file</h2>
+      <div class="option">
+        <div class="frame">
+          <div class="bar"><b>Slip</b><span class="right">What leaves the browser</span></div>
+          <div class="body">
+            <div class="cols c2">
+              <div class="box">
+                <div class="t">Update A, earlier</div>
+                <div class="big">Northern Rail Upgrade, Phase 2</div>
+                <div>Data date 1 June 2026 · 350,000 activities · 498,112 relationships</div>
+                <div class="box quiet"><div class="t">Import report</div><div>"No warnings"</div></div>
+              </div>
+              <div class="box">
+                <div class="t">Update B, later</div>
+                <div class="big">Northern Rail Upgrade, Phase 2</div>
+                <div>Data date 1 July 2026 · 350,412 activities · 498,864 relationships</div>
+                <div class="box lead open"><div class="t"><span class="tag">1</span>Import report: 3,012 warnings of 6 kinds</div><div>How this is laid out is exploration 08.</div><div class="line l"></div><div class="line l"></div><div class="line m"></div></div>
+                <div class="box"><div class="say">"This schedule was not calculated with retained logic. Slip uses retained logic, so its dates may differ from P6."</div></div>
+              </div>
+            </div>
+            <div class="box"><div class="say">"Same project, one month apart. 349,870 activities are in both updates."</div></div>
+            <div class="cols c2">
+              <div class="btn"><span class="tag">2</span>Compare updates</div>
+              <div class="quiet" style="text-align: right">Generate a sample pair</div>
+            </div>
+          </div>
+        </div>
+        <dl class="notes">
+          <dt>Does not block</dt><dd>Compare updates is live. The report leads the eye because it is open and heavy, not because it stands in the way.</dd>
+          <dt>Uneven slots</dt><dd>The slot with warnings grows; the other does not stretch to match. This is the cost of layout A that was accepted.</dd>
+          <dt>Retained logic notice</dt><dd>A persistent notice in the slot of the file it applies to. It follows the planner into the workspace; where it sits there is not drawn yet.</dd>
+        </dl>
+      </div>
+
+      <h2>6. A file that needs an answer before it can be used</h2>
+      <div class="option">
+        <div class="frame">
+          <div class="bar"><b>Slip</b><span class="right">What leaves the browser</span></div>
+          <div class="body">
+            <div class="cols c2">
+              <div class="box lead">
+                <div class="t"><span class="tag">1</span>Update A: several projects in one file</div>
+                <div class="say">"This file holds 3 projects. Choose the one to compare."</div>
+                <div class="row" style="grid-template-columns: 1fr 96px 80px"><div>◉ Northern Rail Upgrade, Phase 2</div><span>1 June 2026</span><span class="n">350,000</span></div>
+                <div class="row" style="grid-template-columns: 1fr 96px 80px"><div>○ Enabling works</div><span>1 June 2026</span><span class="n">4,210</span></div>
+                <div class="row" style="grid-template-columns: 1fr 96px 80px"><div>○ Depot fit-out</div><span>18 May 2026</span><span class="n">12,880</span></div>
+                <div class="quiet">"Relationships to activities in the other projects are counted in the report as external."</div>
+              </div>
+              <div class="box lead">
+                <div class="t"><span class="tag">1</span>Update B: the file stops early</div>
+                <div class="big">Northern Rail Upgrade, Phase 2</div>
+                <div class="say">"This file is incomplete. It ends without the closing line P6 writes, part way through the relationships table. Slip read 350,412 activities and 211,040 relationships; some are probably missing."</div>
+                <div class="cols c2"><div class="btn">Choose another file</div><div class="btn off" style="color: #222; border-color: #777">Use it as it is</div></div>
+              </div>
+            </div>
+            <div class="cols c2">
+              <div class="btn off">Compare updates (waits for an answer in both)</div>
+              <div class="quiet" style="text-align: right">Generate a sample pair</div>
+            </div>
+          </div>
+        </div>
+        <dl class="notes">
+          <dt>Two cases, shown together</dt><dd>They would rarely happen at once. Each is a question asked inside the slot, and Compare updates waits for it.</dd>
+          <dt>Project picker</dt><dd>Data date and activity count beside each name, so the right one can be told apart. If update B is already read, the project with the same name is chosen in advance.</dd>
+          <dt>Incomplete file</dt><dd>The safe answer is the main button. Using the file is allowed, is the planner's choice, and is written to the audit log. The file stays marked incomplete everywhere afterwards.</dd>
+        </dl>
+      </div>
+
+      <h2>7. The pair does not look right</h2>
+      <div class="option">
+        <div class="frame">
+          <div class="bar"><b>Slip</b><span class="right">The "do these two belong together" line, in each case</span></div>
+          <div class="body strip">
+            <div class="box"><span class="k">Sound pair</span><span class="say">"Same project, one month apart. 349,870 activities are in both updates."</span><span></span></div>
+            <div class="box lead"><span class="k">Wrong order</span><span class="say">"Update A is the later one: its data date is 1 July 2026 and update B's is 1 June 2026."</span><span class="btn">Swap them</span></div>
+            <div class="box lead"><span class="k">Different schedules</span><span class="say">"These look like different schedules. The project names differ and only 4% of activity codes are in both. A comparison would show nearly everything as added or deleted."</span><span class="btn">Replace a file</span></div>
+            <div class="box lead"><span class="k">Same file twice</span><span class="say">"These are the same file. There is nothing to compare."</span><span class="btn">Replace update B</span></div>
+            <div class="box"><span class="k">Same data date</span><span class="say">"Both updates have the data date 1 July 2026. Slip will compare them as two versions of the same update."</span><span></span></div>
+          </div>
+        </div>
+        <dl class="notes">
+          <dt>One line, five wordings</dt><dd>The line always states what Slip checked, in a full sentence, so the sound case and the unsound cases read the same way.</dd>
+          <dt>Warn, do not block</dt><dd>In every case but "same file twice" Compare updates stays live, since the spec says warnings never block. The line's own button is the suggested fix and becomes the main button on the screen.</dd>
+          <dt>Wrong order</dt><dd>When both files are dropped at once this cannot happen, because Slip orders them. It is for files chosen one at a time.</dd>
+          <dt>Same data date</dt><dd>Not in the spec. Added here because it happens (a resubmitted update) and the line would otherwise say something odd. Usman to confirm.</dd>
+        </dl>
+      </div>
+
+      <h2>Still open</h2>
+      <div class="option">
+        <div class="body" style="min-width: 0; padding: 0">
+          <div class="box"><div class="t">For Usman</div>
+            <div>1. How the import report is laid out inside the slot: exploration 08, three options.</div>
+            <div>2. Whether "same data date" is a case worth its own wording (section 7).</div>
+            <div>3. Whether "same file twice" should disable Compare updates. Drawn here as the one case that does, since the result would be empty; the spec only says to "say so".</div>
+            <div>4. The copy. Every sentence in quotation marks is a first draft.</div>
+          </div>
+        </div>
+        <dl class="notes">
+          <dt>Not drawn</dt><dd>Generating a sample pair (its own progress, in both slots at once). Returning to this screen with a pair already loaded. Narrow windows, where the slots would stack.</dd>
+        </dl>
+      </div>
+    </main>
+  </body>
+</html>

@@ -2,6 +2,29 @@
 
 What was built, what Usman decided or designed, and what an agent generated. Newest first.
 
+## 11 November 2026: import states and import warnings options
+
+**Done**
+
+- The states of the chosen import layout are drawn as boxes and labels: empty, loading, error, populated, populated with warnings, a file that needs an answer first (several projects, or a file that stops early), and the five wordings of the "do these two belong together" line.
+- Exploration 08, import warnings: three options at the real width of a slot, with a switch between 3,012 warnings, 12 and none.
+
+**Usman decided or designed**
+
+- To draw these next. Nothing on the pages yet.
+
+**The agent (Claude) generated**
+
+- Both pages, all proposed copy, the three options and the recommendation (B, grouped by what it means for the answer).
+- The grouping of the six kinds of warning into "may change dates", "changes what is compared" and "repaired while reading". This is a judgement about planning, made without a planner.
+- Two things that go beyond the spec and are flagged on the page: a wording for two updates with the same data date, and disabling Compare updates when the same file is loaded twice.
+
+**Worth Usman's attention**
+
+- One choice (exploration 08) and three smaller questions are listed in `docs/design/flows/README.md`. The import screen is not built until they are answered.
+- There is no warning colour. Warm means late, so the report is drawn without colour and uses a square mark. Whether Slip needs a warning colour at all is an identity question.
+- The copy is a first draft throughout, and it is the part of this screen a planner will judge most.
+
 ## 11 November 2026: tokens and Storybook
 
 **Done**
