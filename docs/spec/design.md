@@ -26,7 +26,7 @@ In priority order. When two conflict, the higher one wins.
 
 Slip must look like it belongs in the same category as professional planning tools, and must not look like Planlab. Planlab's public look is dark navy with peach and deep green and a geometric sans; avoid all of those as identity colours.
 
-**Confirmed by Usman on 10 November 2026 (D16).** The starting proposal was drafted by an agent and accepted as written, without alternatives being explored first. Say so in the journal and the case study. Exact colour values are still to be chosen when the tokens are built, and must pass the contrast and colour-blind checks.
+**Confirmed by Usman on 10 November 2026 (D16).** The starting proposal was drafted by an agent and accepted as written, without alternatives being explored first. Say so in the journal and the case study. Exact colour values were chosen on 11 November 2026 (neutrals A, warm paper, with the rest as proposed), again by accepting an agent's recommendation as given. The values, their contrast checks and the rules for using them are in [D16](../decisions/D16-visual-identity.md).
 
 | Element | Decision | Reason |
 |---|---|---|
@@ -44,7 +44,7 @@ Slip must look like it belongs in the same category as professional planning too
 | Icons | One outline set at 16px, 1.5px stroke | Consistency at small sizes |
 | Name and mark | Wordmark "Slip" set in the UI typeface; a simple mark of two offset bars (a bar and its baseline) | The mark is the product: this update against the last one |
 
-Write this up as `docs/decisions/D16-visual-identity.md` in phase 1. If the identity is revised later (for example after seeing it on real screens), keep the earlier version and the reason for the change in `docs/design/explorations/identity/`.
+The record is [D16](../decisions/D16-visual-identity.md). If the identity is revised later (for example after seeing it on real screens), keep the earlier version and the reason for the change in `docs/design/explorations/identity/`.
 
 ---
 

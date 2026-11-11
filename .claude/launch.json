@@ -27,6 +27,12 @@
         "--strictPort"
       ],
       "port": 4180
+    },
+    {
+      "name": "storybook",
+      "runtimeExecutable": "pnpm",
+      "runtimeArgs": ["--filter", "@slip/ui", "storybook"],
+      "port": 6006
     }
   ]
 }

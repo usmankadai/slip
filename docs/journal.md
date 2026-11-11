@@ -2,6 +2,75 @@
 
 What was built, what Usman decided or designed, and what an agent generated. Newest first.
 
+## 11 November 2026: import states and import warnings options
+
+**Done**
+
+- The states of the chosen import layout are drawn as boxes and labels: empty, loading, error, populated, populated with warnings, a file that needs an answer first (several projects, or a file that stops early), and the five wordings of the "do these two belong together" line.
+- Exploration 08, import warnings: three options at the real width of a slot, with a switch between 3,012 warnings, 12 and none.
+
+**Usman decided or designed**
+
+- To draw these next. Nothing on the pages yet.
+
+**The agent (Claude) generated**
+
+- Both pages, all proposed copy, the three options and the recommendation (B, grouped by what it means for the answer).
+- The grouping of the six kinds of warning into "may change dates", "changes what is compared" and "repaired while reading". This is a judgement about planning, made without a planner.
+- Two things that go beyond the spec and are flagged on the page: a wording for two updates with the same data date, and disabling Compare updates when the same file is loaded twice.
+
+**Worth Usman's attention**
+
+- One choice (exploration 08) and three smaller questions are listed in `docs/design/flows/README.md`. The import screen is not built until they are answered.
+- There is no warning colour. Warm means late, so the report is drawn without colour and uses a square mark. Whether Slip needs a warning colour at all is an identity question.
+- The copy is a first draft throughout, and it is the part of this screen a planner will judge most.
+
+## 11 November 2026: tokens and Storybook
+
+**Done**
+
+- `packages/ui` exists. `tokens.css` holds the D16 colour values and the space, type, density, shape, elevation and motion tokens. Inter and JetBrains Mono are self-hosted from npm packages.
+- A test reads the token file and enforces the contrast rules in D16: primary text at 7:1, muted text only where it passes, bars and glyphs only from scale steps 4 and 5, inverse text on step 5.
+- Storybook runs with five foundation pages: colour, slip scale, type, density, space and shape. Every value shown is read from the tokens. Building Storybook is now part of `pnpm check`.
+
+**Usman decided or designed**
+
+- The colour values, type scale, radii and densities, through D16 and the choices recorded below. Nothing new in this step.
+
+**The agent (Claude) generated**
+
+- The package, the test, the stories and their wording.
+- Token values the spec did not give, chosen without asking: line heights (16, 16, 20, 20, 24, 28px), font weights (400, 500, 600), cell padding (8px compact, 12px comfortable), the one floating shadow, the z-index order, the easing curve, and the 2px focus ring in the accent colour. These are small, but they are design values and are Usman's to change.
+
+**Worth Usman's attention**
+
+- Float and status colours are not in the tokens. They are data colours and nothing has been drawn for them; they need the same treatment as the slip scale before the grid is built.
+- Storybook is not deployed. No components yet, so no screenshot or axe tests on stories yet either; the spec asks for both once components exist.
+- The custom lint rules (`no-raw-color`, `no-raw-spacing`) do not exist yet, so "no raw values outside tokens.css" is held by care, not by a check.
+
+## 11 November 2026: the four design choices, made by accepting the recommendations
+
+**Done**
+
+- The four open choices are recorded: neutrals A (warm paper) with the other colour values as proposed; slip cell option B, number and diverging bar, on a fixed scale; import layout A, two slots side by side; summary layout B, milestones with a rail.
+- D16 now exists as a file, with the chosen values and the rules for using them that the contrast checks produced.
+- The slip cell mock was changed to the fixed bar scale, so the page shows what was decided.
+
+**Usman decided or designed**
+
+- All four, by saying "use your recommendation". He did not choose between the options one by one and gave no reasons of his own.
+
+**The agent (Claude) generated**
+
+- The options, the recommendations, and every reason written beside the decisions. The write-ups say so.
+- Two details that follow from the slip cell decision and were not put to Usman: the bar scale is a square root scale, and it reaches full length at 40 working days.
+
+**Worth Usman's attention**
+
+- The case study cannot honestly present these as his design reasoning as they stand. Each decision needs either his own reason or a line saying he accepted the agent's.
+- Still no planner research behind any of it, and still no screenshots of the rejected options.
+- The treatment of a "new" row in the slip column is not decided.
+
 ## 11 November 2026: first design options, nothing chosen yet
 
 **Done**

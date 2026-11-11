@@ -11,6 +11,8 @@ Part of the Slip spec. Start at [CLAUDE.md](../../CLAUDE.md).
 - Density: `--row-height`, `--cell-padding-x`, switched by `[data-density="compact" | "comfortable"]`
 - Radius, shadow, z-index, motion duration and easing
 
+Built so far (`packages/ui/src/tokens.css`, values from [D16](../decisions/D16-visual-identity.md)): everything above except the float and status colours, which wait for the screens that use them. Also `--slip-late-text` and `--slip-early-text` (a slip value written as text on a surface), `--critical-hatch`, `--leading-*` line heights, and `--grid-text` and `--grid-leading`, which switch with density. `packages/ui/test/tokens.test.ts` enforces the contrast rules in D16 on the token file, so a changed value that breaks one fails `pnpm check`.
+
 Light theme first. Dark theme tokens are a stretch goal but token names must not assume light (no `--white`, `--grey-100` in components). Fonts are self-hosted (no third-party font requests), which also keeps the CSP strict.
 
 ## Components
@@ -39,6 +41,8 @@ Guidance aimed at coding agents. For each component: when to use it, when not to
 - `pnpm check:secrets` on the built bundle
 
 ## Storybook
+Run with `pnpm storybook`; built by `pnpm build:storybook`, which is part of `pnpm check`. Telemetry is off. So far it holds the foundation pages only (colour, slip scale, type, density, space and shape); every value shown is read from the tokens on the page. It is not deployed yet.
+
 Deployed publicly with the app. As well as component stories it carries written pages (principles, identity, the slip colour scale, density, states, content, do and do not per component, canvas primitives). The list and the reasoning are in [design.md](design.md). The do and do not examples are the same ones used in `AGENTS.md`.
 
 ## Agent comparison experiment

@@ -1,0 +1,3 @@
+/* Self-hosted variable fonts. No third-party font requests, which keeps the Content Security Policy strict. */
+@import '@fontsource-variable/inter/wght.css';
+@import '@fontsource-variable/jetbrains-mono/wght.css';

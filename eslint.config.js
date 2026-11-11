@@ -10,6 +10,7 @@ export default tseslint.config(
   {
     ignores: [
       '**/dist/**',
+      '**/storybook-static/**',
       '**/node_modules/**',
       '**/coverage/**',
       '**/test-results/**',
@@ -59,6 +60,8 @@ export default tseslint.config(
       'scripts/**/*.ts',
       'tools/**/*.ts',
       'apps/api/**/*.ts',
+      'packages/ui/test/**/*.ts',
+      'packages/ui/.storybook/**/*.{ts,tsx}',
     ],
     languageOptions: { globals: globals.node },
   },

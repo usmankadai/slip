@@ -1,6 +1,6 @@
 # Identity: colour values
 
-Status: **values proposed, waiting for Usman's decision.**
+Status: **decided on 11 November 2026: neutrals A, other values as proposed.** Recorded in [D16](../../../decisions/D16-visual-identity.md).
 
 D16 fixed the character of the identity and left the exact values to be chosen "when the tokens are built", subject to contrast and colour-blind checks. This folder holds the proposal and, later, any revision with its reason.
 
@@ -29,10 +29,12 @@ One page with every value and its checks: [colour-options.html](colour-options.h
 
 ## Decision
 
-Not made. This is Usman's to choose.
+**Neutrals A, warm paper. The accent, the late and early scales, no change and critical are accepted as proposed.** Decided by Usman on 11 November 2026.
 
-Claude's recommendation: **neutrals A**, since it is what D16 describes and it is the option that looks least like other enterprise tools; accept the rest as drawn and revise after seeing them on a real screen.
+How it was decided, plainly: Claude proposed the values and recommended A. Usman accepted the recommendation as given ("use your recommendation") and did not add reasons of his own. The reasoning is Claude's: A is what D16 describes (a warm off-white working surface), and it looks least like the cool blue-grey of other enterprise tools. Neutrals B is kept on the page as the rejected option.
+
+The values are to be looked at again once they are on a real screen. Any revision is recorded below with its reason.
 
 ## What changed
 
-Nothing yet.
+Nothing since the decision.
