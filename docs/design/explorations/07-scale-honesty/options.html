@@ -1,0 +1,146 @@
+<!doctype html>
+<html lang="en-GB">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Scale honesty: options</title>
+    <style>
+      /* A record of what was looked at. The product reads these values from packages/ui/src/tokens.css. */
+      :root {
+        --s0: #fbfaf7; --s1: #f4f2ec; --s2: #ebe8e0; --s3: #dedacf; --t1: #1c1b18; --t2: #55524a; --t3: #6c685d;
+        --b1: #e2ded3; --b2: #898477; --accent: #5b3fd6; --late4: #db6b2c; --late5: #b8321f; --early4: #4c8cda;
+      }
+      * { box-sizing: border-box; }
+      body { margin: 0; background: var(--s0); color: var(--t1); font: 13px/20px Inter, system-ui, -apple-system, 'Segoe UI', sans-serif; font-variant-numeric: tabular-nums; }
+      header, main { max-width: 1180px; margin: 0 auto; padding: 0 32px; }
+      header { padding-top: 24px; }
+      main { padding-bottom: 64px; }
+      h1 { font-size: 20px; line-height: 28px; margin: 0 0 4px; }
+      h2 { font-size: 16px; line-height: 24px; margin: 40px 0 8px; }
+      p { margin: 0 0 8px; color: var(--t2); max-width: 760px; }
+      .controls { position: sticky; top: 0; z-index: 2; background: var(--s0); border-bottom: 1px solid var(--b1); padding: 8px 0; margin: 16px 0 0; display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+      .controls button { font: inherit; padding: 2px 10px; border: 1px solid var(--b2); border-radius: 4px; background: var(--s0); color: var(--t1); cursor: pointer; }
+      .controls button[aria-pressed='true'] { background: var(--t1); color: var(--s0); border-color: var(--t1); }
+      .option { display: grid; grid-template-columns: minmax(0, 1fr) 300px; gap: 24px; align-items: start; }
+      .stage { min-width: 0; overflow-x: auto; }
+      .notes { margin: 0; font-size: 12px; line-height: 16px; }
+      .notes dt { font-weight: 600; margin-top: 8px; }
+      .notes dt:first-child { margin-top: 0; }
+      .notes dd { margin: 0; color: var(--t2); }
+
+      .frame { min-width: 700px; border: 1px solid var(--b1); border-radius: 6px; overflow: hidden; background: var(--s0); position: relative; }
+      .bar { display: flex; gap: 8px; align-items: center; padding: 6px 10px; border-bottom: 1px solid var(--b1); font-size: 12px; line-height: 16px; }
+      .chip { border: 1px solid var(--b2); border-radius: 4px; padding: 1px 8px; }
+      .chip.on { border-color: var(--accent); color: var(--accent); }
+      .strong { font-weight: 600; }
+      .push { margin-left: auto; color: var(--t2); }
+      .link { color: var(--accent); text-decoration: underline; }
+      .body { display: grid; grid-template-columns: minmax(0, 1fr) auto; }
+      .rows { font-size: 12px; }
+      .r { display: grid; grid-template-columns: 70px 150px minmax(0, 1fr) 96px 64px; align-items: center; height: 24px; border-bottom: 1px solid var(--b1); }
+      .r > span { padding: 0 8px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+      .h { background: var(--s2); color: var(--t2); font-weight: 500; }
+      .num { text-align: right; }
+      .muted { color: var(--t3); }
+      .code { font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 11px; }
+      .sb { width: 14px; background: var(--s1); border-left: 1px solid var(--b1); position: relative; }
+      .sb i { position: absolute; left: 3px; right: 3px; background: var(--b2); border-radius: 4px; }
+      .status { padding: 5px 10px; border-top: 1px solid var(--b1); font-size: 12px; line-height: 16px; color: var(--t2); display: flex; gap: 12px; }
+      .readout { position: absolute; right: 26px; padding: 4px 10px; background: var(--t1); color: var(--s0); border-radius: 4px; font-size: 12px; line-height: 16px; }
+      .map { width: 44px; background: var(--s1); border-left: 1px solid var(--b1); position: relative; }
+      .map u { position: absolute; left: 6px; right: 6px; height: 1px; background: var(--late4); text-decoration: none; }
+      .map u.e { background: var(--early4); }
+      .map .view { position: absolute; left: 2px; right: 2px; border: 1.5px solid var(--t1); background: rgb(28 27 24 / 8%); }
+      .map .ticks { position: absolute; inset: 0; font-size: 9px; line-height: 10px; color: var(--t3); }
+      .map .ticks b { position: absolute; left: 2px; font-weight: 400; }
+      @media (max-width: 900px) { .option { grid-template-columns: 1fr; } }
+    </style>
+  </head>
+  <body>
+    <header>
+      <h1>Exploration 07: scale honesty</h1>
+      <p>A planner looking at the changes grid sees about 25 rows. The schedule has 350,412 activities, of which 4,812 changed. Three things have to be clear without asking: how many rows this view holds, how many are hidden and why, and where in the list the visible rows are. The scrollbar is the usual answer to the last one, and at this size it stops working: the thumb is at its minimum size whatever the list length, and one pixel of travel is hundreds of rows.</p>
+      <p>The first two are not optional. The UI spec says the count of hidden rows is always visible when a view is filtered. The options differ in where that is said and in what replaces the scrollbar's lost meaning.</p>
+      <div class="controls" id="controls">
+        <span>Case:</span>
+        <button data-case="filtered" aria-pressed="true">4,812 changed of 350,412</button>
+        <button data-case="all" aria-pressed="false">All 350,412</button>
+        <button data-case="few" aria-pressed="false">12 of 350,412</button>
+      </div>
+    </header>
+    <main id="main"></main>
+
+    <script>
+      const NAMES = ['Install catenary, section 2', 'Tamp and align track, section 2', 'Backfill retaining wall, section 2', 'Pour ballast, section 3', 'Erect ballast, section 1', 'Commission catenary, section 5', 'Lay sleepers, section 2', 'Cure cable troughing, section 1', 'Test signalling, section 4', 'Weld rail, section 3', 'Dewater sleepers, section 2', 'Fix drainage, section 5'];
+      const SLIPS = ['+20d', '+18d', '+16d', '−46d', '+2d', '−51d', '+5d', '+1d', '+9d', '+12d', '−3d', '+7d'];
+      const CASES = {
+        filtered: { shown: 4812, total: 350412, first: 1201, label: 'Changed', thumbTop: 24, readout: true },
+        all: { shown: 350412, total: 350412, first: 120401, label: 'All activities', thumbTop: 34, readout: true },
+        few: { shown: 12, total: 350412, first: 1, label: 'Changed · Logic · Critical', thumbTop: 0, readout: false },
+      };
+      const fmt = (n) => n.toLocaleString('en-GB');
+      const VISIBLE = 9;
+      const rows = (c) => {
+        const count = Math.min(VISIBLE, c.shown);
+        return Array.from({ length: count }, (_, k) => {
+          const n = c.first + k;
+          return `<div class="r"><span class="num muted">${fmt(n)}</span><span class="code">P0${(n % 3) + 1}-A00${(n % 5) + 1}-TRK-${String((n * 7) % 9000 + 1000)}</span><span>${NAMES[k % NAMES.length]}</span><span class="muted">${12 + k} Oct 2026</span><span class="num">${SLIPS[k % SLIPS.length]}</span></div>`;
+        }).join('');
+      };
+      const head = `<div class="r h"><span class="num">Row</span><span>Activity code</span><span>Name</span><span>Finish</span><span class="num">Slip</span></div>`;
+      const last = (c) => Math.min(c.first + VISIBLE - 1, c.shown);
+      const hidden = (c) => c.total - c.shown;
+      const thumb = (c) => (c.shown <= VISIBLE ? '' : `<i style="top: ${c.thumbTop}%; height: 20px"></i>`);
+      const filterBar = (c, extra = '') => `<div class="bar"><span class="chip on">${c.label}</span><span class="chip">Add filter</span>${extra}</div>`;
+
+      const OPTIONS = [
+        {
+          title: 'A. A status line under the grid',
+          render: (c) => `<div class="frame">${filterBar(c)}<div class="body"><div class="rows">${head}${rows(c)}</div><div class="sb">${thumb(c)}</div></div>
+            <div class="status"><span><span class="strong">Rows ${fmt(c.first)} to ${fmt(last(c))}</span> of ${fmt(c.shown)}</span>${hidden(c) ? `<span>${fmt(hidden(c))} hidden by the filter</span><span class="link">Show all ${fmt(c.total)}</span>` : `<span>Nothing hidden</span>`}<span class="push">Go to row</span></div></div>`,
+          notes: [
+            ['Says it', 'In one fixed place, always present: which rows are on screen, how many the view holds, how many are hidden, and the way to see them.'],
+            ['Does well', 'Cannot be missed or scrolled away. Reads as a sentence. The position is exact, in rows, so it does not depend on the scrollbar at all. Costs one line of height.'],
+            ['Costs', 'It is at the bottom, away from the filter that caused the hiding. The planner has to look down to learn where they are while dragging the scrollbar. Nothing shows where the changes fall along the schedule.'],
+          ],
+        },
+        {
+          title: 'B. Counts beside the filter, and a readout while scrolling',
+          render: (c) => `<div class="frame">${filterBar(c, `<span class="push"><span class="strong">${fmt(c.shown)}</span> of ${fmt(c.total)} activities${hidden(c) ? ` · ${fmt(hidden(c))} hidden · <span class="link">Show all</span>` : ''}</span>`)}<div class="body"><div class="rows">${head}${rows(c)}</div><div class="sb">${thumb(c)}</div></div>
+            ${c.readout ? `<div class="readout" style="top: ${88 + c.thumbTop * 2}px">Row ${fmt(c.first)} of ${fmt(c.shown)}</div>` : ''}</div>`,
+          notes: [
+            ['Says it', 'The counts sit next to the filter that produced them. While the scrollbar is dragged, a readout beside the thumb gives the row it would land on.'],
+            ['Does well', 'Cause and effect are side by side: change the filter and the number beside it changes. The readout turns a drag into something precise. No height is used.'],
+            ['Costs', 'When not scrolling, nothing says where in the list the planner is. The readout only helps people who drag the thumb; wheel and keyboard users never see it unless it is also shown for them.'],
+          ],
+        },
+        {
+          title: 'C. An overview strip in place of the scrollbar',
+          render: (c) => {
+            const marks = c.shown === c.total ? Array.from({ length: 60 }, (_, k) => `<u class="${k % 7 === 3 ? 'e' : ''}" style="top: ${3 + ((k * 37) % 94)}%"></u>`).join('') : '';
+            const view = c.shown <= VISIBLE ? 'top: 0; height: 100%' : `top: ${c.thumbTop}%; height: 14px`;
+            return `<div class="frame">${filterBar(c, `<span class="push"><span class="strong">${fmt(c.shown)}</span> of ${fmt(c.total)} activities</span>`)}<div class="body"><div class="rows">${head}${rows(c)}</div><div class="map">${marks}<div class="ticks"><b style="top: 2px">1</b><b style="bottom: 2px">${c.shown >= 1000 ? Math.round(c.shown / 1000) + 'k' : c.shown}</b></div><div class="view" style="${view}"></div></div></div></div>`;
+          },
+          notes: [
+            ['Says it', 'A strip the height of the grid stands for the whole list. A box marks the rows on screen. When all activities are shown, marks show where the changed ones fall.'],
+            ['Does well', 'The only option that shows shape: are the changes in one section or spread through the schedule? Click anywhere to jump. It makes the size of the schedule something you can see.'],
+            ['Costs', 'A second small visualisation to design, build, test and explain, and it needs the engine to summarise change density. At 4,812 filtered rows there is nothing to mark, so it earns its width only in the unfiltered view. The hidden count still needs words somewhere.'],
+          ],
+        },
+      ];
+
+      const main = document.getElementById('main');
+      function draw(which) {
+        const c = CASES[which];
+        main.innerHTML = OPTIONS.map((o) => `<h2>${o.title}</h2><div class="option"><div class="stage">${o.render(c)}</div><dl class="notes">${o.notes.map(([t, d]) => `<dt>${t}</dt><dd>${d}</dd>`).join('')}</dl></div>`).join('');
+      }
+      document.getElementById('controls').addEventListener('click', (event) => {
+        const button = event.target.closest('button');
+        if (!button) return;
+        for (const other of document.querySelectorAll('#controls button')) other.setAttribute('aria-pressed', String(other === button));
+        draw(button.dataset.case);
+      });
+      draw('filtered');
+    </script>
+  </body>
+</html>

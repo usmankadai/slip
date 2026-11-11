@@ -2,6 +2,30 @@
 
 What was built, what Usman decided or designed, and what an agent generated. Newest first.
 
+## 11 November 2026: live check, and design options for the changes grid
+
+**Done**
+
+- Both live sites were checked: on https://slip.usmankadai.dev a sample pair imports and compares, the saved-copy cache is written, fonts load, the security headers are served and the console is clean; https://slip-design-system.usmankadai.dev loads with every story.
+- The footer now links to the design system without any Vercel setting, and the README gives both addresses and says what is built.
+- Three pages of options for the changes grid: three layouts for the screen, exploration 06 (density) and exploration 07 (scale honesty), each with a write-up.
+
+**Usman decided or designed**
+
+- Set up the two domains and deployed Storybook. Asked for the grid next.
+- Nothing on the three pages yet.
+
+**The agent (Claude) generated**
+
+- The three pages, every option, the write-ups and the recommendations (layout A, density B, scale honesty A with a scrolling readout).
+- The decision to make the Storybook address a default in the code, with the environment variable as an override.
+
+**Worth Usman's attention**
+
+- Three choices are waiting. The grid is not built until they are made.
+- The browser limits quoted in exploration 07 (the tallest element a browser will lay out) are from memory and must be confirmed before the grid's scrolling is designed around them.
+- Density B is what the identity already says, so that exploration is a check on an earlier decision, not a fresh one.
+
 ## 11 November 2026: the update summary screen
 
 **Done**

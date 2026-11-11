@@ -8,7 +8,7 @@ To view: run the `design` preview (or `pnpm --filter @slip/web exec vite ../../d
 |---|---|---|---|
 | Import | [import.html](import.html): A two slots side by side, B one ledger with two rows, C one file at a time | Decided 11 November 2026 | A, two slots side by side |
 | Update summary | [summary.html](summary.html): A milestones full width with a strip below, B milestones with a rail, C one sentence then the evidence | Decided 11 November 2026 | B, milestones with a rail |
-| Changes | not drawn | | |
+| Changes | [changes.html](changes.html): A grid and Gantt side by side, B grid first with a small timeline in each row, C change types down the left | Waiting for Usman | |
 | Slip trace | not drawn | | |
 | Health | not drawn | | |
 | Finish update | not drawn | | |
@@ -19,6 +19,13 @@ Both were decided by Usman on 11 November 2026 by accepting Claude's recommendat
 
 - **Import: A, two slots side by side**, including the "do these two belong together" line. It is what the spec asks for (two slots), and it keeps each warning beside the file it is about. B is the stronger answer to "can I trust it" and stays the fallback if the import report turns out to need the full width; exploration 08 (import warnings) will show that.
 - **Update summary: B, milestones with a rail.** It is the one where the secondary facts are plainly secondary and still on screen. A's strip of three tiles is the dashboard the spec warns against. C's sentence is a good idea that belongs on the Finish update screen.
+
+## Changes: waiting for a decision
+
+Three layouts, plus two explorations the grid depends on: [06, density](../explorations/06-density/README.md) and [07, scale honesty](../explorations/07-scale-honesty/README.md). Claude's recommendations, which are suggestions only:
+
+- **Layout A**, grid and Gantt side by side. It is the layout the UI spec names and the one planners expect. Built in two steps: the grid first at full width, then the Gantt beside it once exploration 02 (ghost bars) is done.
+- **Density B** and **scale honesty A with B's scrolling readout**. The reasons are in each write-up.
 
 ## States
 

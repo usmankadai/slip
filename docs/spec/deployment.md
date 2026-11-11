@@ -17,10 +17,11 @@ Two Vercel projects from the one repository, both building from `main`:
 
 | Project | Root directory | Preset | Serves | Configured by |
 |---|---|---|---|---|
-| The app | `./` | Other | `apps/web/dist`, under the security headers | `vercel.json` |
-| Storybook | `packages/ui` | Other | `packages/ui/storybook-static` | `packages/ui/vercel.json` ([D21](../decisions/D21-storybook-on-its-own-deployment.md)) |
+| The app, https://slip.usmankadai.dev | `./` | Other | `apps/web/dist`, under the security headers | `vercel.json` |
+| Storybook, https://slip-design-system.usmankadai.dev | `packages/ui` | Other | `packages/ui/storybook-static` | `packages/ui/vercel.json` ([D21](../decisions/D21-storybook-on-its-own-deployment.md)) |
 
-- Neither project has secrets. The app's project has one optional variable, `VITE_STORYBOOK_URL`, the address of the Storybook project; the footer links to it when set.
+- Neither project has secrets or needs any environment variable. The footer links to the Storybook address above; `VITE_STORYBOOK_URL` overrides it for a build that should point elsewhere.
+- Checked on 11 November 2026 on the live app: a sample pair imports and compares, the saved-copy cache is written, fonts load, the security headers are served and the console is clean. Storybook loads with every story.
 - The footer shows the commit the build was made from (Vercel's `VERCEL_GIT_COMMIT_SHA`) and links to the repository, `docs/perf.md` and the journal. It will link to the case study when there is one.
 - The agent server (`apps/api`) is not deployed. When the agent panel exists it joins the app's project under `/api`, so the browser still talks only to its own origin.
 - Do not enable Vercel Speed Insights or Analytics on the app: they add a third-party script that the Content Security Policy blocks, and they send visitor data to Vercel.
