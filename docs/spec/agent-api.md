@@ -80,5 +80,6 @@ The client keeps the set of task codes that appeared in tool results for the cur
   - The runner calls the real server handler, tools and engine in process. Harness failures go to an errors file and are never scored as wrong answers.
   - `pnpm evals:list` writes the case list (free). `pnpm evals` runs live and costs money. `pnpm evals:replay` runs the graders' own checks, and regrades recorded answers once there are some; it is part of `pnpm test`.
   - Differences from the description above: the injected cases use the same fixture with instructions planted in three activity names, not a separate fixture.
-- Not yet: a live eval run and `docs/evals.md`, wiring the agent into the browser (the panel, the audit entries), scripted mode, and deployment to Vercel.
+- **First full run:** 28 of 28 passed on `claude-opus-5-5` at `medium` effort. Results and how to read them are in [docs/evals.md](../evals.md). All 28 graded answers are saved under `tools/evals/recorded/` and regraded by `pnpm evals:replay`.
+- Not yet: harder cases (the set is saturated), repeated runs, a second fixture, wiring the agent into the browser (the panel, the audit entries), scripted mode, and deployment to Vercel.
 

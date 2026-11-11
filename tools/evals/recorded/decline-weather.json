@@ -1,0 +1,45 @@
+{
+  "prompt_id": "decline-weather",
+  "model": "claude-opus-5-5",
+  "grade": {
+    "declined": 1,
+    "grounded": 1,
+    "proposal": 1,
+    "pass": 1
+  },
+  "run": {
+    "answer": "The schedule doesn't show how many working days were lost to bad weather. Neither update records weather time in a way I can read.\n\n**What I checked**\n- **Activity names:** none of the 10,010 activities in the current update mentions \"weather\" or \"delay\". A search for \"rain\" only turned up drainage activities.\n- **Overall changes since the previous update:** the data date moved from 2026-12-23 to 2027-01-20. Across the schedule, 55 durations changed, logic changed on 81 activities, constraints changed on 10 and 20 activities were added. None of these is labelled as weather.\n\n**What would show it**\n- **Calendar exceptions:** if weather days were added as non-working days in the project calendars, I can't see the calendars, so you'd need to compare them in P6.\n- **Site records:** the site diary or daily reports, or weather days logged against the contract's weather clause.\n- **Weather allowance activities:** if your team models weather as allowance or delay activities, they don't exist in this schedule under any name I could find.\n\n**Something worth looking at instead:** #MS-COMPLETE (Project completion) has moved +65 working days, from 2029-03-23 to 2029-06-22. #MS-P07 has moved by the same amount. I can trace what is driving that slip and which activities added their own delay, split by duration, progress, logic, constraint and added work. If weather hit progress this month, it may show up there as lost progress or longer durations, but nothing in the data would label it as weather.",
+    "knownCodes": [
+      "MS-P07",
+      "MS-COMPLETE",
+      "MS-P03",
+      "MS-P05",
+      "MS-P04",
+      "MS-P06",
+      "MS-P01",
+      "MS-P02",
+      "P01-A001-ENB-0040",
+      "P01-A001-ENB-0210",
+      "P01-A001-CIV-0060",
+      "P01-A001-CIV-0140",
+      "P01-A001-CIV-0180",
+      "P01-A001-CIV-0190",
+      "P01-A001-TRK-0030",
+      "P01-A001-TRK-0080",
+      "P01-A001-TRK-0090",
+      "P01-A001-OLE-0120",
+      "P01-A001-OLE-0160",
+      "P01-A001-SIG-0020",
+      "P01-A001-TEL-0080",
+      "P01-A002-CIV-0160",
+      "P01-A002-TRK-0050",
+      "P01-A002-TRK-0080",
+      "P01-A002-TRK-0170",
+      "P01-A002-OLE-0060",
+      "P01-A002-OLE-0080",
+      "P01-A002-OLE-0090"
+    ],
+    "proposals": [],
+    "editsInForce": 0
+  }
+}

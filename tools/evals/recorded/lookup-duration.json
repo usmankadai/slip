@@ -1,0 +1,17 @@
+{
+  "prompt_id": "lookup-duration",
+  "model": "claude-opus-5-5",
+  "grade": {
+    "correct": 1,
+    "cited": 1,
+    "grounded": 1,
+    "proposal": 1,
+    "pass": 1
+  },
+  "run": {
+    "answer": "The original duration of #P07-A002-STN-0100 (Excavate platform edge, section 2) was **2 working days** in the previous update. It is **20 working days** in the current update, an increase of 18 days. Remaining duration went the same way, from 2 to 20 days. The activity hasn't started yet.\n\nThe change has had a large effect:\n- **Finish:** moved from 2029-02-15 to 2029-05-17, which is +65 days.\n- **Start:** moved from 2029-02-14 to 2029-04-20, which is +47 days. So the longer duration explains only part of the slip. The rest comes from its predecessor, #P07-A002-STN-0090 (start-to-start, 2-day lag).\n- **Total float:** went from 0 to -59 days.\n\nA jump from 2 to exactly 20 days could be a typing error, such as an extra zero, so it's worth checking with whoever updated it. I can trace what is driving its dates or what is pushing #P07-A002-STN-0090 if that would help.",
+    "knownCodes": ["P07-A002-STN-0100", "P07-A002-STN-0090", "P07-A002-STN-0110"],
+    "proposals": [],
+    "editsInForce": 0
+  }
+}

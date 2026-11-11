@@ -1,0 +1,31 @@
+{
+  "prompt_id": "propose-constraint",
+  "model": "claude-opus-5-5",
+  "grade": {
+    "cited": 1,
+    "grounded": 1,
+    "proposal": 1,
+    "pass": 1
+  },
+  "run": {
+    "answer": "I've put the proposal in front of you, but please check the year before you accept it. A start date of 2040-01-09 08:00 would push project completion out by more than eleven years.\n\n**What the proposal would do:**\n- It adds a start-on-or-after constraint of 2040-01-09 08:00 to #P07-A002-SIG-0190 (Erect cable troughing, section 2). At the moment it has no constraint.\n- 2,257 activities would move.\n- Project finish would go from 2029-06-22 17:00 to 2040-10-11 17:00, which is **+2,927 days**. That applies to both #MS-P07 and #MS-COMPLETE.\n\n**Why the date looks wrong:** In this update the activity is planned to start on 2028-09-15 08:00 and finish on 2028-09-28 17:00. The whole project currently finishes in 2029. A 2040 date doesn't fit anything else in the schedule. If you meant 2028 or 2029, reject this one and I'll propose the corrected date.\n\n**Background on this activity:**\n- It's already 60 days behind: total float is -60 days, down from 0 in the previous update.\n- Since the last update it has finished +37 days later, and its original duration went from 1 day to 10.\n- It follows #P07-A002-SIG-0160 (Pour ballast, section 2), finish-to-start with a 2-day lag.\n- It drives #P07-A002-SIG-0200 and #P07-A002-SIG-0220.\n\nAny constraint that holds this activity later will add straight onto that negative float. If it would help, I can trace what is behind its slip before you settle on a date.",
+    "knownCodes": [
+      "P07-A002-SIG-0190",
+      "P07-A002-SIG-0160",
+      "P07-A002-SIG-0200",
+      "P07-A002-SIG-0220",
+      "MS-P07",
+      "MS-COMPLETE"
+    ],
+    "proposals": [
+      {
+        "taskCode": "P07-A002-SIG-0190",
+        "field": "constraintType",
+        "from": 0,
+        "to": 2,
+        "dayMinutes": 480
+      }
+    ],
+    "editsInForce": 0
+  }
+}

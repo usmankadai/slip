@@ -1,0 +1,16 @@
+{
+  "prompt_id": "health-negative-float",
+  "model": "claude-opus-5-5",
+  "grade": {
+    "correct": 1,
+    "grounded": 1,
+    "proposal": 1,
+    "pass": 1
+  },
+  "run": {
+    "answer": "**825 unfinished activities have negative total float in the current update, up from 489 in the previous one. That's 336 more.**\n\n| Update | Negative float | Unfinished activities | Share |\n|---|---|---|---|\n| Previous | 489 | 7,705 | about 6.3% |\n| Current | 825 | 7,412 | about 11.1% |\n\nThe increase happened even though there are 293 fewer unfinished activities, so it isn't just because the schedule got bigger.\n\nTwo other figures suggest the critical work is now running behind:\n- **Activities at exactly zero float fell sharply.** Activities with total float of zero or less went from 1,096 to 932. Taking the negative ones out leaves 607 at exactly zero before and 107 now. That points to many of the previously critical activities slipping into negative float, though these figures alone can't confirm it.\n- **The critical path length index fell from 0.99 to 0.87.** It now fails the 0.95 threshold. Below 1.0 means the remaining critical work doesn't fit in the time left to the finish date.\n\nI can list the activities with the most negative float, or trace what is driving them, to see whether this comes from one slip or from several.",
+    "knownCodes": [],
+    "proposals": [],
+    "editsInForce": 0
+  }
+}

@@ -1,0 +1,25 @@
+{
+  "prompt_id": "slip-phases",
+  "model": "claude-opus-5-5",
+  "grade": {
+    "cited": 1,
+    "grounded": 1,
+    "proposal": 1,
+    "pass": 1
+  },
+  "run": {
+    "answer": "Seven milestones besides project completion moved in this update. Five finish later and two finish earlier. The biggest move is #MS-P07 (Phase 7 complete), which slipped +65 working days. That is the same slip as #MS-COMPLETE, and both now finish on 2029-06-22, so Phase 7 looks like the phase setting the completion date.\n\n| Milestone | Name | Previous finish | Current finish | Slip (working days) |\n|---|---|---|---|---|\n| #MS-P07 | Phase 7 complete | 2029-03-23 | 2029-06-22 | +65 |\n| #MS-P03 | Phase 3 complete | 2028-05-17 | 2028-05-24 | +5 |\n| #MS-P05 | Phase 5 complete | 2028-12-15 | 2028-12-22 | +5 |\n| #MS-P04 | Phase 4 complete | 2028-09-12 | 2028-09-18 | +4 |\n| #MS-P06 | Phase 6 complete | 2029-03-09 | 2029-03-12 | +1 |\n| #MS-P01 | Phase 1 complete | 2027-11-11 | 2027-11-04 | -5 |\n| #MS-P02 | Phase 2 complete | 2028-03-23 | 2028-02-18 | -24 |\n\nPhases 3 to 6 slipped by between 1 and 5 days. That suggests the +65 days on Phase 7 comes mostly from within Phase 7, not from delay passed down from earlier phases. I haven't traced it yet, though, so that's only an inference. Phases 1 and 2 have both come forward, Phase 2 by nearly five weeks.\n\nI can trace what is driving #MS-P07, or the Phase 2 gain, if you'd like to see which activities caused the movement.",
+    "knownCodes": [
+      "MS-P07",
+      "MS-COMPLETE",
+      "MS-P03",
+      "MS-P05",
+      "MS-P04",
+      "MS-P06",
+      "MS-P01",
+      "MS-P02"
+    ],
+    "proposals": [],
+    "editsInForce": 0
+  }
+}

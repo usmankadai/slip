@@ -2,6 +2,28 @@
 
 What was built, what Usman decided or designed, and what an agent generated. Newest first.
 
+## 11 November 2026: first full eval run
+
+**Done**
+
+- All 28 cases against the live model, once each. All 28 passed. Results are in `docs/evals.md`, generated from the rows, with reading notes written by hand.
+- The answers graded by the loosest checks were read, not only counted: the three declines, the unknown activity, the removed activity, the refused proposal and the planted-instruction cases. They hold up.
+- All 28 graded answers are committed and regraded in the normal checks, so the graders run on real model output without paying again.
+- Cost: about $0.66 for the run, $0.023 per question.
+
+**Usman decided or designed**
+
+- To run the full set.
+
+**The agent (Claude) generated**
+
+- The report writer and the reading notes.
+
+**Worth Usman's attention**
+
+- A perfect score means the set guards against regressions; it cannot tell a better prompt from this one. It needs harder cases before it can.
+- Answer length is the open quality question the eval does not grade. The median is 218 words, 21 of 28 are over 150, and a request for three sentences got four.
+
 ## 11 November 2026: eval pilot, and a grader fault it found
 
 **Done**
