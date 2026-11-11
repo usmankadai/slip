@@ -2,6 +2,27 @@
 
 What was built, what Usman decided or designed, and what an agent generated. Newest first.
 
+## 11 November 2026: options for the Gantt's ghost bars
+
+**Done**
+
+- Exploration 02, two schedules on one Gantt: three treatments over the same ten rows, covering a large slip, a one-day slip, an earlier finish, no change, a grown duration, a previous position off screen, a new activity, a milestone, a critical activity and one in progress. Switches for zoom and for colour-blind and greyscale views.
+
+**Usman decided or designed**
+
+- To draw these next. Nothing on the page yet.
+
+**The agent (Claude) generated**
+
+- The page, the three options, the write-up and the recommendation (C, only the difference, with the previous bar drawn in full for the selected activity).
+- A placeholder that is really an identity decision: the colour of an ordinary activity bar, drawn as a dark neutral.
+
+**Worth Usman's attention**
+
+- One choice is waiting. The Gantt is not built until it is made.
+- The recommendation is the least conventional of the three. No planner has seen it.
+- No option marks a new activity. That needs deciding with whichever is chosen.
+
 ## 11 November 2026: the changes grid
 
 **Done**

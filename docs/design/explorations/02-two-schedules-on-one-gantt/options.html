@@ -1,0 +1,244 @@
+<!doctype html>
+<html lang="en-GB">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Two schedules on one Gantt: options</title>
+    <style>
+      /* A record of what was looked at. The product reads these values from packages/ui/src/tokens.css. */
+      :root {
+        --s0: #fbfaf7; --s1: #f4f2ec; --s2: #ebe8e0; --t1: #1c1b18; --t2: #55524a; --t3: #6c685d;
+        --b1: #e2ded3; --b2: #898477; --accent: #5b3fd6;
+        --late4: #db6b2c; --late5: #b8321f; --early4: #4c8cda; --early5: #1b56a8;
+        --none: #b9b5aa; --critical: #9b1c1c; --bar: #55524a;
+      }
+      * { box-sizing: border-box; }
+      body { margin: 0; background: var(--s0); color: var(--t1); font: 13px/20px Inter, system-ui, -apple-system, 'Segoe UI', sans-serif; font-variant-numeric: tabular-nums; }
+      header, main { max-width: 1180px; margin: 0 auto; padding: 0 32px; }
+      header { padding-top: 24px; }
+      main { padding-bottom: 64px; }
+      h1 { font-size: 20px; line-height: 28px; margin: 0 0 4px; }
+      h2 { font-size: 16px; line-height: 24px; margin: 40px 0 8px; }
+      p { margin: 0 0 8px; color: var(--t2); max-width: 760px; }
+      .controls { position: sticky; top: 0; z-index: 2; background: var(--s0); border-bottom: 1px solid var(--b1); padding: 8px 0; margin: 16px 0 0; display: flex; gap: 8px 20px; align-items: center; flex-wrap: wrap; }
+      .controls span { color: var(--t2); }
+      .controls div { display: flex; gap: 6px; align-items: center; }
+      .controls button { font: inherit; padding: 2px 10px; border: 1px solid var(--b2); border-radius: 4px; background: var(--s0); color: var(--t1); cursor: pointer; }
+      .controls button[aria-pressed='true'] { background: var(--t1); color: var(--s0); border-color: var(--t1); }
+      .option { display: grid; grid-template-columns: minmax(0, 1fr) 300px; gap: 24px; align-items: start; }
+      .stage { min-width: 0; overflow-x: auto; }
+      .notes { margin: 0; font-size: 12px; line-height: 16px; }
+      .notes dt { font-weight: 600; margin-top: 8px; }
+      .notes dt:first-child { margin-top: 0; }
+      .notes dd { margin: 0; color: var(--t2); }
+      .frame { display: grid; grid-template-columns: 250px 680px; width: 932px; border: 1px solid var(--b1); background: var(--s0); }
+      .names { border-right: 1px solid var(--b1); font-size: 12px; }
+      .names div { height: 24px; line-height: 24px; padding: 0 8px; border-bottom: 1px solid var(--b1); display: flex; justify-content: space-between; gap: 8px; white-space: nowrap; overflow: hidden; }
+      .names div span:first-child { overflow: hidden; text-overflow: ellipsis; }
+      .names .h { background: var(--s2); color: var(--t2); font-weight: 500; }
+      .names b { font-weight: 600; }
+      .frame svg { display: block; }
+      svg text { font: 11px Inter, system-ui, sans-serif; fill: var(--t3); }
+      .legend { font-size: 11px; line-height: 16px; color: var(--t3); margin-top: 6px; }
+      table.cmp { border-collapse: collapse; font-size: 12px; line-height: 16px; width: 100%; max-width: 900px; }
+      table.cmp th, table.cmp td { text-align: left; padding: 5px 8px; border-bottom: 1px solid var(--b1); vertical-align: top; }
+      table.cmp th { background: var(--s2); color: var(--t2); font-weight: 500; }
+      @media (max-width: 900px) { .option { grid-template-columns: 1fr; } }
+    </style>
+  </head>
+  <body>
+    <header>
+      <h1>Exploration 02: two schedules on one Gantt</h1>
+      <p>The Gantt has to show this update and the previous one on the same rows, so a planner can see what moved without reading two charts. Drawing every activity twice doubles the ink and, when most bars have not moved, says nothing with it. The treatment also has to survive three awkward cases: a bar that moved by a day (less than a pixel at month zoom), a bar whose previous position is off the edge of the view, and an activity with no previous position at all.</p>
+      <p>Each option draws the same ten rows: a large slip, a one-day slip, an earlier finish, no change, a duration that grew, a previous position off screen to the left, a new activity, a moved milestone, a critical activity that slipped, and one in progress. The dashed line is the data date. Switch the zoom to see what each does when a day is less than a pixel.</p>
+      <div class="controls" id="controls">
+        <div><span>Zoom:</span>
+          <button data-zoom="4" aria-pressed="true">Weeks, 4px a day</button>
+          <button data-zoom="1" aria-pressed="false">Months, 1px a day</button>
+        </div>
+        <div><span>View:</span>
+          <button data-vision="none" aria-pressed="true">Full colour</button>
+          <button data-vision="deut" aria-pressed="false">Deuteranopia</button>
+          <button data-vision="grey" aria-pressed="false">Greyscale</button>
+        </div>
+      </div>
+    </header>
+    <main id="main"></main>
+
+    <svg width="0" height="0" style="position: absolute" aria-hidden="true">
+      <defs>
+        <filter id="deut"><feColorMatrix type="matrix" values="0.367 0.861 -0.228 0 0  0.280 0.673 0.047 0 0  -0.012 0.043 0.969 0 0  0 0 0 1 0" /></filter>
+        <pattern id="hatch" width="5" height="5" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="2" height="5" fill="#9b1c1c" /></pattern>
+      </defs>
+    </svg>
+
+    <script>
+      // Days from the left edge of the view at week zoom. `was` is the previous update, `now` this one.
+      const ROWS = [
+        { name: 'Install catenary, section 2', slip: '+20d', was: [20, 62], now: [34, 90] },
+        { name: 'Lay sleepers, section 2', slip: '+1d', was: [48, 76], now: [49, 77] },
+        { name: 'Pour ballast, section 3', slip: '−12d', was: [70, 112], now: [58, 96] },
+        { name: 'Erect ballast, section 1', slip: '0d', was: [84, 118], now: [84, 118] },
+        { name: 'Tamp and align track', slip: '+16d', was: [96, 124], now: [96, 146] },
+        { name: 'Backfill retaining wall', slip: '+44d', was: [-70, -30], now: [6, 46] },
+        { name: 'Additional drainage works', slip: 'new', was: null, now: [104, 132] },
+        { name: 'Section 2 handover', slip: '+18d', was: [128, 128], now: [154, 154], milestone: true },
+        { name: 'Commission catenary', slip: '+18d', was: [100, 128], now: [126, 154], critical: true },
+        { name: 'Cure cable troughing', slip: '+6d', was: [4, 36], now: [10, 42], progress: 0.6 },
+      ];
+      const ROW = 24;
+      const DAYS = 170;
+      const DATA_DATE = 40;
+
+      function chart(option, zoom) {
+        // At month zoom the same activities sit in a view four times as long, so everything is a quarter of the width.
+        const px = (day) => day * zoom + (zoom === 1 ? 40 : 0);
+        const width = DAYS * 4;
+        const height = ROW * (ROWS.length + 1);
+        const parts = [];
+        // Header and month lines
+        parts.push(`<rect x="0" y="0" width="${width}" height="${ROW}" fill="var(--s2)" />`);
+        const step = 30 * zoom;
+        const labels = ['Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec', 'Jan', 'Feb', 'Mar', 'Apr', 'May'];
+        for (let k = 0; k * step < width; k++) {
+          parts.push(`<line x1="${k * step + 0.5}" y1="0" x2="${k * step + 0.5}" y2="${height}" stroke="var(--b1)" />`);
+          parts.push(`<text x="${k * step + 5}" y="16">${labels[k % labels.length]}</text>`);
+        }
+        ROWS.forEach((row, index) => {
+          const y = ROW * (index + 1);
+          parts.push(`<line x1="0" y1="${y + ROW - 0.5}" x2="${width}" y2="${y + ROW - 0.5}" stroke="var(--b1)" />`);
+          parts.push(option.draw(row, y, px, width));
+        });
+        parts.push(`<line x1="${px(DATA_DATE) + 0.5}" y1="${ROW}" x2="${px(DATA_DATE) + 0.5}" y2="${height}" stroke="var(--accent)" stroke-dasharray="3 3" />`);
+        return `<svg width="${width}" height="${height}" role="img" aria-label="${option.title}">${parts.join('')}</svg>`;
+      }
+
+      const fill = (row) => (row.critical ? 'url(#hatch)' : 'var(--bar)');
+      const stroke = (row) => (row.critical ? 'var(--critical)' : 'var(--bar)');
+      const diamond = (x, cy, r, attrs) => `<path d="M${x} ${cy - r} L${x + r} ${cy} L${x} ${cy + r} L${x - r} ${cy} Z" ${attrs} />`;
+      const span = ([a, b], px) => [px(a), Math.max(px(b) - px(a), 2)];
+      // The current bar, shared by every option.
+      function current(row, y, px, top, h) {
+        if (row.milestone) return diamond(px(row.now[0]), y + top + h / 2, h / 2 + 1, `fill="${stroke(row)}"`);
+        const [x, w] = span(row.now, px);
+        const progress = row.progress ? `<rect x="${x}" y="${y + top}" width="${w * row.progress}" height="${h}" fill="var(--t1)" />` : '';
+        return `<rect x="${x}" y="${y + top}" width="${w}" height="${h}" fill="${fill(row)}" stroke="${stroke(row)}" stroke-width="${row.critical ? 1 : 0}" />${progress}`;
+      }
+      // A small arrow at the left edge when the previous position is out of view.
+      const offLeft = (y, cy) => `<path d="M2 ${cy} L8 ${cy - 4} L8 ${cy + 4} Z" fill="var(--none)" /><line x1="8" y1="${cy}" x2="14" y2="${cy}" stroke="var(--none)" stroke-width="2" />`;
+      const moved = (row) => row.was && (row.was[0] !== row.now[0] || row.was[1] !== row.now[1]);
+
+      const OPTIONS = [
+        {
+          title: 'A. A thin bar underneath',
+          legend: 'Dark: this update. Thin grey bar below: the previous update, drawn for every activity.',
+          draw(row, y, px) {
+            let out = current(row, y, px, 5, 9);
+            if (!row.was) return out;
+            if (px(row.was[1]) < 0) return out + offLeft(y, y + 18.5);
+            if (row.milestone) return out + diamond(px(row.was[0]), y + 18.5, 3, 'fill="var(--none)"');
+            const [x, w] = span(row.was, px);
+            return out + `<rect x="${x}" y="${y + 17}" width="${w}" height="3" fill="var(--none)" />`;
+          },
+          notes: [
+            ['Shows', 'Both updates in full, one above the other. The convention every P6 user knows as the baseline bar.'],
+            ['Does well', 'Nothing to learn. Start and finish of both updates can be read off the axis. Works for any kind of change.'],
+            ['Costs', 'Doubles the marks: a grey bar under every activity, including the many that did not move, where it says nothing. A one-day move is two bars that look identical. The current bar is thinner to make room, so there is less of it for progress and the critical pattern.'],
+          ],
+        },
+        {
+          title: 'B. An outline behind',
+          legend: 'Solid: this update. Outline: the previous update, on the same line, drawn only when the activity moved.',
+          draw(row, y, px) {
+            let ghost = '';
+            if (row.was && moved(row)) {
+              if (px(row.was[1]) < 0) ghost = offLeft(y, y + 12);
+              else if (row.milestone) ghost = diamond(px(row.was[0]), y + 12, 6, 'fill="none" stroke="var(--b2)" stroke-dasharray="2 2"');
+              else {
+                const [x, w] = span(row.was, px);
+                ghost = `<rect x="${x + 0.5}" y="${y + 5.5}" width="${w}" height="13" fill="var(--s1)" stroke="var(--b2)" stroke-dasharray="3 2" />`;
+              }
+            }
+            return ghost + current(row, y, px, 6, 12);
+          },
+          notes: [
+            ['Shows', 'The previous position as a dashed outline at the same height. Where the two overlap you see one bar; the outline shows only where they differ.'],
+            ['Does well', 'The current bar keeps its full height. Unmoved activities carry no extra mark, so the chart is quiet where nothing happened. The gap between outline and bar is the move.'],
+            ['Costs', 'When the bar moved later, the outline pokes out on the left and looks like a second, empty activity. A dashed line at 1px is fragile on a busy chart. A one-day move is a hairline that is easy to miss.'],
+          ],
+        },
+        {
+          title: 'C. Only the difference',
+          legend: 'Dark: this update. Coloured tail: from the previous finish to this one, warm for later and blue for earlier. A tick marks the previous start when it moved.',
+          draw(row, y, px) {
+            let out = '';
+            if (row.was && moved(row)) {
+              const late = row.now[1] > row.was[1];
+              const colour = late ? 'var(--late4)' : 'var(--early4)';
+              if (row.now[1] !== row.was[1]) {
+                const from = Math.max(px(row.was[1]), 0);
+                const to = px(row.now[1]);
+                const x = Math.min(from, to);
+                // Never thinner than 3px, so a one-day move stays visible at any zoom.
+                const w = Math.max(Math.abs(to - from), 3);
+                out += `<rect x="${late ? x : to}" y="${y + 17}" width="${w}" height="3" fill="${colour}" />`;
+                if (px(row.was[1]) < 0) out += offLeft(y, y + 18.5);
+                else out += `<rect x="${px(row.was[1]) - 0.5}" y="${y + 4}" width="1.5" height="16" fill="${colour}" />`;
+              }
+              if (row.was[0] !== row.now[0] && px(row.was[0]) >= 0 && !row.milestone) {
+                out += `<rect x="${px(row.was[0]) - 0.5}" y="${y + 6}" width="1" height="12" fill="var(--b2)" />`;
+              }
+            }
+            return out + current(row, y, px, 5, 10);
+          },
+          notes: [
+            ['Shows', 'This update, plus the move itself: a line from where the finish was to where it is, in the slip colours. No second bar.'],
+            ['Does well', 'The least ink, and all of it means something: colour appears only where a date moved, and its direction is its meaning. Later and earlier are told apart by which side of the bar the tail is on, not by colour alone. A minimum width keeps a one-day move visible at any zoom.'],
+            ['Costs', 'It is not the baseline bar planners know, so it has to be learned. The previous start is only a tick, and the previous duration is not drawn at all: a planner who wants to see the old bar cannot. The minimum width overstates a very small move at month zoom.'],
+          ],
+        },
+      ];
+
+      const main = document.getElementById('main');
+      const state = { zoom: 4, vision: 'none' };
+      function draw() {
+        main.innerHTML =
+          OPTIONS.map((option) => `
+            <h2>${option.title}</h2>
+            <div class="option">
+              <div class="stage">
+                <div class="frame">
+                  <div class="names"><div class="h"><span>Activity</span><span>Finish slip</span></div>${ROWS.map((row) => `<div><span>${row.name}</span><b>${row.slip}</b></div>`).join('')}</div>
+                  ${chart(option, state.zoom)}
+                </div>
+                <div class="legend">${option.legend}</div>
+              </div>
+              <dl class="notes">${option.notes.map(([t, d]) => `<dt>${t}</dt><dd>${d}</dd>`).join('')}</dl>
+            </div>`).join('') +
+          `<h2>The awkward cases, side by side</h2>
+           <table class="cmp">
+             <thead><tr><th>Case</th><th>A. Thin bar underneath</th><th>B. Outline behind</th><th>C. Only the difference</th></tr></thead>
+             <tbody>
+               <tr><td>Did not move</td><td>Still draws a grey bar</td><td>Nothing extra</td><td>Nothing extra</td></tr>
+               <tr><td>Moved by a day, month zoom</td><td>Two bars that look the same</td><td>A hairline</td><td>A tail of at least 3px</td></tr>
+               <tr><td>Previous position off screen</td><td>An arrow at the edge</td><td>An arrow at the edge</td><td>An arrow, and the tail runs in from the edge</td></tr>
+               <tr><td>New activity</td><td>No grey bar, which is easy to miss</td><td>No outline, which is easy to miss</td><td>No tail, which is easy to miss</td></tr>
+               <tr><td>Duration grew, start unchanged</td><td>Clear: the lower bar is shorter</td><td>Outline hidden behind the bar; the growth is not visible</td><td>Clear: a warm tail on the end</td></tr>
+               <tr><td>Critical and slipped</td><td>Hatch on a thinner bar</td><td>Hatch at full height</td><td>Hatch, with a warm tail that sits close to the critical red</td></tr>
+               <tr><td>Greyscale or colour-blind view</td><td>Unaffected</td><td>Unaffected</td><td>Direction still read from the side the tail is on</td></tr>
+             </tbody>
+           </table>`;
+        main.style.filter = state.vision === 'none' ? '' : state.vision === 'grey' ? 'grayscale(1)' : 'url(#deut)';
+      }
+      document.getElementById('controls').addEventListener('click', (event) => {
+        const button = event.target.closest('button');
+        if (!button) return;
+        const key = button.dataset.zoom ? 'zoom' : 'vision';
+        state[key] = key === 'zoom' ? Number(button.dataset.zoom) : button.dataset.vision;
+        for (const other of button.parentElement.querySelectorAll('button')) other.setAttribute('aria-pressed', String(other === button));
+        draw();
+      });
+      draw();
+    </script>
+  </body>
+</html>
