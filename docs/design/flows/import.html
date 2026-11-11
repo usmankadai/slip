@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="en-GB">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Flow: import, three layouts</title>
+    <link rel="stylesheet" href="wire.css" />
+  </head>
+  <body>
+    <header>
+      <h1>Import: three low-fidelity layouts</h1>
+      <p>Hierarchy only: boxes and labels, no identity. The numbered tags show the order the eye should take. A heavy border marks what leads.</p>
+      <p class="question">
+        The planner's question: "Did my files load, and can I trust what loaded?"<br />
+        Most prominent: two slots, A and B, each with project name, data date and activity count as soon as they are known.<br />
+        Must not: hide warnings behind a success tick.
+      </p>
+      <p>Layouts drawn by Claude for Usman to choose between. Each is shown part way through: update A has loaded, update B is still loading.</p>
+    </header>
+
+    <main>
+      <h2>A. Two slots side by side</h2>
+      <div class="option">
+        <div class="frame">
+          <div class="bar"><b>Slip</b><span class="right">What leaves the browser</span></div>
+          <div class="body">
+            <div class="cols c2">
+              <div class="box lead">
+                <div class="t"><span class="tag">1</span>Update A, earlier</div>
+                <div class="big">Project name</div>
+                <div>Data date · activity count · relationship count</div>
+                <div class="box"><div class="t"><span class="tag">3</span>Import report</div><div>Warnings by kind, with counts. Open by default when there are any.</div><div class="line l"></div><div class="line m"></div></div>
+              </div>
+              <div class="box lead">
+                <div class="t"><span class="tag">2</span>Update B, later</div>
+                <div class="big">Project name, as soon as read</div>
+                <div>Progress: rows read, bytes read</div>
+                <div class="line m"></div>
+                <div class="box quiet"><div class="t">Import report</div><div>Fills in as the file is read</div></div>
+              </div>
+            </div>
+            <div class="box"><div class="t"><span class="tag">4</span>Do these two belong together?</div><div>Same project, B's data date after A's, activities in common. A plain sentence, and a warning when not.</div></div>
+            <div class="cols c2">
+              <div class="btn off"><span class="tag">5</span>Compare updates (waits for B)</div>
+              <div class="quiet" style="text-align: right">No files to hand? Generate a sample pair</div>
+            </div>
+          </div>
+        </div>
+        <dl class="notes">
+          <dt>Leads with</dt><dd>The two files as equals. Each slot owns its own facts, progress and warnings, so a warning is always next to the file it is about.</dd>
+          <dt>Does well</dt><dd>Matches how planners think of it: last month's file and this month's. Either slot can be filled first. The report is inside the slot, so it cannot be missed or hidden by success.</dd>
+          <dt>Costs</dt><dd>Comparing the two (is B really later than A?) means reading across two cards. A long report in one slot makes the cards uneven. Half-width reports are cramped for six kinds of warning.</dd>
+        </dl>
+      </div>
+
+      <h2>B. One ledger, two rows</h2>
+      <div class="option">
+        <div class="frame">
+          <div class="bar"><b>Slip</b><span class="right">What leaves the browser</span></div>
+          <div class="body">
+            <div class="box lead">
+              <div class="t"><span class="tag">1</span>The two updates, as a table</div>
+              <div class="row"><span></span><span>Data date</span><span>Activities</span><span>Warnings</span></div>
+              <div class="row"><div><b>A</b> · Project name · file name</div><span>date</span><span class="n">count</span><span class="n">count</span></div>
+              <div class="row"><div><b>B</b> · Project name · reading, rows and bytes</div><span>date</span><span class="n">so far</span><span class="n">so far</span></div>
+              <div class="row"><div class="quiet">Difference</div><span>days apart</span><span class="n">added, removed</span><span></span></div>
+            </div>
+            <div class="box tall">
+              <div class="t"><span class="tag">2</span>Import report, both files together</div>
+              <div>One row per kind of warning, with a count for A and a count for B. Expand a kind to see examples.</div>
+              <div class="line l"></div><div class="line l"></div><div class="line m"></div>
+            </div>
+            <div class="cols c2">
+              <div class="btn off"><span class="tag">3</span>Compare updates (waits for B)</div>
+              <div class="quiet" style="text-align: right">No files to hand? Generate a sample pair</div>
+            </div>
+          </div>
+        </div>
+        <dl class="notes">
+          <dt>Leads with</dt><dd>The comparison. The same fact for A and B sits in one column, so a wrong pair (different project, B older than A) shows at a glance.</dd>
+          <dt>Does well</dt><dd>Answers "can I trust it" as well as "did it load". One full-width report has room for six kinds of warning and shows which file each kind came from. Already looks like the product: a table of differences.</dd>
+          <dt>Costs</dt><dd>Less obvious where to drop a file before anything is loaded; the empty state needs its own design. Warnings sit one step further from the file they belong to.</dd>
+        </dl>
+      </div>
+
+      <h2>C. One file at a time</h2>
+      <div class="option">
+        <div class="frame">
+          <div class="bar"><b>Slip</b><span>1 Earlier update, done</span><b>2 Later update</b><span>3 Check and compare</span><span class="right">What leaves the browser</span></div>
+          <div class="body">
+            <div class="box quiet"><div class="t">Update A: Project name · data date · activity count · warning count</div></div>
+            <div class="box lead tall">
+              <div class="t"><span class="tag">1</span>Update B, later</div>
+              <div class="big">Project name, as soon as read</div>
+              <div>Progress: rows read, bytes read</div>
+              <div class="line l"></div>
+              <div class="box"><div class="t"><span class="tag">2</span>Import report for this file</div><div>Full width. Warnings by kind, with counts and examples.</div><div class="line l"></div><div class="line m"></div></div>
+            </div>
+            <div class="cols c2">
+              <div class="btn off"><span class="tag">3</span>Next: check and compare</div>
+              <div class="quiet" style="text-align: right">No files to hand? Generate a sample pair</div>
+            </div>
+          </div>
+        </div>
+        <dl class="notes">
+          <dt>Leads with</dt><dd>The file being read now, at full size, with its report.</dd>
+          <dt>Does well</dt><dd>Most room for each file's report. Nothing to misread: one thing at a time. The order (earlier, then later) is fixed, so the files cannot be swapped by accident.</dd>
+          <dt>Costs</dt><dd>Three steps for a job planners do every month; it will feel slow by the second use. The two files are never seen side by side until the last step. Both files cannot be dropped at once.</dd>
+        </dl>
+      </div>
+    </main>
+  </body>
+</html>

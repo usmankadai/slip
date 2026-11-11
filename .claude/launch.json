@@ -12,6 +12,21 @@
       "runtimeExecutable": "pnpm",
       "runtimeArgs": ["--filter", "@slip/web", "preview", "--port", "4174", "--strictPort"],
       "port": 4174
+    },
+    {
+      "name": "design",
+      "runtimeExecutable": "pnpm",
+      "runtimeArgs": [
+        "--filter",
+        "@slip/web",
+        "exec",
+        "vite",
+        "../../docs/design",
+        "--port",
+        "4180",
+        "--strictPort"
+      ],
+      "port": 4180
     }
   ]
 }
