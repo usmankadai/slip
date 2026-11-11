@@ -1,5 +1,5 @@
 /** The "do these two belong together" check, from small facts about each update. No schedule data. */
-import { apart, count, longDate, plural } from './format.ts';
+import { apart, count, longDate, plural } from '../../shared/format.ts';
 
 export interface PairFacts {
   projectName: string;

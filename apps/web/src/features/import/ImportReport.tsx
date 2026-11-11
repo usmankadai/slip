@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { count, plural } from './format.ts';
+import { count, plural } from '../../shared/format.ts';
 import styles from './import.module.css';
 import type { Report, ReportRow } from './warnings.ts';
 

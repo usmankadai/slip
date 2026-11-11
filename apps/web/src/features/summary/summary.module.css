@@ -1,0 +1,199 @@
+.screen {
+  max-width: 1120px;
+  width: 100%;
+  margin: var(--space-0) auto;
+  padding: var(--space-6);
+  display: grid;
+  gap: var(--space-4);
+  align-content: start;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: start;
+  gap: var(--space-4);
+}
+
+.title {
+  margin: var(--space-0);
+  font-size: var(--text-xl);
+  line-height: var(--leading-xl);
+  font-weight: var(--weight-semibold);
+  overflow-wrap: anywhere;
+}
+
+.period {
+  margin: var(--space-0);
+  color: var(--text-secondary);
+  font-variant-numeric: tabular-nums;
+}
+
+.columns {
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
+  gap: var(--space-4);
+  align-items: start;
+}
+
+.single {
+  display: grid;
+}
+
+.rail {
+  display: grid;
+  gap: var(--space-4);
+}
+
+.box {
+  display: grid;
+  gap: var(--space-2);
+  align-content: start;
+  padding: var(--space-4);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-card);
+  background: var(--surface-0);
+  min-width: 0;
+}
+
+.lead {
+  border-color: var(--border-strong);
+}
+
+.answer {
+  margin: var(--space-0);
+  font-size: var(--text-lg);
+  line-height: var(--leading-lg);
+  font-weight: var(--weight-semibold);
+}
+
+.boxTitle {
+  margin: var(--space-0);
+  font-size: var(--text-xs);
+  line-height: var(--leading-xs);
+  font-weight: var(--weight-medium);
+  color: var(--text-muted);
+}
+
+.say {
+  margin: var(--space-0);
+}
+
+.quiet,
+.foot {
+  margin: var(--space-0);
+  font-size: var(--text-sm);
+  line-height: var(--leading-sm);
+  color: var(--text-secondary);
+}
+
+.skeletons {
+  display: grid;
+  gap: var(--space-3);
+  padding: var(--space-2) var(--space-0);
+}
+
+.actions {
+  display: flex;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--grid-text);
+  line-height: var(--grid-leading);
+}
+
+.table th,
+.table td {
+  padding: var(--space-1) var(--cell-padding-x);
+  border-bottom: 1px solid var(--border-subtle);
+  text-align: left;
+  vertical-align: middle;
+  font-weight: var(--weight-regular);
+}
+
+.table thead th {
+  background: var(--surface-2);
+  color: var(--text-secondary);
+  font-weight: var(--weight-medium);
+  white-space: nowrap;
+}
+
+.table tbody tr:hover {
+  background: var(--surface-1);
+}
+
+.table .slipHead,
+.table .slip {
+  text-align: right;
+  white-space: nowrap;
+}
+
+.name {
+  font-weight: var(--weight-medium);
+}
+
+.code {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+
+.date {
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+  color: var(--text-secondary);
+}
+
+.fold {
+  display: none;
+  font-size: var(--text-xs);
+  line-height: var(--leading-xs);
+  color: var(--text-secondary);
+  font-variant-numeric: tabular-nums;
+}
+
+.lines {
+  margin: var(--space-0);
+  display: grid;
+  gap: var(--space-1);
+  font-size: var(--text-sm);
+  line-height: var(--leading-sm);
+}
+
+.lines div {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--space-2);
+}
+
+.lines dd {
+  margin: var(--space-0);
+  font-weight: var(--weight-semibold);
+  font-variant-numeric: tabular-nums;
+}
+
+@media (max-width: 1000px) {
+  .columns {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+/* A narrow window: the two dates fold into one line under the name; the slip keeps its number and bar. */
+@media (max-width: 700px) {
+  .table .date {
+    display: none;
+  }
+
+  .fold {
+    display: block;
+  }
+
+  .screen {
+    padding: var(--space-4);
+  }
+}

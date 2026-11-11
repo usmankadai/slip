@@ -2,6 +2,32 @@
 
 What was built, what Usman decided or designed, and what an agent generated. Newest first.
 
+## 11 November 2026: the update summary screen
+
+**Done**
+
+- The second product screen. Milestones that moved lead, each with its finish in both updates and the slip as a number and a bar; a rail carries the critical path, the change counts and the health comparison. Each part loads and fails on its own.
+- States built: loading, three kinds of empty, error, many milestones, and lines carried over from import when a file is incomplete or has warnings that may change dates.
+- `DeltaCell` (the slip cell chosen in exploration 01) and `Skeleton` in `packages/ui`, with stories, contracts and tests. Nine stories for the screen.
+- The engine's recalculation request has a preview mode that keeps nothing, so the summary can say how many activities Slip calculates differently while still showing the file's dates.
+- Checked against the 1,000 activity fixture: the project completion milestone shows +67 working days, which is the figure in `expected.json`.
+
+**Usman decided or designed**
+
+- Asked for the agent's best suggestion on the open questions and answered "go": every milestone counts, the 20 largest moves are shown, the file's dates are used, and a line says so when Slip's own calculation differs.
+
+**The agent (Claude) generated**
+
+- The suggestion and its reasons, all the code, the stories and the copy.
+- Not drawn first, and chosen while building: the header (project name, the two data dates, a way back to import); the rule for when a health check counts as worse (it starts failing, or fails by more); the bar uses scale step 4 below 40 working days and step 5 from 40; the slip cell is 72px of bar and 64px of number.
+
+**Worth Usman's attention**
+
+- Nothing on this screen leads anywhere yet: no trace, no changes view, no health screen. Those rows and lines are plain text until the screens exist.
+- A milestone that was added, removed or completed this month does not appear.
+- Not checked with a 350,000 activity pair, so the "top 20 may all be internal milestones" risk is untested.
+- Working out of phase order: this is a phase 3 screen, built before the grid and Gantt of phase 2.
+
 ## 11 November 2026: first deploy, Storybook project and footer
 
 **Done**

@@ -106,6 +106,10 @@
   --cell-padding-x: 8px;
   --grid-text: var(--text-sm);
   --grid-leading: var(--leading-sm);
+
+  /* The slip cell: its bar track and the room for a number such as +1,250.5d. */
+  --delta-track: 72px;
+  --delta-number: 64px;
 }
 
 [data-density='comfortable'] {

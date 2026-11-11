@@ -1,0 +1,44 @@
+.cell {
+  display: inline-grid;
+  grid-template-columns: var(--delta-track) var(--delta-number);
+  align-items: center;
+  gap: var(--space-2);
+  font-variant-numeric: tabular-nums;
+}
+
+.track {
+  display: block;
+  width: 100%;
+  height: var(--space-2);
+}
+
+.axis {
+  fill: var(--border-strong);
+}
+
+.late {
+  fill: var(--slip-late-4);
+}
+
+.lateFull {
+  fill: var(--slip-late-5);
+}
+
+.early {
+  fill: var(--slip-early-4);
+}
+
+.earlyFull {
+  fill: var(--slip-early-5);
+}
+
+.number {
+  text-align: right;
+  font-weight: var(--weight-semibold);
+  white-space: nowrap;
+}
+
+.none {
+  font-weight: var(--weight-regular);
+  color: var(--text-muted);
+}

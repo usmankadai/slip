@@ -1,6 +1,6 @@
 /** Wording for a file that cannot be read at all. Three parts: what happened, how Slip knows, what to do. */
 import type { ImportErrorCode } from '../../workers/protocol.ts';
-import { megabytes } from './format.ts';
+import { megabytes } from '../../shared/format.ts';
 import { MAX_FILE_BYTES } from './types.ts';
 
 export interface ErrorCopy {

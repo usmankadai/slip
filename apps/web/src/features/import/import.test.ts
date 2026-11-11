@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import type { ImportWarning } from '@slip/xer';
 import { errorCopy, rejectBeforeReading } from './errors.ts';
-import { apart, longDate, megabytes, plural, share } from './format.ts';
+import { apart, longDate, megabytes, plural, share } from '../../shared/format.ts';
 import { checkPair, type PairFacts } from './pair.ts';
 import {
   compareBlocker,

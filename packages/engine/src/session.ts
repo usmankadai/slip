@@ -101,7 +101,12 @@ export interface SortSpec {
 export type EngineRequest =
   | { type: 'ping' }
   | { type: 'load'; slot: Slot; data: ScheduleData }
-  | { type: 'cpm'; slot: Slot }
+  /**
+   * Recalculate dates. Afterwards every view of the slot uses the recalculated dates instead
+   * of the ones stored in the file. With `preview`, the summary is returned and nothing is
+   * kept: views go on using the file's dates.
+   */
+  | { type: 'cpm'; slot: Slot; preview?: boolean }
   | { type: 'diff' }
   | { type: 'health'; slot: Slot }
   /** Trace an activity of update B, by index or by activity code. */
@@ -292,7 +297,7 @@ export class EngineSession {
         case 'load':
           return { type: 'load', ...this.load(request.slot, request.data) };
         case 'cpm':
-          return { type: 'cpm', ...this.cpm(request.slot) };
+          return { type: 'cpm', ...this.cpm(request.slot, request.preview === true) };
         case 'diff':
           return { type: 'diff', ...this.diffSummary() };
         case 'health':
@@ -379,15 +384,17 @@ export class EngineSession {
     return { slot, activities: data.n, relationships: data.meta.relationshipCount, version };
   }
 
-  private cpm(slot: Slot): CpmSummary {
+  private cpm(slot: Slot, preview = false): CpmSummary {
     const loaded = this.need(slot);
     const result = runCpm(loaded.data, loaded.clocks);
-    loaded.cpm = result;
-    loaded.version = ++this.versionCounter;
-    loaded.columnCache.clear();
-    loaded.health = null;
-    this.diff = null;
-    this.views = [];
+    if (!preview) {
+      loaded.cpm = result;
+      loaded.version = ++this.versionCounter;
+      loaded.columnCache.clear();
+      loaded.health = null;
+      this.diff = null;
+      this.views = [];
+    }
     let critical = 0;
     let differsFromFile = 0;
     for (let i = 0; i < loaded.data.n; i++) {

@@ -25,7 +25,7 @@ Both were decided by Usman on 11 November 2026 by accepting Claude's recommendat
 | Screen | States | Status |
 |---|---|---|
 | Import, layout A | [import-states.html](import-states.html): empty, loading, error, populated, populated with warnings, a file that needs an answer, a pair that does not look right | Drawn by Claude on 11 November 2026 and built the same day. Usman chose the report layout; the other open questions below were built as drawn and are still his to change |
-| Update summary, layout B | [summary-states.html](summary-states.html): populated, loading, three kinds of empty, error, many milestones, things carried over from import, narrow window | Drawn by Claude on 11 November 2026, waiting for Usman's review |
+| Update summary, layout B | [summary-states.html](summary-states.html): populated, loading, three kinds of empty, error, many milestones, things carried over from import, narrow window | Drawn by Claude on 11 November 2026 and built the same day, on the answers below |
 
 Open questions on the import states, all Usman's:
 
@@ -34,13 +34,16 @@ Open questions on the import states, all Usman's:
 - Whether loading the same file twice should disable Compare updates. It is drawn that way, as the one exception to "warnings never block"; the spec only says to say so.
 - The copy. Every sentence in quotation marks on the page is a first draft.
 
-Open questions on the summary states, all Usman's. The screen is not built until the first two are answered, since they change what it computes:
+Decisions on the summary, made by Usman on 11 November 2026. He asked for the agent's best suggestion and answered "go"; the reasons are Claude's and need his own words, or a line saying he accepted them, before they go in the case study.
 
-- **Which milestones lead.** Every milestone; only those the planner marks; or every milestone with finish milestones and constrained ones first. Drawn as every milestone, cut to the 20 largest moves.
-- **Which dates the summary uses.** The dates stored in each file, or Slip's recalculated dates. Drawn with the file's dates, as the XER spec says; this means a summary row can disagree with its trace.
-- Whether early moves are listed after all late moves (drawn) or mixed in by size.
-- How a milestone that was added, removed or completed this month is shown. Not drawn.
-- The copy.
+- **Which milestones lead: every milestone, showing the 20 largest moves.** It works as soon as two files are loaded, with no setup. Letting the planner mark key milestones is probably the better long-term answer, but needs a marking interface and a planner's account of how they choose. If the top 20 on a very large schedule turn out to be internal milestones, the fallback is to list finish milestones and constrained ones first.
+- **Which dates: the ones stored in each file.** Those are the dates the planner sees in P6. Slip's own calculation has known simplifications (D18), so leading with it would put numbers on the first screen that cannot be reconciled with P6.
+- **Say so when the two disagree.** When Slip's recalculated finish differs from the file for any activity of update B, the summary carries one line saying how many.
+- **Late moves before early ones**, as drawn.
+
+Still open, and Usman's: how a milestone that was added, removed or completed this month is shown (left out of this version); and the copy.
+
+Built differently from the drawing, because the screens they lead to do not exist yet: no Trace on a row, no links from the rail, and no navigation bar. The header shows the project and the two data dates, with a way back to import. In the "no milestones" case the latest finish is given as two dates, without a working-day figure.
 
 Not drawn for the summary: the navigation bar, which first appears on this screen; the agent panel; what the critical path line opens.
 

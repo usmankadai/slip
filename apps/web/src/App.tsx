@@ -1,8 +1,8 @@
 import { useState } from 'react';
-import { Button, Notice } from '@slip/ui';
 import { Footer } from './app/Footer.tsx';
 import { DevHarness } from './dev/DevHarness.tsx';
 import { ImportScreen } from './features/import/ImportScreen.tsx';
+import { SummaryScreen, type ComparedPair } from './features/summary/SummaryScreen.tsx';
 import styles from './App.module.css';
 
 const params = new URLSearchParams(location.search);
@@ -10,7 +10,7 @@ const params = new URLSearchParams(location.search);
 const SHOW_HARNESS = params.has('dev') || params.has('perf');
 
 export function App() {
-  const [compared, setCompared] = useState(false);
+  const [pair, setPair] = useState<ComparedPair | null>(null);
   if (SHOW_HARNESS) {
     return (
       <main>
@@ -21,17 +21,10 @@ export function App() {
   }
   return (
     <div className={styles.shell}>
-      {compared ? (
-        <main className={styles.placeholder}>
-          <Notice
-            title="The update summary is not built yet"
-            action={<Button onClick={() => setCompared(false)}>Back to import</Button>}
-          >
-            Both updates are loaded and compared. The screen that shows what changed comes next.
-          </Notice>
-        </main>
+      {pair ? (
+        <SummaryScreen pair={pair} onBack={() => setPair(null)} />
       ) : (
-        <ImportScreen onCompare={() => setCompared(true)} />
+        <ImportScreen onCompare={setPair} />
       )}
       <Footer />
     </div>
