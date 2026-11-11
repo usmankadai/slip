@@ -21,7 +21,7 @@ function send(message: ImportResponse, transfer: Transferable[] = []): void {
 
 class Cancelled extends Error {}
 
-async function run(blob: Blob): Promise<void> {
+async function run(blob: Blob, projectId: number | undefined): Promise<void> {
   const started = performance.now();
   const totalBytes = blob.size;
   let lastProgress = 0;
@@ -61,7 +61,9 @@ async function run(blob: Blob): Promise<void> {
   const hash = hasher.hex();
   const hashed = performance.now();
 
-  const cachedBuffer = await readCached(hash);
+  // A file with several projects is cached once per project read from it.
+  const cacheKey = projectId === undefined ? hash : `${hash}-p${projectId}`;
+  const cachedBuffer = await readCached(cacheKey);
   if (cachedBuffer) {
     try {
       const data = decode(cachedBuffer);
@@ -87,7 +89,7 @@ async function run(blob: Blob): Promise<void> {
     }
   }
 
-  const parser = new XerParser();
+  const parser = new XerParser(projectId === undefined ? {} : { projectId });
   const decoder = new TextDecoder('windows-1252');
   const parseStarted = performance.now();
   await chunks(
@@ -102,7 +104,7 @@ async function run(blob: Blob): Promise<void> {
 
   progress('caching', parser.rowsParsed, totalBytes, true);
   const packed = encode(parsed);
-  const cached = await writeCached(hash, packed);
+  const cached = await writeCached(cacheKey, packed);
   // Hand back views over the packed buffer: one transfer, and the parser's own arrays can be freed.
   const data = decode(packed.buffer);
   const now = performance.now();
@@ -128,7 +130,12 @@ self.onmessage = (event: MessageEvent<ImportRequest>) => {
     cancelled = true;
     return;
   }
-  run(event.data.blob).catch((error: unknown) => {
+  const { blob, projectId } = event.data;
+  if (!(blob instanceof Blob) || (projectId !== undefined && !Number.isSafeInteger(projectId))) {
+    send({ type: 'error', code: 'failed', message: 'The import request was not valid.' });
+    return;
+  }
+  run(blob, projectId).catch((error: unknown) => {
     let code: ImportErrorCode = 'failed';
     let message = 'The file could not be imported.';
     if (error instanceof Cancelled) {

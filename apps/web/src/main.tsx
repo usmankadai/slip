@@ -1,5 +1,8 @@
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
+import '@slip/ui/fonts.css';
+import '@slip/ui/tokens.css';
+import '@slip/ui/base.css';
 import { App } from './App.tsx';
 import { installPerfApi } from './dev/perfApi.ts';
 

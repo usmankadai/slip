@@ -24,7 +24,7 @@ Both were decided by Usman on 11 November 2026 by accepting Claude's recommendat
 
 | Screen | States | Status |
 |---|---|---|
-| Import, layout A | [import-states.html](import-states.html): empty, loading, error, populated, populated with warnings, a file that needs an answer, a pair that does not look right | Drawn by Claude on 11 November 2026, waiting for Usman's review |
+| Import, layout A | [import-states.html](import-states.html): empty, loading, error, populated, populated with warnings, a file that needs an answer, a pair that does not look right | Drawn by Claude on 11 November 2026 and built the same day. Usman chose the report layout; the other open questions below were built as drawn and are still his to change |
 | Update summary, layout B | not drawn | |
 
 Open questions on the import states, all Usman's:

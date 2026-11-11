@@ -12,14 +12,17 @@
   "dependencies": {
     "@slip/engine": "workspace:*",
     "@slip/gen": "workspace:*",
+    "@slip/ui": "workspace:*",
     "@slip/xer": "workspace:*",
     "react": "^19.3.1",
     "react-dom": "^19.3.1"
   },
   "devDependencies": {
+    "@storybook/react-vite": "^10.6.7",
     "@types/react": "^19.3.0",
     "@types/react-dom": "^19.3.0",
     "@vitejs/plugin-react": "^6.3.0",
+    "storybook": "^10.6.7",
     "typescript": "^6.0.3",
     "vite": "^8.3.7"
   }

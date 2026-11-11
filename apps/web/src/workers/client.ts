@@ -33,6 +33,7 @@ export function importSchedule(
   blob: Blob,
   onProgress?: (event: ProgressEvent) => void,
   signal?: AbortSignal,
+  projectId?: number,
 ): Promise<ImportResult> {
   return new Promise((resolve, reject) => {
     const worker = new Worker(new URL('./parse.worker.ts', import.meta.url), { type: 'module' });
@@ -58,7 +59,11 @@ export function importSchedule(
       finish();
       reject(new ImportError('failed', 'The import worker stopped unexpectedly.'));
     };
-    worker.postMessage({ type: 'import', blob } satisfies ImportRequest);
+    worker.postMessage({
+      type: 'import',
+      blob,
+      ...(projectId === undefined ? {} : { projectId }),
+    } satisfies ImportRequest);
   });
 }
 

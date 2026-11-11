@@ -1,6 +1,6 @@
 # Exploration 08: import warnings
 
-Status: **options drawn, waiting for Usman's decision.**
+Status: **decided on 11 November 2026: option B, grouped by what it means for the answer.**
 
 ## Problem
 
@@ -29,10 +29,17 @@ The grouping in B and C (may change dates, changes what is compared, repaired wh
 
 ## Decision
 
-Not made. This is Usman's to choose.
+**Option B, grouped by what it means for the answer.** Chosen by Usman on 11 November 2026 ("i will choose B"). He gave no reasons; the reasoning recorded here is Claude's and needs his own words, or a line saying he accepted it, before it goes in the case study.
 
-Claude's recommendation: **B**, with C's full-width table kept as what Export and the audit log hold. B is the only one that answers "can I trust what loaded" in the slot itself, and it does not hide anything. If the tall slot proves a problem on a real screen, fall back to C with the three group counts in the sentence.
+- B is the only option that answers "can I trust what loaded" in the slot itself, without hiding anything behind a click.
+- A was rejected because sorting by count puts the least important kind first. C was rejected because the detail is a click away.
+
+Not decided, and built as Claude drew them:
+
+- The grouping itself. The parser reports 17 kinds of warning, not the six in the mock; all 17 are placed in one of the three groups in `apps/web/src/features/import/warnings.ts`. That placement is a judgement about planning made without a planner.
+- The square mark on the first group, which is still a placeholder.
+- C's full-width table for Export and the audit log. Neither exists yet.
 
 ## What changed
 
-Nothing yet.
+- 11 November 2026: built as the import report on the import screen. Two differences from the mock: logic loops are not in the report, because they are found when dates are calculated and not when the file is read; and a kind with no examples cannot be opened.
