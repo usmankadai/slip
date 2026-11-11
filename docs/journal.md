@@ -2,6 +2,29 @@
 
 What was built, what Usman decided or designed, and what an agent generated. Newest first.
 
+## 11 November 2026: the four design choices, made by accepting the recommendations
+
+**Done**
+
+- The four open choices are recorded: neutrals A (warm paper) with the other colour values as proposed; slip cell option B, number and diverging bar, on a fixed scale; import layout A, two slots side by side; summary layout B, milestones with a rail.
+- D16 now exists as a file, with the chosen values and the rules for using them that the contrast checks produced.
+- The slip cell mock was changed to the fixed bar scale, so the page shows what was decided.
+
+**Usman decided or designed**
+
+- All four, by saying "use your recommendation". He did not choose between the options one by one and gave no reasons of his own.
+
+**The agent (Claude) generated**
+
+- The options, the recommendations, and every reason written beside the decisions. The write-ups say so.
+- Two details that follow from the slip cell decision and were not put to Usman: the bar scale is a square root scale, and it reaches full length at 40 working days.
+
+**Worth Usman's attention**
+
+- The case study cannot honestly present these as his design reasoning as they stand. Each decision needs either his own reason or a line saying he accepted the agent's.
+- Still no planner research behind any of it, and still no screenshots of the rejected options.
+- The treatment of a "new" row in the slip column is not decided.
+
 ## 11 November 2026: first design options, nothing chosen yet
 
 **Done**

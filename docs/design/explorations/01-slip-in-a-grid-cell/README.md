@@ -1,6 +1,6 @@
 # Exploration 01: showing slip in a grid cell
 
-Status: **options drawn, waiting for Usman's decision.**
+Status: **decided on 11 November 2026: option B, number and diverging bar, on a fixed scale.**
 
 ## Problem
 
@@ -25,10 +25,22 @@ Things the mock made visible that the descriptions did not:
 
 ## Decision
 
-Not made. This is Usman's to choose.
+**Option B, number and diverging bar, with a fixed scale.** Decided by Usman on 11 November 2026.
 
-Claude's recommendation, for what it is worth: **B with a fixed scale**, because finding the worst movers by eye is the job of this column and B is the only option that does it by position, which survives every colour-blind view and greyscale. The width is the price; slip is the subject of the product, so it can have the widest numeric column.
+How it was decided, plainly: Claude drew the four options and recommended B. Usman accepted the recommendation as given ("use your recommendation") and did not add reasons of his own. The reasoning below is therefore Claude's, and should be replaced or confirmed in Usman's words before it goes in the case study.
+
+- Finding the worst movers by eye is the job of this column, and B is the only option that does it by position (right is later, left is earlier). Position survives every colour-blind view and greyscale.
+- The width, about 170px, is the price. Slip is the subject of the product, so it can have the widest numeric column.
+- A, C and D were rejected for the reasons in the table: A gives nothing to scan, C fills the grid with colour and leans hardest on it, D's five glyph sizes are hard to tell apart.
+
+Details that follow from the decision. These are Claude's and are open to change:
+
+- The bar scale is fixed and is a square root scale, reaching full length at 40 working days, the top band of the colour scale. A slip beyond 40 days draws at full length; the number tells them apart.
+- Bars use scale steps 4 and 5 only, since steps 1 to 3 fall below 3:1 against the surface.
+- The "new" row still shows a placeholder tag. Its treatment is not decided.
+
+Not done before deciding: no planner has seen these options. If research later disagrees, the decision is reopened here with the reason.
 
 ## What changed
 
-Nothing yet.
+- 11 November 2026: the mock of option B was changed from a scale relative to the largest slip in view to the fixed scale above, so the page shows what was decided.
