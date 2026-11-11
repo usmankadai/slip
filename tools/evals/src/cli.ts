@@ -5,6 +5,7 @@
  *   pnpm evals -- --pilot                run four cases live. Costs money.
  *   pnpm evals                           run every case live and write docs/evals.md. Costs money.
  *   pnpm evals -- --cases slip-why,...   run named cases.   --reps 2   --variant v1   --timeout-s 240
+ *   --record                             also save each graded answer under recorded/, for replay in the checks
  *
  * Results go to tools/evals/results/<variant>/: one row per (case, rep) in
  * results.jsonl, the full exchange in traces/, and harness failures in
@@ -27,6 +28,7 @@ const { values } = parseArgs({
   options: {
     list: { type: 'boolean', default: false },
     pilot: { type: 'boolean', default: false },
+    record: { type: 'boolean', default: false },
     cases: { type: 'string' },
     reps: { type: 'string', default: '1' },
     variant: { type: 'string', default: 'baseline' },
@@ -214,8 +216,37 @@ for (const test of cases) {
           words: run.words,
           tool_result_bytes: run.toolResultBytes,
           answer: run.answer,
+          // Enough to grade the answer again later without the model.
+          run: {
+            answer: run.answer,
+            knownCodes: run.knownCodes,
+            proposals: run.proposals,
+            editsInForce: run.editsInForce,
+          },
         }) + '\n',
       );
+      if (values.record) {
+        // A committed copy of a real answer, so the graders are exercised on model output in the normal checks.
+        mkdirSync(join(here, '..', 'recorded'), { recursive: true });
+        writeFileSync(
+          join(here, '..', 'recorded', `${test.id}.json`),
+          JSON.stringify(
+            {
+              prompt_id: test.id,
+              model: served.models[0],
+              grade,
+              run: {
+                answer: run.answer,
+                knownCodes: run.knownCodes,
+                proposals: run.proposals,
+                editsInForce: run.editsInForce,
+              },
+            },
+            null,
+            2,
+          ) + '\n',
+        );
+      }
       ran++;
       console.log(
         `${grade.pass === 1 ? 'pass' : 'FAIL'}  ${test.id}${reps > 1 ? ` #${rep}` : ''}  ${run.modelCalls} calls, ${run.latencyS}s, ${run.words} words${
