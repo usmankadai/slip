@@ -4,7 +4,7 @@
  * recorded as the agent's in the exploration; change it here and there together.
  */
 import type { ImportWarning, WarningKind } from '@slip/xer';
-import { count, share } from './format.ts';
+import { count, share } from '../../shared/format.ts';
 
 export type WarningGroupId = 'dates' | 'compare' | 'repair';
 

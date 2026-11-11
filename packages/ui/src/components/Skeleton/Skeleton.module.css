@@ -1,0 +1,18 @@
+.skeleton {
+  display: block;
+  height: var(--space-2);
+  border-radius: var(--radius-control);
+  background: var(--surface-3);
+}
+
+.short {
+  width: 35%;
+}
+
+.medium {
+  width: 60%;
+}
+
+.long {
+  width: 85%;
+}

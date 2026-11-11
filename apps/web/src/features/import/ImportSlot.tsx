@@ -1,6 +1,6 @@
 import { useId, useRef, useState, type DragEvent } from 'react';
 import { Button, Notice, ProgressBar } from '@slip/ui';
-import { count, longDate, megabytes, plural } from './format.ts';
+import { count, longDate, megabytes, plural } from '../../shared/format.ts';
 import { ImportReport } from './ImportReport.tsx';
 import styles from './import.module.css';
 import type { SlotId, SlotState } from './types.ts';
