@@ -1,6 +1,6 @@
 # Exploration 07: scale honesty
 
-Status: **options drawn, waiting for Usman's decision.**
+Status: **decided on 11 November 2026: option A, a status line under the grid, with B's readout while scrolling.**
 
 ## Problem
 
@@ -26,9 +26,9 @@ Things the mock made visible:
 
 ## Decision
 
-Not made. This is Usman's to choose.
+**Option A, a status line under the grid, with B's readout shown while the grid is scrolling.** Decided by Usman on 11 November 2026 by accepting Claude's recommendation ("use your picks"), without reasons of his own. The reasoning is Claude's: A satisfies the spec's rule in a place that cannot be scrolled away and gives an exact position in rows that does not depend on the scrollbar; the readout covers the moment A is weakest. C is kept as a possible later addition for the unfiltered view.
 
-Claude's recommendation: **A, with B's readout added while the scrollbar is dragged.** A satisfies the spec's rule in a place that cannot be scrolled away, and gives an exact position that does not depend on the scrollbar. The readout covers the moment A is weakest. C is worth keeping as a later addition for the unfiltered view, once the grid exists and it is clear whether planners use that view.
+Built with one change from the mock: the readout appears for any scrolling (wheel, keyboard or dragging the thumb), not only while dragging, since B's stated weakness was that it missed wheel and keyboard users.
 
 ## What changed
 

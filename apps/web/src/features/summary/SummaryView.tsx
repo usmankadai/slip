@@ -1,5 +1,6 @@
 import { Button, DeltaCell, Notice, Skeleton } from '@slip/ui';
 import { count, longDate, plural } from '../../shared/format.ts';
+import type { ChangeKind } from '../changes/model.ts';
 import {
   changeLines,
   criticalSentence,
@@ -23,6 +24,8 @@ export interface SummaryViewProps {
   state: SummaryState;
   onRetry: () => void;
   onBack: () => void;
+  /** Opens the changes grid on a kind of change. */
+  onChanges: (kind: ChangeKind) => void;
 }
 
 function Milestones({
@@ -185,6 +188,7 @@ export function SummaryView({
   state,
   onRetry,
   onBack,
+  onChanges,
 }: SummaryViewProps) {
   const all = state.recalculation ? [...notices, state.recalculation] : notices;
   const empty = state.changes.status === 'ready' && nothingChanged(state.changes.value);
@@ -197,9 +201,12 @@ export function SummaryView({
             Update summary · {longDate(dataDateA)} to {longDate(dataDateB)}
           </p>
         </div>
-        <Button variant="quiet" onClick={onBack}>
-          Back to import
-        </Button>
+        <div className={styles.headerActions}>
+          <Button onClick={() => onChanges('all')}>See all changes</Button>
+          <Button variant="quiet" onClick={onBack}>
+            Back to import
+          </Button>
+        </div>
       </header>
 
       {all.map((notice) => (
@@ -225,7 +232,19 @@ export function SummaryView({
                   <dl className={styles.lines}>
                     {changeLines(value).map((line) => (
                       <div key={line.label}>
-                        <dt>{line.label}</dt>
+                        <dt>
+                          {line.kind && line.value > 0 ? (
+                            <button
+                              type="button"
+                              className={styles.lineLink}
+                              onClick={() => onChanges(line.kind!)}
+                            >
+                              {line.label}
+                            </button>
+                          ) : (
+                            line.label
+                          )}
+                        </dt>
                         <dd>{count(line.value)}</dd>
                       </div>
                     ))}

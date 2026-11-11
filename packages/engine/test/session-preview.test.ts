@@ -54,3 +54,41 @@ describe('cpm preview', () => {
     expect(session.handle(request).type).toBe('cpm');
   });
 });
+
+describe('locate', () => {
+  const session = new EngineSession();
+  session.handle({ type: 'load', slot: 'b', data: read() });
+  const view = { sort: { column: 'code', direction: 'desc' } } as const;
+  const rows = session.handle({ type: 'rows', slot: 'b', range: [0, 50], columns: [], ...view });
+  if (rows.type !== 'rows') throw new Error('expected rows');
+
+  it('finds the row of an activity in a sorted view', () => {
+    for (const row of [0, rows.indices.length - 1]) {
+      const found = session.handle({
+        type: 'locate',
+        slot: 'b',
+        activity: rows.indices[row]!,
+        ...view,
+      });
+      expect(found).toMatchObject({ type: 'locate', row, total: rows.total });
+    }
+  });
+
+  it('answers -1 when the filter leaves the activity out', () => {
+    const found = session.handle({
+      type: 'locate',
+      slot: 'b',
+      activity: rows.indices[0]!,
+      filter: { text: 'no activity has this text in it' },
+    });
+    expect(found).toMatchObject({ row: -1, total: 0 });
+  });
+
+  it('rejects an activity that does not exist', () => {
+    for (const activity of [-1, 1.5, 1e9, Number.NaN]) {
+      expect(() => session.handle({ type: 'locate', slot: 'b', activity })).toThrow(
+        'There is no such activity.',
+      );
+    }
+  });
+});

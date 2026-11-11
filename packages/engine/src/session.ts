@@ -131,6 +131,11 @@ export type EngineRequest =
     }
   | { type: 'revertEdit'; editId: string }
   | { type: 'edits' }
+  /**
+   * Where an activity sits in a filtered and sorted view: its row, or -1 if the view does not
+   * hold it. Lets a grid keep the planner's place when the filter or sort changes.
+   */
+  | { type: 'locate'; slot: Slot; activity: number; filter?: FilterSpec; sort?: SortSpec | null }
   /** What is loaded: project, data date, counts and calendars, per update. */
   | { type: 'info' }
   /** One activity by exact code, in both updates, with its relationships and what changed. */
@@ -227,6 +232,7 @@ export type EngineResult =
   | ({ type: 'applyEdit' } & EditResult)
   | ({ type: 'revertEdit' } & EditResult)
   | { type: 'edits'; edits: EditPatch[] }
+  | { type: 'locate'; slot: Slot; activity: number; row: number; total: number }
   | { type: 'info'; a: ScheduleInfo | null; b: ScheduleInfo | null }
   | {
       type: 'activity';
@@ -322,6 +328,8 @@ export class EngineSession {
           return { type: 'activity', ...this.activity(request.taskCode) };
         case 'edits':
           return { type: 'edits', edits: this.need('b').edits.map((edit) => ({ ...edit })) };
+        case 'locate':
+          return { type: 'locate', ...this.locate(request) };
         case 'rows':
           return { type: 'rows', ...this.rows(request) };
         default:
@@ -876,6 +884,16 @@ export class EngineSession {
       if (q === NONE) return -1;
       return p < q ? -sign : sign;
     });
+  }
+
+  private locate(request: Extract<EngineRequest, { type: 'locate' }>) {
+    const { slot, activity } = request;
+    const loaded = this.need(slot);
+    if (!Number.isInteger(activity) || activity < 0 || activity >= loaded.data.n) {
+      throw new EngineError('bad-request', 'There is no such activity.');
+    }
+    const view = this.view(slot, request.filter ?? {}, request.sort ?? null);
+    return { slot, activity, row: view.indexOf(activity), total: view.length };
   }
 
   private rows(request: Extract<EngineRequest, { type: 'rows' }>): RowsResult {

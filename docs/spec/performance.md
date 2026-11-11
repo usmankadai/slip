@@ -37,3 +37,9 @@ A toggle (`Shift+P`) shows a small overlay: activity count for A and B, frame ti
 - **Memory is measured on the main thread only** (JS heap after a forced collection, plus the typed arrays of both schedules). It will grow when the engine worker holds schedules and derived results, so the budget row is still the starting estimate. Set the real budget once the engine exists.
 - Not measured yet: first rows visible, CPM, diff, scroll frame times, the bundle-size budget, and the HUD.
 
+## The grid (11 November 2026)
+
+The changes grid is windowed: only the rows on screen are in the document (about 360 elements in all at 350,000 activities), and it holds a few hundred fetched rows whatever the size of the schedule. The scrolling element is capped at 8,000,000 pixels; above that the scroll position is read as a fraction of the way through the list, so a million rows scroll in the same element.
+
+One hand-run check, not a published number: on the 350,000 activity rail pair, in the development build, in the desktop app's browser pane on the build machine, a three second sweep from the first row to the last held a 95th percentile frame time of 8.4ms on a 120Hz display, and sorting all 350,350 activities by name took about 0.3s. The perf suite does not measure scrolling yet; until it does, the budget row for scroll is unverified.
+

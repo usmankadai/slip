@@ -1,6 +1,6 @@
 # Exploration 06: density
 
-Status: **options drawn, waiting for Usman's decision.**
+Status: **decided on 11 November 2026: option B, taller rows, larger text, more padding.**
 
 ## Problem
 
@@ -28,9 +28,7 @@ Things the mock made visible:
 
 ## Decision
 
-Not made. This is Usman's to choose.
-
-Claude's recommendation: **B**, with column widths left as the planner set them. It is the only option that makes the grid easier to read, which is what people ask for, and it keeps one line per row. If where an activity sits turns out to matter, that should be a WBS column or grouping, not a density setting.
+**Option B: 32px rows, 13px text, 12px cell padding. Column widths stay as the planner set them.** Decided by Usman on 11 November 2026 by accepting Claude's recommendation ("use your picks"), without reasons of his own. The reasoning is Claude's: B is the only option that makes the grid easier to read, which is what people ask for, and it keeps one line per row. A only adds air. C changes what a row contains, which is a different feature; if where an activity sits matters, that should be a WBS column or grouping.
 
 ## What changed
 

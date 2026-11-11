@@ -9,3 +9,9 @@ export {
   type DeltaCellProps,
 } from './components/DeltaCell/DeltaCell.tsx';
 export { Skeleton, type SkeletonProps } from './components/Skeleton/Skeleton.tsx';
+export {
+  SegmentedControl,
+  type SegmentedControlProps,
+  type SegmentedOption,
+} from './components/SegmentedControl/SegmentedControl.tsx';
+export { ROW_HEIGHT, type Density } from './density.ts';

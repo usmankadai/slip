@@ -5,6 +5,7 @@ import {
   DeltaCell,
   Notice,
   ProgressBar,
+  SegmentedControl,
   Skeleton,
   barLength,
   formatDelta,
@@ -101,5 +102,24 @@ describe('DeltaCell', () => {
 describe('Skeleton', () => {
   it('is hidden from assistive technology', () => {
     expect(renderToStaticMarkup(<Skeleton />)).toContain('aria-hidden="true"');
+  });
+});
+
+describe('SegmentedControl', () => {
+  it('marks exactly one option as pressed and names the group', () => {
+    const html = renderToStaticMarkup(
+      <SegmentedControl
+        label="Density"
+        value="comfortable"
+        onChange={() => {}}
+        options={[
+          { value: 'compact', label: 'Compact' },
+          { value: 'comfortable', label: 'Comfortable' },
+        ]}
+      />,
+    );
+    expect(html).toContain('aria-label="Density"');
+    expect(html.match(/aria-pressed="true"/g)).toHaveLength(1);
+    expect(html).toMatch(/aria-pressed="true"[^>]*>Comfortable/);
   });
 });

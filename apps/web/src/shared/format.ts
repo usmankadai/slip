@@ -51,3 +51,18 @@ export function apart(earlier: number, later: number): string {
   if (days >= 27 && days <= 32) return 'one month apart';
   return `${plural(days, 'day')} apart`;
 }
+
+/** "7 May 2027" with a three-letter month, for a grid cell. '' when there is no date. */
+export function shortDate(minutes: number): string {
+  const text = formatXerDate(minutes);
+  if (text === '') return '';
+  const month = (MONTHS[Number(text.slice(5, 7)) - 1] ?? '').slice(0, 3);
+  return `${Number(text.slice(8, 10))} ${month} ${text.slice(0, 4)}`;
+}
+
+/** A duration or float in working days from hundredths of a day: "7d", "2.5d", "−3d". */
+export function workingDays(hundredths: number): string {
+  const days = Math.round(hundredths / 10) / 10;
+  if (days === 0) return '0d';
+  return `${days < 0 ? '−' : ''}${Math.abs(days).toLocaleString('en-GB', { maximumFractionDigits: 1 })}d`;
+}
