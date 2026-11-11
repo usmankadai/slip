@@ -8,7 +8,7 @@
     "pass": 1
   },
   "run": {
-    "answer": "**55 activities** had their duration changed between the previous update (data date 2026-12-23 08:00) and the current one (data date 2027-01-20 08:00).\n\nThat is a small share of the 5,855 activities that changed overall. Most of the other changes were knock-on effects: 5,461 had their total float change and 2,613 had their finish move. Other changes that could also move dates:\n\n- 20 activities were added and 10 removed.\n- 81 activities had logic changes.\n- 10 activities had constraint changes.\n- 349 activities were progressed.\n\nThese matter because Project completion (#MS-COMPLETE) and Phase 7 complete (#MS-P07) both slipped **+65 days**, to 2029-06-22.\n\nI can list the 55 activities with changed durations, sorted by finish slip, to see whether any of them sit on the driving path. I can also trace exactly what is pushing #MS-COMPLETE out by 65 days.",
+    "answer": "In this update, 55 activities had their duration changed.",
     "knownCodes": [
       "MS-P07",
       "MS-COMPLETE",

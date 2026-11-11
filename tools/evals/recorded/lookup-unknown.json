@@ -9,7 +9,7 @@
     "pass": 1
   },
   "run": {
-    "answer": "I can't give you a finish date because there is no activity coded ZZ-999-NOPE in either update. I also searched the current update's 10,010 activities for \"ZZ-999\" and for \"NOPE\" in codes and names, and nothing came back.\n\nThe code may be mistyped or slightly different in P6. If you can give me part of the code, a word from the activity name, or the area of work it belongs to, I'll find it and give you its finish date, how far it moved since the previous update, and its total float.",
+    "answer": "There's no activity with the code ZZ-999-NOPE in either update, and searching for \"ZZ-999\" in the current update found nothing either. So I can't give a finish date for it. If you have the activity's name or part of its code, I can search for that instead.",
     "knownCodes": [],
     "proposals": [],
     "editsInForce": 0

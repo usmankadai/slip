@@ -8,7 +8,7 @@
     "pass": 1
   },
   "run": {
-    "answer": "This update **added 20 activities and removed 10**. That takes the count from 10,000 in the previous update to 10,010 in the current one, a net gain of 10.\n\nAt the relationship level, 30 relationships were added and 28 removed, and 5 had their lag changed.\n\nYou may also want to know that #MS-COMPLETE (Project completion) moved from 2029-03-23 to 2029-06-22, which is **+65 working days**. #MS-P07 slipped by the same amount. I can list the added and removed activities or trace what is driving that completion slip.",
+    "answer": "In this update, 20 activities were added and 10 were removed. That takes the total from 10,000 activities in the previous update to 10,010 in the current one.",
     "knownCodes": [
       "MS-P07",
       "MS-COMPLETE",

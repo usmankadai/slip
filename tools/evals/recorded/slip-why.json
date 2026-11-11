@@ -8,7 +8,7 @@
     "pass": 1
   },
   "run": {
-    "answer": "Project completion, #MS-COMPLETE, slipped **+65 working days**, from 2029-03-23 to 2029-06-22. The cause is longer durations, not slow progress or logic changes. Planned durations went up on activities on the driving path that haven't started yet. Most of the increase is in Phase 7, section 2. #MS-P07 (Phase 7 complete) moved by the same +65 days.\n\n**What added the delay along the driving path**\n\n| Activity | Name | Duration (prev → current) | Delay added |\n|---|---|---|---|\n| #P07-A002-STN-0100 | Excavate platform edge, section 2 (Stations) | 2 → 20 days | +18 |\n| #P07-A002-OLE-0050 | Test cable troughing, section 2 | 6 → 18 days | +12 |\n| #P07-A002-OLE-0220 | Excavate platform edge, section 2 (Overhead line) | 7 → 19 days | +12 |\n| #P07-A002-TEL-0140 | Set out mast foundations, section 2 | 1 → 12 days | +11 |\n| #P07-A002-SIG-0190 | Erect cable troughing, section 2 | 1 → 10 days | +9 |\n| #P05-A005-ENB-0200 | Install points machine, section 5 | (not checked) | +5 |\n| #P06-A009-ENB-0120 | Set out sleepers, section 9 | (not checked) | +2 |\n| #P07-A002-ENB-0060 | Fabricate signal gantry, section 2 | driving predecessor changed | -1 |\n| #P07-A002-TRK-0210 | Pour points machine, section 2 | driving predecessor changed | -1 |\n\n**Points to check**\n- **These look like re-estimates, not delays on site.** The five largest contributors are all not started. Their original durations went up, so this update re-planned the work rather than recording slow progress. Four of them went up roughly tenfold or more: 1 → 12, 1 → 10 and 2 → 20 days. Please confirm these are real re-estimates and not entry errors, such as days typed as hours or a wrong unit.\n- **The figures don't add up exactly.** The contributions above total +67 days, but the milestone moved +65. The 2-day gap is probably calendar or lag effects along the 130-activity driving path. The data doesn't show exactly where it comes from.\n- **Negative float.** Those activities now have total float of -59 or -60 days, down from 0. That suggests a deadline or constraint further along the path is now being missed. The data I've looked at doesn't show which date that is. I can check the milestone itself for a constraint if that would help.\n\nIf you want to recover time, I can draft proposed duration changes on these activities for you to review. Each would show its effect on completion.",
+    "answer": "#MS-COMPLETE (Project completion) moved +65 working days, from 2029-03-23 to 2029-06-22. Most of that delay comes from longer durations on five Phase 7, section 2 activities on the driving path, which together add +62 days.\n\n| Activity | Name | Cause | Days added |\n|---|---|---|---|\n| #P07-A002-STN-0100 | Excavate platform edge, section 2 | Duration | +18 |\n| #P07-A002-OLE-0050 | Test cable troughing, section 2 | Duration | +12 |\n| #P07-A002-OLE-0220 | Excavate platform edge, section 2 | Duration | +12 |\n| #P07-A002-TEL-0140 | Set out mast foundations, section 2 | Duration | +11 |\n| #P07-A002-SIG-0190 | Erect cable troughing, section 2 | Duration | +9 |\n| #P05-A005-ENB-0200 | Install points machine, section 5 | Duration | +5 |\n| #P06-A009-ENB-0120 | Set out sleepers, section 9 | Duration | +2 |\n| #P07-A002-ENB-0060 | Fabricate signal gantry, section 2 | Driver changed | -1 |\n| #P07-A002-TRK-0210 | Pour points machine, section 2 | Driver changed | -1 |\n\nThe driving path was traced in full: 130 activities back to finished work. However, these contributions add up to +67 days, not the +65 the milestone moved, and the data doesn't show where the other 2 days went.",
     "knownCodes": [
       "MS-P07",
       "MS-COMPLETE",
@@ -26,22 +26,7 @@
       "P05-A005-ENB-0200",
       "P06-A009-ENB-0120",
       "P07-A002-ENB-0060",
-      "P07-A002-TRK-0210",
-      "P07-A002-STN-0090",
-      "P07-A002-STN-0110",
-      "P07-A002-OLE-0040",
-      "P07-A002-OLE-0060",
-      "P07-A002-OLE-0080",
-      "P07-A002-OLE-0210",
-      "P07-A002-OLE-0200",
-      "P07-A002-OLE-0190",
-      "P07-A002-SIG-0010",
-      "P07-A002-TEL-0130",
-      "P07-A002-TEL-0150",
-      "P07-A002-TEL-0170",
-      "P07-A002-SIG-0160",
-      "P07-A002-SIG-0200",
-      "P07-A002-SIG-0220"
+      "P07-A002-TRK-0210"
     ],
     "proposals": [],
     "editsInForce": 0
