@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Button, Notice } from '@slip/ui';
+import { Footer } from './app/Footer.tsx';
 import { DevHarness } from './dev/DevHarness.tsx';
 import { ImportScreen } from './features/import/ImportScreen.tsx';
 import styles from './App.module.css';
@@ -18,17 +19,21 @@ export function App() {
       </main>
     );
   }
-  if (compared) {
-    return (
-      <main className={styles.placeholder}>
-        <Notice
-          title="The update summary is not built yet"
-          action={<Button onClick={() => setCompared(false)}>Back to import</Button>}
-        >
-          Both updates are loaded and compared. The screen that shows what changed comes next.
-        </Notice>
-      </main>
-    );
-  }
-  return <ImportScreen onCompare={() => setCompared(true)} />;
+  return (
+    <div className={styles.shell}>
+      {compared ? (
+        <main className={styles.placeholder}>
+          <Notice
+            title="The update summary is not built yet"
+            action={<Button onClick={() => setCompared(false)}>Back to import</Button>}
+          >
+            Both updates are loaded and compared. The screen that shows what changed comes next.
+          </Notice>
+        </main>
+      ) : (
+        <ImportScreen onCompare={() => setCompared(true)} />
+      )}
+      <Footer />
+    </div>
+  );
 }

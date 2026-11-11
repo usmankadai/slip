@@ -23,3 +23,4 @@ Part of the Slip spec. Start at [CLAUDE.md](../../CLAUDE.md).
 - **D18: What the engine's CPM does, and what it simplifies.** Kahn ordering, loops broken and reported, and a table of known differences from P6. See [D18](D18-cpm-rules-and-simplifications.md).
 - **D19: How the engine worker takes requests.** Cancel and supersede act on waiting requests; a started job finishes, because nothing runs long enough to need interrupting. See [D19](D19-engine-worker-protocol.md).
 - **D20: How the agent server is built.** One request is one model call; four events; tools in a shared package; model output checked twice; two guards. See [D20](D20-agent-server.md).
+- **D21: Storybook is deployed as its own project.** The app's Content Security Policy stays strict and has no exception for documentation. See [D21](D21-storybook-on-its-own-deployment.md).

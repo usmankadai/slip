@@ -1,5 +1,12 @@
+.shell {
+  min-height: 100vh;
+  display: grid;
+  grid-template-rows: 1fr auto;
+}
+
 .placeholder {
   max-width: 720px;
+  width: 100%;
   margin: var(--space-0) auto;
   padding: var(--space-6);
 }
