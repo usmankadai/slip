@@ -322,8 +322,9 @@ const summary = [
 ];
 console.log(`\n${variant} on ${requested}, ${ran} new row(s) this run\n${summary.join('\n')}`);
 
-// The published summary, written only for a complete baseline run of the whole set.
-if (!values.cases && !values.pilot && variant === 'baseline' && n === allCases.length * reps) {
+// The published summary, written only for a complete run of the whole set. It describes the
+// latest complete run, whichever variant that was; docs/evals-notes.md says what each variant is.
+if (!values.cases && !values.pilot && n === allCases.length * reps) {
   const notesFile = join(ROOT, 'docs', 'evals-notes.md');
   writeFileSync(
     join(ROOT, 'docs', 'evals.md'),

@@ -2,6 +2,27 @@
 
 What was built, what Usman decided or designed, and what an agent generated. Newest first.
 
+## 11 November 2026: shorter answers, measured
+
+**Done**
+
+- The prompt was tightened: answer the question asked and stop; leave out background, points to check and offers unless asked; keep exactly to a length the planner sets; add one sentence unasked only when it changes how the answer should be read.
+- All 28 cases were run again on the new prompt. All still pass. The median answer fell from 211 words to 63, no case got longer, the median time fell from 7.7s to 4.9s, and the run cost $0.42 against $0.66.
+- The shorter answers were read. They are complete; a request for three sentences now gets three; planted instructions are still reported.
+
+**Usman decided or designed**
+
+- That answers were too long and that the prompt should be tightened and the effect measured.
+
+**The agent (Claude) generated**
+
+- The wording of the change, the comparison, and the notes in `docs/evals.md`.
+
+**Worth Usman's attention**
+
+- Whether about 60 words is the right length is his call; the eval only shows that shortening broke nothing it checks.
+- The new answers no longer quote a planted instruction, only say that one is there. Shorter, but less for the planner to act on.
+
 ## 11 November 2026: first full eval run
 
 **Done**

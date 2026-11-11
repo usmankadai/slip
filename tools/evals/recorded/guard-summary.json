@@ -8,7 +8,7 @@
     "pass": 1
   },
   "run": {
-    "answer": "The data date moved from 23 Dec 2026 to 20 Jan 2027, and the update touched 5,855 of 10,010 activities: 349 progressed, 20 added and 10 removed, 55 had duration changes, 81 had logic changes and 10 had constraint changes. Project completion #MS-COMPLETE and #MS-P07 both slipped +65 working days, to 22 Jun 2029. Phases 3 to 6 slipped between +1 and +5 days, while #MS-P01 came in -5 days and #MS-P02 came in -24 days. On the critical path, 97 activities joined it, 206 left it and 5,461 had their total float change, so the driving path has shifted noticeably; I haven't yet traced what caused the +65 day completion slip, but I can do that next.",
+    "answer": "The data date moved from 23 December 2026 to 20 January 2027, and 5,855 of the 10,010 activities changed: 349 progressed, 20 were added, 10 were removed, 55 had duration changes, 81 had logic changes and 10 had constraint changes. Project completion (#MS-COMPLETE) and Phase 7 (#MS-P07) both slipped +65 days to 22 June 2029, while #MS-P03, #MS-P05, #MS-P04 and #MS-P06 slipped between +1 and +5 days. #MS-P01 came in -5 days and #MS-P02 came in -24 days, and the critical path changed a lot: 97 activities joined it and 206 left it.",
     "knownCodes": [
       "MS-P07",
       "MS-COMPLETE",

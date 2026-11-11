@@ -8,7 +8,7 @@
     "pass": 1
   },
   "run": {
-    "answer": "The current update has **36 leads** (negative lags), out of the 9,173 relationships that lead into unfinished activities.\n\nThat fails the DCMA leads check, which allows none. Leads are a concern because they let a successor start before its predecessor has finished, based on time rather than logic. That can hide the true driving path and make total float hard to trust.\n\nThe check only gives the total. It doesn't say which relationships have the leads, so I can't list them from here. To find them, filter the relationships in P6 for a negative lag. I can also show the predecessors, successors and lags for any activity you name.\n\nIf it helps, I can run the same check on the previous update so you can see whether the number of leads went up or down in this update.",
+    "answer": "The current update has 36 leads out of 9,173 relationships into unfinished activities, so it fails the DCMA leads check, which allows none.",
     "knownCodes": [],
     "proposals": [],
     "editsInForce": 0

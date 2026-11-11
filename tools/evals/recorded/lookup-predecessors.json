@@ -8,7 +8,7 @@
     "pass": 1
   },
   "run": {
-    "answer": "In the current update, #P07-A002-STN-0100 (Excavate platform edge, section 2) has **one predecessor**: #P07-A002-STN-0090 (Inspect catenary, section 2). The link is **start-to-start with a 2-day lag**. That means excavation can start 2 working days after the catenary inspection starts.\n\nThe activity also changed a lot since the previous update:\n\n- **Duration:** the original duration went from 2 to 20 working days (+18 days).\n- **Dates:** the start moved +47 days, to 2029-04-20. The finish moved +65 days, to 2029-05-17.\n- **Total float:** it went from 0 to -59 days, so the activity is now well behind its required dates.\n- **Successor:** it has one, #P07-A002-STN-0110 (Set out retaining wall, section 2), linked finish-to-finish with a 1-day lag.\n\nAbout two-thirds of the finish slip could come from the longer duration itself. The rest seems to come from the later start, which this one predecessor controls. I can trace what is driving that date if you want to see where the delay comes from.",
+    "answer": "#P07-A002-STN-0100 has one predecessor in the current update: #P07-A002-STN-0090 (Inspect catenary, section 2). The link is start-to-start with a 2-day lag.",
     "knownCodes": ["P07-A002-STN-0100", "P07-A002-STN-0090", "P07-A002-STN-0110"],
     "proposals": [],
     "editsInForce": 0

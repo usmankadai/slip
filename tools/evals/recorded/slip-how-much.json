@@ -9,7 +9,7 @@
     "pass": 1
   },
   "run": {
-    "answer": "Project completion slipped by **+65 working days** between the two updates. In the previous update (data date 2026-12-23), #MS-COMPLETE \"Project completion\" was due to finish on 2029-03-23. In the current update (data date 2027-01-20), it now finishes on 2029-06-22.\n\n#MS-P07 \"Phase 7 complete\" slipped by exactly the same amount, between the same two dates, so Phase 7 looks like the work driving completion. None of the other phase milestones moved by anything close to that:\n\n| Milestone | Previous finish | Current finish | Slip |\n|---|---|---|---|\n| #MS-P07 Phase 7 complete | 2029-03-23 | 2029-06-22 | +65 days |\n| #MS-P03 Phase 3 complete | 2028-05-17 | 2028-05-24 | +5 days |\n| #MS-P05 Phase 5 complete | 2028-12-15 | 2028-12-22 | +5 days |\n| #MS-P04 Phase 4 complete | 2028-09-12 | 2028-09-18 | +4 days |\n| #MS-P06 Phase 6 complete | 2029-03-09 | 2029-03-12 | +1 day |\n| #MS-P01 Phase 1 complete | 2027-11-11 | 2027-11-04 | -5 days |\n| #MS-P02 Phase 2 complete | 2028-03-23 | 2028-02-18 | -24 days |\n\nSo a large delay came in on the Phase 7 path in this update. The data doesn't show the cause yet. I can trace back from #MS-COMPLETE along its driving path to find which activities added the delay and why: duration changes, progress, logic, constraints or added work.",
+    "answer": "Project completion (#MS-COMPLETE) slipped by **+65 working days**. It moved from 2029-03-23 17:00 in the previous update to 2029-06-22 17:00 in the current one.",
     "knownCodes": [
       "MS-P07",
       "MS-COMPLETE",
