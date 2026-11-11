@@ -65,7 +65,7 @@ jobs:
           node-version: 24
           cache: pnpm
       - run: pnpm install --frozen-lockfile
-      - run: pnpm --filter @slip/perf exec playwright install --with-deps chromium
+      - run: pnpm --filter @slip/perf exec playwright install chromium
       # Builds the app, serves it with vite preview, and checks the 100K budgets
       # at twice the local thresholds. Shared runners are too noisy for more (D14).
       - run: pnpm perf:ci
