@@ -1,0 +1,263 @@
+<!doctype html>
+<html lang="en-GB">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Flow: update summary, the states of layout B</title>
+    <link rel="stylesheet" href="wire.css" />
+    <style>
+      .frame { min-height: 0; }
+      .say { color: #222; }
+      .ms { display: grid; grid-template-columns: minmax(0, 1fr) 84px 84px 120px 44px; gap: 8px; align-items: center; padding: 4px 0; border-bottom: 1px solid #e5e5e5; }
+      .ms:last-child { border-bottom: 0; }
+      .ms span { color: #666; }
+      .ms .n { text-align: right; font-variant-numeric: tabular-nums; color: #222; font-weight: 600; }
+      .ms .slip { display: grid; grid-template-columns: 1fr 46px; gap: 6px; align-items: center; }
+      .track { position: relative; height: 8px; border-left: 0; background: linear-gradient(#999, #999) center / 1px 100% no-repeat; }
+      .track i { position: absolute; top: 1px; height: 6px; background: #222; }
+      .track i.late { left: 50%; }
+      .track i.early { right: 50%; background: #999; }
+      .code { font-family: ui-monospace, monospace; font-size: 11px; color: #777; }
+      .skel { height: 8px; background: #e2e2e2; }
+      .skel.s { width: 35%; } .skel.m { width: 60%; } .skel.l { width: 85%; }
+      .open { background: repeating-linear-gradient(135deg, #f1f1f1 0 6px, #fff 6px 12px); }
+      .lines { display: grid; gap: 4px; }
+      .lines div { display: flex; justify-content: space-between; }
+      .lines b { font-variant-numeric: tabular-nums; }
+      .narrow { max-width: 420px; }
+      .narrow .body { min-width: 0; }
+    </style>
+  </head>
+  <body>
+    <header>
+      <h1>Update summary: the states of layout B</h1>
+      <p>Layout B (milestones on the left, the rest in a rail) was chosen on 11 November 2026. This page draws every moment it has to handle, still as boxes and labels. Wording in quotation marks is proposed copy. The numbers are from the generated rail schedule where they exist and made up where they do not.</p>
+      <p class="question">
+        The planner's question: "What happened this month?"<br />
+        Most prominent: the milestones that moved, each with a signed working-day delta, worst first.<br />
+        Must not: become a dashboard of equal-weight tiles. Milestones lead.
+      </p>
+      <p>Drawn by Claude for Usman to review. Hatched boxes mark a choice that is still open; they are listed at the end.</p>
+    </header>
+
+    <main>
+      <h2>1. Populated: an ordinary month</h2>
+      <div class="option">
+        <div class="frame">
+          <div class="bar"><b>Slip</b><span>Northern Rail Upgrade, Phase 2 · 1 June to 1 July 2026</span><b>Summary</b><span>Changes</span><span>Health</span><span>Finish update</span><span class="right">Ask</span></div>
+          <div class="body">
+            <div class="cols c21">
+              <div class="box lead">
+                <div class="t"><span class="tag">1</span>"5 milestones moved"</div>
+                <div class="ms"><span>Milestone</span><span>Was</span><span>Now</span><span class="n">Finish slip</span><span></span></div>
+                <div class="ms"><div>Contract completion <span class="code">MS-COMPLETE</span></div><span>7 May 2027</span><span>10 Aug 2027</span><div class="slip"><div class="track"><i class="late" style="width: 50%"></i></div><div class="n">+67d</div></div><span>Trace</span></div>
+                <div class="ms"><div>Section 3 handover <span class="code">MS-S3-HO</span></div><span>12 Feb 2027</span><span>23 Mar 2027</span><div class="slip"><div class="track"><i class="late" style="width: 41%"></i></div><div class="n">+27d</div></div><span>Trace</span></div>
+                <div class="ms"><div>Energisation, section 5 <span class="code">MS-S5-EN</span></div><span>4 Dec 2026</span><span>18 Dec 2026</span><div class="slip"><div class="track"><i class="late" style="width: 25%"></i></div><div class="n">+10d</div></div><span>Trace</span></div>
+                <div class="ms"><div>Track possession 4 <span class="code">MS-POS-4</span></div><span>9 Oct 2026</span><span>13 Oct 2026</span><div class="slip"><div class="track"><i class="late" style="width: 11%"></i></div><div class="n">+2d</div></div><span>Trace</span></div>
+                <div class="ms"><div>Depot access <span class="code">MS-DEPOT</span></div><span>21 Aug 2026</span><span>7 Aug 2026</span><div class="slip"><div class="track"><i class="early" style="width: 25%"></i></div><div class="n">−10d</div></div><span>Trace</span></div>
+                <div class="quiet">"37 milestones did not move · Show all"</div>
+              </div>
+              <div class="cols">
+                <div class="box"><div class="t"><span class="tag">2</span>Critical path</div><div class="say">"14 activities joined, 6 left · See them"</div></div>
+                <div class="box"><div class="t"><span class="tag">3</span>What changed</div>
+                  <div class="lines">
+                    <div><span>Dates moved</span><b>4,812</b></div>
+                    <div><span>Durations changed</span><b>312</b></div>
+                    <div><span>Logic changed</span><b>96</b></div>
+                    <div><span>Constraints changed</span><b>12</b></div>
+                    <div><span>Progressed</span><b>2,240</b></div>
+                    <div><span>Added</span><b>412</b></div>
+                    <div><span>Removed</span><b>130</b></div>
+                  </div>
+                  <div class="quiet">"of 350,412 activities"</div>
+                </div>
+                <div class="box"><div class="t"><span class="tag">4</span>Health</div><div class="say">"2 checks worse, 1 better. Worst: 12 new hard constraints · See all 14"</div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <dl class="notes">
+          <dt>The heading is the answer</dt><dd>The milestone box is titled with the count that moved, not with a label. A planner who reads only that line and the first row has the month.</dd>
+          <dt>Each row</dt><dd>Name and code, the finish in each update, the slip in working days as number and bar (exploration 01, option B, same fixed scale as the grid), and Trace. The whole row opens the trace; Trace is there so that is discoverable.</dd>
+          <dt>Order</dt><dd>Later first, by size; then earlier, by size. An early move is good news and should not sit above a late one of the same size.</dd>
+          <dt>The rail</dt><dd>Three ways into other screens. Each line of "What changed" opens the changes view with that filter. Counts overlap (an activity can move and change duration), so there is no total; the line under the list gives the scale.</dd>
+        </dl>
+      </div>
+
+      <h2>2. Loading: the comparison is being worked out</h2>
+      <div class="option">
+        <div class="frame">
+          <div class="bar"><b>Slip</b><span>Northern Rail Upgrade, Phase 2 · 1 June to 1 July 2026</span><b>Summary</b><span class="quiet">Changes</span><span class="quiet">Health</span><span class="quiet">Finish update</span><span class="right quiet">Ask</span></div>
+          <div class="body">
+            <div class="cols c21">
+              <div class="box lead">
+                <div class="t"><span class="tag">1</span>"Finding the milestones that moved"</div>
+                <div class="ms"><span>Milestone</span><span>Was</span><span>Now</span><span class="n">Finish slip</span><span></span></div>
+                <div class="ms"><div class="skel l"></div><div class="skel m"></div><div class="skel m"></div><div class="skel l"></div><span></span></div>
+                <div class="ms"><div class="skel m"></div><div class="skel m"></div><div class="skel m"></div><div class="skel m"></div><span></span></div>
+                <div class="ms"><div class="skel l"></div><div class="skel m"></div><div class="skel m"></div><div class="skel s"></div><span></span></div>
+              </div>
+              <div class="cols">
+                <div class="box"><div class="t">Critical path</div><div class="skel m"></div></div>
+                <div class="box"><div class="t">What changed</div>
+                  <div class="lines">
+                    <div><span>Dates moved</span><b>4,812</b></div>
+                    <div><span>Durations changed</span><b>312</b></div>
+                    <div><span>Logic changed</span><b>96</b></div>
+                  </div>
+                  <div class="quiet">Already known from the import screen</div>
+                </div>
+                <div class="box"><div class="t">Health</div><div class="say">"Running 14 checks on each update"</div><div class="skel m"></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <dl class="notes">
+          <dt>Each box loads on its own</dt><dd>The change counts are known before this screen opens, because the import screen needed them. Milestones and the critical path follow; health is slowest. Nothing waits for the slowest part.</dd>
+          <dt>Shape is kept</dt><dd>Skeleton rows hold the milestone table's shape, so nothing jumps when rows arrive. Each box says in words what is being worked out.</dd>
+          <dt>Usually brief</dt><dd>At 350,000 activities this state lasts about a second. It is drawn because at a million it does not, and because a skeleton that flashes for 100ms is worse than none: below about 300ms nothing is shown.</dd>
+        </dl>
+      </div>
+
+      <h2>3. Empty: three different reasons</h2>
+      <div class="option">
+        <div class="frame">
+          <div class="bar"><b>Slip</b><span class="right">The milestone box, in each case. The rail is as in state 1 unless said.</span></div>
+          <div class="body">
+            <div class="box lead">
+              <div class="t"><span class="tag">a</span>"No milestone moved"</div>
+              <div class="say">"All 42 milestones finish when they did in the last update. 4,812 activities did move; 96 of them lost float."</div>
+              <div class="btn">See the activities that moved</div>
+            </div>
+            <div class="box lead">
+              <div class="t"><span class="tag">b</span>"Nothing changed between these updates"</div>
+              <div class="say">"Every activity has the same dates, durations and logic in both. If that is not what you expected, check that update B is this month's file."</div>
+              <div class="btn">Back to import</div>
+              <div class="quiet">The rail is not shown: there is nothing for it to say.</div>
+            </div>
+            <div class="box lead">
+              <div class="t"><span class="tag">c</span>"This schedule has no milestones"</div>
+              <div class="say">"Slip leads with milestones, and there are none in update B. The latest finish moved from 7 May 2027 to 10 August 2027, 67 working days later."</div>
+              <div class="btn">See the activities that moved</div>
+            </div>
+          </div>
+        </div>
+        <dl class="notes">
+          <dt>a. Nothing moved</dt><dd>Good news, said plainly, with the thing most likely to matter next: activities that moved without moving a milestone are eating float.</dd>
+          <dt>b. Nothing changed at all</dt><dd>Almost always a mistake in what was loaded. The next action is back to import, not onward.</dd>
+          <dt>c. No milestones</dt><dd>The screen still has to answer the question, so it falls back to the project's latest finish. This is the one case where the lead is a sentence and not a table.</dd>
+        </dl>
+      </div>
+
+      <h2>4. Error: the comparison could not be finished</h2>
+      <div class="option">
+        <div class="frame">
+          <div class="bar"><b>Slip</b><span>Northern Rail Upgrade, Phase 2 · 1 June to 1 July 2026</span><b>Summary</b><span>Changes</span><span>Health</span><span>Finish update</span><span class="right">Ask</span></div>
+          <div class="body">
+            <div class="cols c21">
+              <div class="box lead">
+                <div class="t"><span class="tag">1</span>"Slip could not compare the milestones"</div>
+                <div class="say">"There was not enough memory to work out the dates for both updates. Closing other tabs may help. Your files are still loaded."</div>
+                <div class="cols c2"><div class="btn">Try again</div><div class="btn off" style="color: #222; border-color: #777">Back to import</div></div>
+              </div>
+              <div class="cols">
+                <div class="box"><div class="t">Critical path</div><div class="quiet">"Not available until the dates are worked out"</div></div>
+                <div class="box"><div class="t">What changed</div><div class="lines"><div><span>Dates moved</span><b>4,812</b></div><div><span>Durations changed</span><b>312</b></div></div></div>
+                <div class="box"><div class="t">Health</div><div class="say">"The checks could not be run · Try again"</div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <dl class="notes">
+          <dt>Per box</dt><dd>A failure is shown in the box it belongs to. What did work stays on screen: here the change counts survive.</dd>
+          <dt>Three parts</dt><dd>What happened, the likely reason, what to do. The same shape as an import error.</dd>
+          <dt>If the engine stopped</dt><dd>When the engine worker has crashed, the schedules are gone with it. The message says so, and Try again reads both files from the saved copies before comparing again.</dd>
+        </dl>
+      </div>
+
+      <h2>5. Many milestones</h2>
+      <div class="option">
+        <div class="frame">
+          <div class="bar"><b>Slip</b><span>Northern Rail Upgrade, Phase 2 · 1 June to 1 July 2026</span><b>Summary</b><span>Changes</span><span>Health</span><span>Finish update</span><span class="right">Ask</span></div>
+          <div class="body">
+            <div class="cols c21">
+              <div class="box lead">
+                <div class="t"><span class="tag">1</span>"412 milestones moved: 371 later, 41 earlier"</div>
+                <div class="ms"><span>Milestone</span><span>Was</span><span>Now</span><span class="n">Finish slip</span><span></span></div>
+                <div class="ms"><div>Contract completion <span class="code">MS-COMPLETE</span></div><span>7 May 2027</span><span>10 Aug 2027</span><div class="slip"><div class="track"><i class="late" style="width: 50%"></i></div><div class="n">+67d</div></div><span>Trace</span></div>
+                <div class="ms"><div>Section 3 handover <span class="code">MS-S3-HO</span></div><span>12 Feb 2027</span><span>23 Mar 2027</span><div class="slip"><div class="track"><i class="late" style="width: 41%"></i></div><div class="n">+27d</div></div><span>Trace</span></div>
+                <div class="quiet">… 18 more rows, the 20 largest moves …</div>
+                <div class="box open"><div class="t"><span class="tag">2</span>"Show all 412 in the changes view"</div><div>Opens Changes filtered to milestones that moved, sorted by slip.</div></div>
+              </div>
+              <div class="cols">
+                <div class="box open"><div class="t">Which milestones count?</div><div>A 350,000 activity schedule can hold thousands of milestones, most of them internal. "Key" needs a rule. Options are listed at the end.</div></div>
+                <div class="box quiet"><div class="t">Critical path · What changed · Health</div><div>As in state 1</div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <dl class="notes">
+          <dt>A fixed number of rows</dt><dd>The summary shows the 20 largest moves and says how many there are. The full list belongs in the changes view, which is built for long lists; a second long list here would make the summary a grid.</dd>
+          <dt>The heading carries the split</dt><dd>With hundreds moved, later and earlier are counted in the heading, since the early ones will not appear in the first 20.</dd>
+          <dt>Scale honesty</dt><dd>"20 of 412" is always stated. This is the same problem as exploration 07 and should use the same words when that is done.</dd>
+        </dl>
+      </div>
+
+      <h2>6. Things carried over from import</h2>
+      <div class="option">
+        <div class="frame">
+          <div class="bar"><b>Slip</b><span>Northern Rail Upgrade, Phase 2 · 1 June to 1 July 2026</span><b>Summary</b><span>Changes</span><span>Health</span><span>Finish update</span><span class="right">Ask</span></div>
+          <div class="body">
+            <div class="box"><div class="say"><span class="tag">1</span>"Update B is incomplete: the file stopped early and some relationships are missing. Dates below may be earlier than in P6. · Import report"</div></div>
+            <div class="box"><div class="say">"136 import warnings in update B may change dates. · Import report"</div></div>
+            <div class="cols c21">
+              <div class="box lead"><div class="t"><span class="tag">2</span>"5 milestones moved"</div><div class="line l"></div><div class="line l"></div><div class="line m"></div></div>
+              <div class="cols"><div class="box quiet"><div class="t">Critical path · What changed · Health</div><div>As in state 1</div></div></div>
+            </div>
+          </div>
+        </div>
+        <dl class="notes">
+          <dt>Above the answer</dt><dd>If something about the files makes the numbers below less trustworthy, it is said before the numbers, in one line each, with a way back to the import report.</dd>
+          <dt>Only what matters here</dt><dd>Warnings in the "may change dates" group are carried. Rows that were padded are not: they do not change the answer.</dd>
+          <dt>Persistent, not dismissible</dt><dd>These lines stay for as long as the condition is true. They also belong on every later screen; how they shrink there is not drawn.</dd>
+        </dl>
+      </div>
+
+      <h2>7. Narrow window</h2>
+      <div class="option">
+        <div class="frame narrow">
+          <div class="bar"><b>Slip</b><b>Summary</b><span>Changes</span><span>…</span></div>
+          <div class="body">
+            <div class="box lead"><div class="t"><span class="tag">1</span>"5 milestones moved"</div>
+              <div class="ms" style="grid-template-columns: minmax(0, 1fr) 110px"><div>Contract completion<br /><span class="quiet">7 May to 10 Aug 2027</span></div><div class="slip"><div class="track"><i class="late" style="width: 50%"></i></div><div class="n">+67d</div></div></div>
+              <div class="ms" style="grid-template-columns: minmax(0, 1fr) 110px"><div>Section 3 handover<br /><span class="quiet">12 Feb to 23 Mar 2027</span></div><div class="slip"><div class="track"><i class="late" style="width: 41%"></i></div><div class="n">+27d</div></div></div>
+            </div>
+            <div class="box"><div class="t"><span class="tag">2</span>Critical path</div><div>"14 joined, 6 left"</div></div>
+            <div class="box"><div class="t"><span class="tag">3</span>What changed</div><div class="line l"></div><div class="line m"></div></div>
+            <div class="box"><div class="t"><span class="tag">4</span>Health</div><div>"2 worse, 1 better"</div></div>
+          </div>
+        </div>
+        <dl class="notes">
+          <dt>Below about 1,000px</dt><dd>The rail moves under the milestones, in the same order. The two dates fold into one line under the name; the slip keeps its number and bar.</dd>
+          <dt>With the agent panel open</dt><dd>The panel takes the right-hand edge, so the summary uses this stacked form at any window width while it is open.</dd>
+        </dl>
+      </div>
+
+      <h2>Still open</h2>
+      <div class="option">
+        <div class="body" style="min-width: 0; padding: 0">
+          <div class="box"><div class="t">For Usman</div>
+            <div>1. <b>Which milestones lead.</b> (a) Every milestone in the schedule. (b) Only those the planner marks, remembered per project. (c) Every milestone, with finish milestones and those with a constraint date listed first, since contract dates are usually constrained. Drawn here as (a), cut to the 20 largest moves.</div>
+            <div>2. <b>Which dates the summary uses.</b> The dates stored in each file, or Slip's own recalculated dates. The spec says the file's dates are the source of truth until the planner makes an edit. Drawn that way; it means the summary can disagree with a trace, which uses recalculated dates.</div>
+            <div>3. <b>Early moves.</b> Listed after all late moves, as drawn, or mixed in by size.</div>
+            <div>4. <b>A milestone that was added, removed or completed this month.</b> Not drawn. It did not "move", but a planner would expect to see it here.</div>
+            <div>5. <b>The copy.</b> Every sentence in quotation marks is a first draft.</div>
+          </div>
+        </div>
+        <dl class="notes">
+          <dt>Not drawn</dt><dd>The navigation bar itself, which appears here for the first time and belongs to every later screen. The agent panel. What "See them" opens for the critical path.</dd>
+        </dl>
+      </div>
+    </main>
+  </body>
+</html>
