@@ -2,6 +2,26 @@
 
 What was built, what Usman decided or designed, and what an agent generated. Newest first.
 
+## 11 November 2026: update summary states
+
+**Done**
+
+- The states of the chosen summary layout are drawn as boxes and labels: an ordinary month, loading (each box on its own), three kinds of empty (no milestone moved, nothing changed at all, no milestones in the schedule), error, hundreds of milestones, warnings carried over from import, and a narrow window.
+
+**Usman decided or designed**
+
+- To draw these next. Nothing on the page yet.
+
+**The agent (Claude) generated**
+
+- The page, the proposed copy and the list of open questions.
+- Defaults drawn without an answer: every milestone counts, the 20 largest moves are shown, late moves are listed before early ones, and the file's own dates are used.
+
+**Worth Usman's attention**
+
+- Two questions change what the screen computes and need an answer before it is built: which milestones lead, and whether the summary uses the file's dates or Slip's recalculated ones.
+- The navigation bar appears for the first time on this screen and has not been designed.
+
 ## 11 November 2026: the import screen
 
 **Done**
