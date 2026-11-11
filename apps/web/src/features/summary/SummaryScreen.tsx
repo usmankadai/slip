@@ -1,3 +1,4 @@
+import type { ChangeKind } from '../changes/model.ts';
 import type { SlotFacts } from '../import/types.ts';
 import { carriedNotices } from './model.ts';
 import { SummaryView } from './SummaryView.tsx';
@@ -8,7 +9,15 @@ export interface ComparedPair {
   b: SlotFacts;
 }
 
-export function SummaryScreen({ pair, onBack }: { pair: ComparedPair; onBack: () => void }) {
+export function SummaryScreen({
+  pair,
+  onBack,
+  onChanges,
+}: {
+  pair: ComparedPair;
+  onBack: () => void;
+  onChanges: (kind: ChangeKind) => void;
+}) {
   const { state, retry } = useSummary();
   return (
     <SummaryView
@@ -19,6 +28,7 @@ export function SummaryScreen({ pair, onBack }: { pair: ComparedPair; onBack: ()
       state={state}
       onRetry={retry}
       onBack={onBack}
+      onChanges={onChanges}
     />
   );
 }

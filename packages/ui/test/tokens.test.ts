@@ -1,5 +1,6 @@
 import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
+import { ROW_HEIGHT } from '../src/density.ts';
 
 /**
  * The rules in D16 ("Rules that come from the checks"), enforced on tokens.css itself,
@@ -121,5 +122,16 @@ describe('tokens.css', () => {
         );
       }
     }
+  });
+});
+
+describe('density', () => {
+  it('keeps the row heights used for windowing equal to the tokens', () => {
+    const compact = /:root\s*\{[^}]*--row-height:\s*(\d+)px/.exec(css)?.[1];
+    const comfortable = /\[data-density='comfortable'\]\s*\{[^}]*--row-height:\s*(\d+)px/.exec(
+      css,
+    )?.[1];
+    expect(Number(compact)).toBe(ROW_HEIGHT.compact);
+    expect(Number(comfortable)).toBe(ROW_HEIGHT.comfortable);
   });
 });

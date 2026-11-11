@@ -2,6 +2,36 @@
 
 What was built, what Usman decided or designed, and what an agent generated. Newest first.
 
+## 11 November 2026: the changes grid
+
+**Done**
+
+- The third product screen, first step: the changes grid at full width. Activities with any change, largest finish slip first. Columns: row number, code, name, finish in each update, finish slip as number and bar, total float, and what changed in words.
+- Filter by kind of change or show every activity; find by code or name; sort by any column; compact and comfortable density; arrow keys, Page Up and Down, Home and End move the selection.
+- The planner's place is kept: after a new filter or sort the selected activity is found again and brought back into view, or a line says it is now hidden.
+- Scale honesty as decided: a status line with the rows on screen, the rows in the view and the number hidden, and a readout of the row while scrolling. Removed activities are counted in the status line, since they cannot be rows.
+- Windowed, with the scrolling element capped in height so a million rows fit in one scroller. The engine gained `locate`. `SegmentedControl` was added to `packages/ui`.
+- The summary now leads here: a "See all changes" button, and each line of "What changed" opens the grid on that kind.
+- Tried by hand on the 350,000 activity rail pair: see `docs/spec/performance.md`.
+
+**Usman decided or designed**
+
+- Layout A, density B, and scale honesty A with the scrolling readout, by accepting the agent's three recommendations ("use your picks"). No reasons of his own.
+
+**The agent (Claude) generated**
+
+- All the code, stories, tests and copy.
+- Choices made while building that were not drawn or asked about: which columns are shown and their widths; the default sort (largest finish slip first); the search box; that sorting a number column starts largest first; the selected row's look (a darker surface and an accent edge); the wording of every label and message; the 8,000,000 pixel cap.
+- A change to the decided option: the scrolling readout shows for wheel and keyboard scrolling too, not only while the thumb is dragged.
+
+**Worth Usman's attention**
+
+- Not built: the Gantt (needs exploration 02), the drawer for the selected activity, configurable columns, URL state, the performance overlay, and a navigation bar. Enter on a row does nothing yet.
+- The states of this screen were not drawn as a low-fidelity page before building; they exist only as stories.
+- Above the height cap, one notch of the mouse wheel moves more than one notch of rows: about 3 times as far at a million rows. Keyboard movement is exact. This is a known cost of the approach.
+- The scroll figures are from one hand-run check in a development build, not from the perf suite. The browser height limits quoted in exploration 07 are still unconfirmed; the cap was set well below both remembered figures.
+- No screenshot or axe tests on stories, and no lint rules for raw colours and spacing, still.
+
 ## 11 November 2026: live check, and design options for the changes grid
 
 **Done**

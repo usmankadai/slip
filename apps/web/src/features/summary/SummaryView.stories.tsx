@@ -65,6 +65,7 @@ const meta: Meta<typeof SummaryView> = {
     state: POPULATED,
     onRetry: noop,
     onBack: noop,
+    onChanges: noop,
   },
 };
 export default meta;

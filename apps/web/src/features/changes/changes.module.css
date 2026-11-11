@@ -1,0 +1,222 @@
+.screen {
+  width: 100%;
+  min-height: 0;
+  padding: var(--space-4) var(--space-6) var(--space-0);
+  display: grid;
+  grid-template-rows: auto auto minmax(0, 1fr) auto;
+  gap: var(--space-3);
+  /* The grid fills the window; the page itself does not scroll. */
+  height: calc(100vh - var(--space-8) - var(--space-2));
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: start;
+  gap: var(--space-4);
+}
+
+.title {
+  margin: var(--space-0);
+  font-size: var(--text-xl);
+  line-height: var(--leading-xl);
+  font-weight: var(--weight-semibold);
+  overflow-wrap: anywhere;
+}
+
+.period {
+  margin: var(--space-0);
+  color: var(--text-secondary);
+  font-variant-numeric: tabular-nums;
+}
+
+.toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2) var(--space-4);
+}
+
+.search {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: var(--text-sm);
+  color: var(--text-secondary);
+}
+
+.search input {
+  height: var(--space-6);
+  width: 220px;
+  padding: var(--space-0) var(--space-2);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-control);
+  background: var(--surface-0);
+  color: var(--text-primary);
+  font: inherit;
+  font-size: var(--text-sm);
+}
+
+.push {
+  margin-left: auto;
+}
+
+.gridFrame {
+  position: relative;
+  min-height: 0;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-grid);
+  background: var(--surface-0);
+  display: grid;
+}
+
+.scroller {
+  overflow: auto;
+  min-height: 0;
+  font-size: var(--grid-text);
+  line-height: var(--grid-leading);
+  font-variant-numeric: tabular-nums;
+}
+
+.scroller:focus-visible {
+  outline-offset: -2px;
+}
+
+.row {
+  display: grid;
+  grid-template-columns: 72px 168px minmax(220px, 1fr) 104px 104px 168px 96px minmax(150px, 240px);
+  align-items: center;
+  height: var(--row-height);
+  min-width: 1100px;
+  border-bottom: 1px solid var(--border-subtle);
+  cursor: default;
+}
+
+.row:hover {
+  background: var(--surface-1);
+}
+
+.selected,
+.selected:hover {
+  background: var(--surface-2);
+  box-shadow: inset var(--space-1) 0 0 var(--accent);
+}
+
+.head,
+.head:hover {
+  position: sticky;
+  top: 0;
+  z-index: var(--z-sticky);
+  background: var(--surface-2);
+  color: var(--text-secondary);
+  font-weight: var(--weight-medium);
+  border-bottom: 1px solid var(--border-strong);
+}
+
+.cell {
+  padding: var(--space-0) var(--cell-padding-x);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 0;
+}
+
+.numeric {
+  text-align: right;
+}
+
+.rowNumber {
+  text-align: right;
+  color: var(--text-muted);
+}
+
+.code {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+}
+
+.date,
+.words {
+  color: var(--text-secondary);
+}
+
+.sort {
+  padding: var(--space-0);
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+}
+
+.sort:hover {
+  color: var(--text-primary);
+}
+
+.spacer {
+  position: relative;
+}
+
+.layer {
+  position: sticky;
+  overflow: hidden;
+}
+
+.readout {
+  position: absolute;
+  right: var(--space-6);
+  top: 50%;
+  padding: var(--space-1) var(--space-3);
+  border-radius: var(--radius-control);
+  background: var(--text-primary);
+  color: var(--text-inverse);
+  font-size: var(--text-sm);
+  line-height: var(--leading-sm);
+  font-variant-numeric: tabular-nums;
+  pointer-events: none;
+  z-index: var(--z-popover);
+}
+
+.message {
+  align-self: start;
+  padding: var(--space-6);
+  display: grid;
+  gap: var(--space-2);
+  justify-items: start;
+}
+
+.messageTitle {
+  margin: var(--space-0);
+  font-size: var(--text-lg);
+  line-height: var(--leading-lg);
+  font-weight: var(--weight-semibold);
+}
+
+.messageBody {
+  margin: var(--space-0);
+  color: var(--text-secondary);
+}
+
+.status {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1) var(--space-4);
+  align-items: center;
+  padding-bottom: var(--space-2);
+  font-size: var(--text-sm);
+  line-height: var(--leading-sm);
+  color: var(--text-secondary);
+  font-variant-numeric: tabular-nums;
+}
+
+.where {
+  color: var(--text-primary);
+  font-weight: var(--weight-semibold);
+}
+
+/* Stories only: a fixed-height place to stand the grid in. */
+.storyFrame {
+  height: 420px;
+  display: grid;
+  padding: var(--space-4);
+}

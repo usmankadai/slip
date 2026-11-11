@@ -6,6 +6,7 @@
  */
 import type { HealthSummary } from '@slip/engine';
 import { count, plural } from '../../shared/format.ts';
+import type { ChangeKind } from '../changes/model.ts';
 import type { SlotFacts } from '../import/types.ts';
 
 /** How many milestone rows the summary shows. The full list belongs in the changes view. */
@@ -70,6 +71,8 @@ export function milestoneHeading(list: MilestoneList): string {
 export interface ChangeLine {
   label: string;
   value: number;
+  /** The filter the changes grid opens with for this line, or null when the grid cannot show it. */
+  kind: ChangeKind | null;
 }
 
 export interface ChangeCounts {
@@ -87,13 +90,13 @@ export interface ChangeCounts {
 
 export function changeLines(counts: ChangeCounts): ChangeLine[] {
   return [
-    { label: 'Dates moved', value: counts.datesMoved },
-    { label: 'Durations changed', value: counts.durationChanged },
-    { label: 'Logic changed', value: counts.logicChanged },
-    { label: 'Constraints changed', value: counts.constraintChanged },
-    { label: 'Progressed', value: counts.progressed },
-    { label: 'Added', value: counts.added },
-    { label: 'Removed', value: counts.removed },
+    { label: 'Dates moved', value: counts.datesMoved, kind: 'dates' },
+    { label: 'Durations changed', value: counts.durationChanged, kind: 'durations' },
+    { label: 'Logic changed', value: counts.logicChanged, kind: 'logic' },
+    { label: 'Constraints changed', value: counts.constraintChanged, kind: 'constraints' },
+    { label: 'Progressed', value: counts.progressed, kind: 'progress' },
+    { label: 'Added', value: counts.added, kind: 'added' },
+    { label: 'Removed', value: counts.removed, kind: null },
   ];
 }
 
