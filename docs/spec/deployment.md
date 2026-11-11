@@ -11,6 +11,21 @@ Part of the Slip spec. Start at [CLAUDE.md](../../CLAUDE.md).
 - `GET /health` on the API returns the build commit and which optional features are configured (booleans only, no values).
 - The footer of the app shows the build commit and links to the repository, `docs/perf.md` and the case study.
 
+## What is deployed today
+
+Two Vercel projects from the one repository, both building from `main`:
+
+| Project | Root directory | Preset | Serves | Configured by |
+|---|---|---|---|---|
+| The app | `./` | Other | `apps/web/dist`, under the security headers | `vercel.json` |
+| Storybook | `packages/ui` | Other | `packages/ui/storybook-static` | `packages/ui/vercel.json` ([D21](../decisions/D21-storybook-on-its-own-deployment.md)) |
+
+- Neither project has secrets. The app's project has one optional variable, `VITE_STORYBOOK_URL`, the address of the Storybook project; the footer links to it when set.
+- The footer shows the commit the build was made from (Vercel's `VERCEL_GIT_COMMIT_SHA`) and links to the repository, `docs/perf.md` and the journal. It will link to the case study when there is one.
+- The agent server (`apps/api`) is not deployed. When the agent panel exists it joins the app's project under `/api`, so the browser still talks only to its own origin.
+- Do not enable Vercel Speed Insights or Analytics on the app: they add a third-party script that the Content Security Policy blocks, and they send visitor data to Vercel.
+- Not done: `GET /health`, branch protection, and a check of each preview deploy under the production headers.
+
 ## CI (GitHub Actions; adapt switchboard's workflow)
 Every job runs without secrets. A newer push cancels the older run. Jobs:
 1. **Checks:** install with a frozen lockfile, lint (including custom rules), typecheck, unit tests, `evals:replay`, `pnpm audit`.

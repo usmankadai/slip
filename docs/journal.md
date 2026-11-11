@@ -2,6 +2,31 @@
 
 What was built, what Usman decided or designed, and what an agent generated. Newest first.
 
+## 11 November 2026: first deploy, Storybook project and footer
+
+**Done**
+
+- The app is deployed to Vercel from `main`. Usman created the project; the repository's `vercel.json` supplied the build and the security headers.
+- A second Vercel configuration in `packages/ui` builds Storybook as its own project (D21).
+- The app has a footer: links to the source, the performance numbers and the journal, a link to the design system when its address is set, and the commit the build was made from.
+
+**Usman decided or designed**
+
+- To deploy Storybook as a second project and not inside the app's deployment, on the agent's recommendation.
+- He created the Vercel project himself and deployed it.
+
+**The agent (Claude) generated**
+
+- The Storybook deploy configuration, the footer and its tests, and D21.
+- The footer's look and wording, which were not drawn or asked about: one quiet line at the bottom, small muted text, "Source code", "Design system", "Performance numbers", "Build journal".
+
+**Worth Usman's attention**
+
+- The deployed app has not been checked by the agent. Only a screenshot of Vercel's thumbnail was seen. Workers, the saved-copy cache and fonts under the production headers on Vercel are unverified.
+- The Storybook project does not exist yet; it needs creating in Vercel with root directory `packages/ui`, and its address setting as `VITE_STORYBOOK_URL` on the app's project.
+- The claim that Storybook needs inline scripts was not tested. It is the reason given for D21.
+- The first deploy came after the import screen, not at the end of week 1 as the plan asked.
+
 ## 11 November 2026: update summary states
 
 **Done**

@@ -4,6 +4,8 @@ import { SECURITY_HEADERS } from '../../config/securityHeaders.ts';
 
 export default defineConfig({
   plugins: [react()],
+  // Vercel sets the commit when it builds. Locally it is empty and the footer says so.
+  define: { __BUILD_COMMIT__: JSON.stringify(process.env.VERCEL_GIT_COMMIT_SHA ?? '') },
   worker: { format: 'es' },
   // Never inline an asset as a data: URI. The small font subsets would otherwise be
   // inlined, and the Content Security Policy only allows fonts from our own origin.
