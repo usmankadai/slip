@@ -1,0 +1,35 @@
+{
+  "prompt_id": "slip-biggest",
+  "model": "claude-opus-5-5",
+  "grade": {
+    "correct": 1,
+    "cited": 1,
+    "grounded": 1,
+    "proposal": 1,
+    "pass": 1
+  },
+  "run": {
+    "answer": "The activity that added the most delay is **#P07-A002-STN-0100** (Excavate platform edge, section 2). It added **+18 working days** to completion, and the cause was a change to its duration.\n\nProject completion (#MS-COMPLETE) has moved from 2029-03-23 to 2029-06-22, a slip of +65 working days. I traced the driving path back from completion and listed the activities on it that added delay of their own:\n\n| Activity | Name | Cause | Days |\n|---|---|---|---|\n| #P07-A002-STN-0100 | Excavate platform edge, section 2 | Duration | +18 |\n| #P07-A002-OLE-0050 | Test cable troughing, section 2 | Duration | +12 |\n| #P07-A002-OLE-0220 | Excavate platform edge, section 2 | Duration | +12 |\n| #P07-A002-TEL-0140 | Set out mast foundations, section 2 | Duration | +11 |\n| #P07-A002-SIG-0190 | Erect cable troughing, section 2 | Duration | +9 |\n| #P05-A005-ENB-0200 | Install points machine, section 5 | Duration | +5 |\n| #P06-A009-ENB-0120 | Set out sleepers, section 9 | Duration | +2 |\n| #P07-A002-ENB-0060 | Fabricate signal gantry, section 2 | Driving predecessor changed | -1 |\n| #P07-A002-TRK-0210 | Pour points machine, section 2 | Driving predecessor changed | -1 |\n\n#P07-A002-STN-0100 is the largest single cause, but it explains less than a third of the slip. Most of the delay comes from duration changes on several Phase 7, section 2 activities. Two things to check:\n\n- **Two activities have the same name.** #P07-A002-STN-0100 and #P07-A002-OLE-0220 are both called \"Excavate platform edge, section 2\", but sit under different codes (STN and OLE). This may be a duplicate or a naming error.\n- **The contributions don't add up exactly.** They total +67 days, while completion moved +65.\n\nI can open #P07-A002-STN-0100 to show its old and new durations and what drives it.",
+    "knownCodes": [
+      "MS-P07",
+      "MS-COMPLETE",
+      "MS-P03",
+      "MS-P05",
+      "MS-P04",
+      "MS-P06",
+      "MS-P01",
+      "MS-P02",
+      "P07-A002-STN-0100",
+      "P07-A002-OLE-0050",
+      "P07-A002-OLE-0220",
+      "P07-A002-TEL-0140",
+      "P07-A002-SIG-0190",
+      "P05-A005-ENB-0200",
+      "P06-A009-ENB-0120",
+      "P07-A002-ENB-0060",
+      "P07-A002-TRK-0210"
+    ],
+    "proposals": [],
+    "editsInForce": 0
+  }
+}

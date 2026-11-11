@@ -1,0 +1,37 @@
+{
+  "prompt_id": "counts-list-added",
+  "model": "claude-opus-5-5",
+  "grade": {
+    "cited": 1,
+    "grounded": 1,
+    "proposal": 1,
+    "pass": 1
+  },
+  "run": {
+    "answer": "This update adds **20 activities**. All 20 are not started and named \"Additional works following …\". They all have positive total float, from 113 to 571 days, so none of them is on the critical path.\n\n| Code | Name | Start | Finish | Total float (days) |\n|---|---|---|---|---|\n| #P01-A006-TEL-N0001 | Additional works following install mast foundations, section 6 | 2027-04-13 | 2027-04-23 | 562 |\n| #P01-A008-TEL-N0002 | Additional works following pour retaining wall, section 8 | 2027-05-24 | 2027-06-04 | 532 |\n| #P02-A009-STN-N0003 | Additional works following set out signal gantry, section 9 | 2027-11-23 | 2027-11-24 | 489 |\n| #P03-A002-STN-N0004 | Additional works following backfill track panels, section 2 | 2028-03-13 | 2028-03-16 | 394 |\n| #P03-A006-STN-N0005 | Additional works following excavate cable troughing, section 6 | 2027-12-28 | 2028-01-04 | 380 |\n| #P03-A008-TEL-N0006 | Additional works following fabricate points machine, section 8 | 2027-08-20 | 2027-08-31 | 470 |\n| #P04-A001-STN-N0008 | Additional works following commission drainage run, section 1 | 2028-03-09 | 2028-03-13 | 331 |\n| #P04-A001-TEL-N0007 | Additional works following set out ballast, section 1 | 2028-02-10 | 2028-02-11 | 352 |\n| #P04-A002-TEL-N0009 | Additional works following erect points machine, section 2 | 2027-11-08 | 2027-11-15 | 416 |\n| #P04-A002-TEL-N0010 | Additional works following pour platform edge, section 2 | 2027-11-16 | 2027-11-25 | 408 |\n| #P04-A003-TRK-N0011 | Additional works following survey drainage run, section 3 | 2027-04-27 | 2027-04-30 | 557 |\n| #P04-A007-TEL-N0012 | Additional works following backfill signal gantry, section 7 | 2027-12-09 | 2027-12-13 | 396 |\n| #P04-A008-SIG-N0013 | Additional works following erect points machine, section 8 | 2027-09-07 | 2027-09-13 | 461 |\n| #P05-A005-CIV-N0014 | Additional works following excavate sleepers, section 5 | 2027-04-09 | 2027-04-12 | 571 |\n| #P05-A007-CIV-N0015 | Additional works following excavate mast foundations, section 7 | 2027-04-01 | 2027-04-13 | 570 |\n| #P07-A003-OLE-N0016 | Additional works following excavate sleepers, section 3 | 2028-04-13 | 2028-04-20 | 303 |\n| #P07-A004-OLE-N0017 | Additional works following install retaining wall, section 4 | 2028-06-10 | 2028-06-20 | 312 |\n| #P07-A005-STN-N0018 | Additional works following deliver ballast, section 5 | 2029-01-04 | 2029-01-16 | 113 |\n| #P07-A006-TEL-N0019 | Additional works following deliver cable troughing, section 6 | 2027-04-01 | 2027-04-13 | 570 |\n| #P07-A007-STN-N0020 | Additional works following backfill track panels, section 7 | 2028-11-30 | 2028-12-04 | 141 |\n\n**Things to note:**\n- **Least float:** #P07-A005-STN-N0018 (113 days) and #P07-A007-STN-N0020 (141 days) have the least float, so they are the ones closest to affecting key dates.\n- **Very high float:** Most of the others have 300 to 570+ days of float. Float that high can mean an activity is only loosely tied into the network, for example with no successor that drives anything. I can check the predecessors and successors of any of these to confirm they are properly linked.\n- **Numbering gap:** The codes run from N0001 to N0020, but this list is sorted by code, so N0007 appears after N0008. None are missing.",
+    "knownCodes": [
+      "P01-A006-TEL-N0001",
+      "P01-A008-TEL-N0002",
+      "P02-A009-STN-N0003",
+      "P03-A002-STN-N0004",
+      "P03-A006-STN-N0005",
+      "P03-A008-TEL-N0006",
+      "P04-A001-STN-N0008",
+      "P04-A001-TEL-N0007",
+      "P04-A002-TEL-N0009",
+      "P04-A002-TEL-N0010",
+      "P04-A003-TRK-N0011",
+      "P04-A007-TEL-N0012",
+      "P04-A008-SIG-N0013",
+      "P05-A005-CIV-N0014",
+      "P05-A007-CIV-N0015",
+      "P07-A003-OLE-N0016",
+      "P07-A004-OLE-N0017",
+      "P07-A005-STN-N0018",
+      "P07-A006-TEL-N0019",
+      "P07-A007-STN-N0020"
+    ],
+    "proposals": [],
+    "editsInForce": 0
+  }
+}

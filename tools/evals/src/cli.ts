@@ -5,6 +5,7 @@
  *   pnpm evals -- --pilot                run four cases live. Costs money.
  *   pnpm evals                           run every case live and write docs/evals.md. Costs money.
  *   pnpm evals -- --cases slip-why,...   run named cases.   --reps 2   --variant v1   --timeout-s 240
+ *   --record                             also save each graded answer under recorded/, for replay in the checks
  *
  * Results go to tools/evals/results/<variant>/: one row per (case, rep) in
  * results.jsonl, the full exchange in traces/, and harness failures in
@@ -14,11 +15,13 @@ import { appendFileSync, existsSync, mkdirSync, readFileSync, writeFileSync } fr
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { parseArgs } from 'node:util';
+import { AGENT_LIMITS } from '@slip/agent';
 import { createApp } from '@slip/api/app';
 import { depsFromEnv } from '@slip/api/config';
 import { buildCases, type EvalCase } from './cases.ts';
 import { buildFixture } from './fixture.ts';
 import { gradeCase } from './grade.ts';
+import { buildReport, interval, median, type ResultRow } from './report.ts';
 import { HarnessError, runAgent } from './runAgent.ts';
 
 const here = dirname(fileURLToPath(import.meta.url));
@@ -27,6 +30,7 @@ const { values } = parseArgs({
   options: {
     list: { type: 'boolean', default: false },
     pilot: { type: 'boolean', default: false },
+    record: { type: 'boolean', default: false },
     cases: { type: 'string' },
     reps: { type: 'string', default: '1' },
     variant: { type: 'string', default: 'baseline' },
@@ -214,8 +218,37 @@ for (const test of cases) {
           words: run.words,
           tool_result_bytes: run.toolResultBytes,
           answer: run.answer,
+          // Enough to grade the answer again later without the model.
+          run: {
+            answer: run.answer,
+            knownCodes: run.knownCodes,
+            proposals: run.proposals,
+            editsInForce: run.editsInForce,
+          },
         }) + '\n',
       );
+      if (values.record) {
+        // A committed copy of a real answer, so the graders are exercised on model output in the normal checks.
+        mkdirSync(join(here, '..', 'recorded'), { recursive: true });
+        writeFileSync(
+          join(here, '..', 'recorded', `${test.id}.json`),
+          JSON.stringify(
+            {
+              prompt_id: test.id,
+              model: served.models[0],
+              grade,
+              run: {
+                answer: run.answer,
+                knownCodes: run.knownCodes,
+                proposals: run.proposals,
+                editsInForce: run.editsInForce,
+              },
+            },
+            null,
+            2,
+          ) + '\n',
+        );
+      }
       ran++;
       console.log(
         `${grade.pass === 1 ? 'pass' : 'FAIL'}  ${test.id}${reps > 1 ? ` #${rep}` : ''}  ${run.modelCalls} calls, ${run.latencyS}s, ${run.words} words${
@@ -256,53 +289,57 @@ for (const test of cases) {
 }
 
 // Summary, recomputed from the rows on disk.
-interface Row {
-  prompt_id: string;
-  tags: string[];
-  grade: Record<string, number>;
-  usage: Record<string, number>;
-  latency_s: number;
-  words: number;
-  model_calls: number;
-  tool_result_bytes: number;
-  model: string;
-}
 const rows = readFileSync(resultsFile, 'utf8')
   .split('\n')
   .filter(Boolean)
-  .map((line) => JSON.parse(line) as Row)
+  .map((line) => JSON.parse(line) as ResultRow)
   .filter((row) => cases.some((test) => test.id === row.prompt_id));
 const errors = existsSync(errorsFile)
   ? readFileSync(errorsFile, 'utf8').split('\n').filter(Boolean).length
   : 0;
 const n = rows.length;
 const passed = rows.filter((row) => row.grade.pass === 1).length;
-// Wilson 95% interval for a pass rate.
-const z = 1.96;
-const p = n ? passed / n : 0;
-const centre = (p + (z * z) / (2 * n)) / (1 + (z * z) / n);
-const half = (z * Math.sqrt((p * (1 - p)) / n + (z * z) / (4 * n * n))) / (1 + (z * z) / n);
-const median = (list: number[]) => {
-  const sorted = [...list].sort((a, b) => a - b);
-  return sorted.length ? sorted[Math.floor(sorted.length / 2)]! : 0;
-};
+const [low, high] = interval(passed, n);
 const tokens = (key: string) => rows.reduce((total, row) => total + (row.usage[key] ?? 0), 0);
-const PRICES: Record<string, [number, number]> = {
-  'claude-opus-5-5': [4, 20],
-  'claude-sonnet-5-5': [2, 10],
-  'claude-haiku-5-5': [0.1, 0.5],
+/** Dollars per million tokens: input, output, cache read. Cache writes are 1.25 times input. */
+const PRICES: Record<string, [number, number, number]> = {
+  'claude-opus-5-5': [4, 20, 0.2],
+  'claude-sonnet-5-5': [2, 10, 0.1],
+  'claude-haiku-5-5': [0.1, 0.5, 0.01],
 };
 const price = Object.entries(PRICES).find(([model]) => requested.startsWith(model))?.[1];
 const cost = price
   ? (tokens('input_tokens') * price[0] +
       tokens('output_tokens') * price[1] +
-      tokens('cache_read_input_tokens') * price[0] * 0.1 +
+      tokens('cache_read_input_tokens') * price[2] +
       tokens('cache_creation_input_tokens') * price[0] * 1.25) /
     1e6
   : null;
 const summary = [
-  `${passed} of ${n} passed (${n ? Math.round(p * 100) : 0}%, 95% interval ${n ? Math.round((centre - half) * 100) : 0} to ${n ? Math.round((centre + half) * 100) : 0}%). ${errors} harness error(s) on record, not counted.`,
+  `${passed} of ${n} passed (${n ? Math.round((passed / n) * 100) : 0}%, 95% interval ${low} to ${high}%). ${errors} harness error(s) on record, not counted.`,
   `Per question, median: ${median(rows.map((row) => row.latency_s))}s, ${median(rows.map((row) => row.model_calls))} model calls, ${median(rows.map((row) => row.words))} words, ${median(rows.map((row) => row.tool_result_bytes))} bytes of tool results.`,
   `Tokens: ${tokens('input_tokens')} input, ${tokens('output_tokens')} output, ${tokens('cache_read_input_tokens')} cache read, ${tokens('cache_creation_input_tokens')} cache write.${cost === null ? '' : ` About $${cost.toFixed(2)} at list prices, $${n ? (cost / n).toFixed(3) : '0'} per question.`}`,
 ];
 console.log(`\n${variant} on ${requested}, ${ran} new row(s) this run\n${summary.join('\n')}`);
+
+// The published summary, written only for a complete baseline run of the whole set.
+if (!values.cases && !values.pilot && variant === 'baseline' && n === allCases.length * reps) {
+  const notesFile = join(ROOT, 'docs', 'evals-notes.md');
+  writeFileSync(
+    join(ROOT, 'docs', 'evals.md'),
+    buildReport({
+      variant,
+      model: requested,
+      effort: deps.env.effort,
+      reps,
+      activities: fixture.options.activities,
+      seed: fixture.options.seed,
+      rows,
+      errors,
+      cost,
+      callsAllowed: AGENT_LIMITS.callsPerQuestion,
+      notes: existsSync(notesFile) ? readFileSync(notesFile, 'utf8') : '',
+    }),
+  );
+  console.log('Wrote docs/evals.md');
+}

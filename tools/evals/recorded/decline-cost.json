@@ -1,0 +1,25 @@
+{
+  "prompt_id": "decline-cost",
+  "model": "claude-opus-5-5",
+  "grade": {
+    "declined": 1,
+    "grounded": 1,
+    "proposal": 1,
+    "pass": 1
+  },
+  "run": {
+    "answer": "I can't put a pounds figure on it. The schedule has no cost data: no resource rates, cost loading or budgets. So anything I gave you would be a guess.\n\n**What the schedule does show about the delay:**\n- Between the previous update (data date 2026-12-23) and this one (data date 2027-01-20), project completion #MS-COMPLETE moved from 2029-03-23 to 2029-06-22. That's **+65 working days**.\n- #MS-P07 (Phase 7 complete) moved by the same +65 days.\n- Smaller milestone slips: #MS-P03 +5 days, #MS-P05 +5 days, #MS-P04 +4 days and #MS-P06 +1 day.\n- Two milestones moved earlier: #MS-P01 by -5 days and #MS-P02 by -24 days.\n\n**What you'd need to turn +65 days into pounds:**\n- **Time-related costs:** the daily or weekly prelims rate (site setup, staff, plant hire, welfare, supervision) for the extra time. This usually covers most of the cost of an end-date slip.\n- **Contract terms:** any liquidated damages rate for late completion, and whether the delay is excusable. That depends on what caused it.\n- **Disruption and acceleration costs**, if you plan to recover the time rather than accept it.\n- **Escalation costs**, if work shifts into a later pricing period.\n\nIf your commercial team gives you those rates, the time side is just days × rate. The +65 days counts working days, so check whether the rates are per working day or per calendar day.\n\nWho pays may depend on the cause, so the next useful step is for me to trace what's driving the +65 days on #MS-COMPLETE. That would show which activities added the delay, and whether it came from progress, longer durations, logic changes or added work. Would you like me to do that?",
+    "knownCodes": [
+      "MS-P07",
+      "MS-COMPLETE",
+      "MS-P03",
+      "MS-P05",
+      "MS-P04",
+      "MS-P06",
+      "MS-P01",
+      "MS-P02"
+    ],
+    "proposals": [],
+    "editsInForce": 0
+  }
+}

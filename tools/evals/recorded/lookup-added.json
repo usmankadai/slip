@@ -1,0 +1,17 @@
+{
+  "prompt_id": "lookup-added",
+  "model": "claude-opus-5-5",
+  "grade": {
+    "correct": 1,
+    "cited": 1,
+    "grounded": 1,
+    "proposal": 1,
+    "pass": 1
+  },
+  "run": {
+    "answer": "No. #P01-A006-TEL-N0001 is not in the previous update. It was **added** in the current one.\n\nWhat it looks like now:\n- **Name:** \"Additional works following install mast foundations, section 6\" (Telecoms work breakdown structure)\n- **Status:** not started, with 9 working days original and remaining duration\n- **Dates:** starts 2027-04-13 08:00 and finishes 2027-04-23 17:00\n- **Logic:** one predecessor, #P01-A006-TEL-0070 \"Install mast foundations, section 6\", finish-to-start with no lag\n- **Total float:** 562 days\n\n**Something to check:** this activity has **no successors**, so it is an open end. That is probably why its total float is so high, at 562 days. As it stands, the added work cannot push any later activity or milestone. If these works have to finish before something else can go ahead, such as mast erection in section 6, it needs a successor link. Otherwise any delay to it won't show up on the driving path.",
+    "knownCodes": ["P01-A006-TEL-N0001", "P01-A006-TEL-0070"],
+    "proposals": [],
+    "editsInForce": 0
+  }
+}
