@@ -4,7 +4,9 @@ import type { ScheduleData, XerErrorCode } from '@slip/xer';
 
 export type ImportPhase = 'hashing' | 'parsing' | 'caching';
 
-export type ImportRequest = { type: 'import'; blob: Blob } | { type: 'cancel' };
+export type ImportRequest =
+  /** `projectId` picks a project when the file holds several. Left out, the first is read. */
+  { type: 'import'; blob: Blob; projectId?: number } | { type: 'cancel' };
 
 export interface ImportTimings {
   hashMs: number;

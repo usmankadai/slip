@@ -1,0 +1,35 @@
+.wrap {
+  display: grid;
+  gap: var(--space-1);
+}
+
+.bar {
+  appearance: none;
+  display: block;
+  width: 100%;
+  height: var(--space-1);
+  border: 0;
+  border-radius: var(--radius-grid);
+  background: var(--surface-3);
+  color: var(--text-primary);
+  overflow: hidden;
+}
+
+.bar::-webkit-progress-bar {
+  background: var(--surface-3);
+}
+
+.bar::-webkit-progress-value {
+  background: var(--text-primary);
+}
+
+.bar::-moz-progress-bar {
+  background: var(--text-primary);
+}
+
+.label {
+  font-size: var(--text-sm);
+  line-height: var(--leading-sm);
+  color: var(--text-secondary);
+  font-variant-numeric: tabular-nums;
+}

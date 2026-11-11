@@ -2,6 +2,34 @@
 
 What was built, what Usman decided or designed, and what an agent generated. Newest first.
 
+## 11 November 2026: the import screen
+
+**Done**
+
+- The first product screen. Two slots side by side; each reads a file in the parse worker, shows its project, data date and counts, and its import report grouped by what the warnings mean for the answer. Both schedules go to the engine worker, which says how many activities the two share; the line under the slots says whether the pair is sound.
+- Handled: a file that is not an XER, an empty or oversized file, a truncated file (asks before it is used), several projects in one file (a picker), a pair in the wrong order (offers to swap), different schedules, the same file twice, and two files dropped together (ordered by data date).
+- Three components in `packages/ui` with stories, contracts and tests: `Button`, `ProgressBar`, `Notice`. Nine stories for the screen's states.
+- The parse worker takes a project id. The developer harness moved to `/?dev`; the perf suite still uses `/?perf`.
+- CI: the perf job had been failing while fetching font packages from the Ubuntu mirrors, before measuring anything. It now installs only the browser. No budget changed.
+
+**Usman decided or designed**
+
+- Import layout A (earlier), and option B for the import report: "i will choose B". No reasons given for either.
+
+**The agent (Claude) generated**
+
+- All the code, the stories and every word of copy on the screen.
+- The placement of the parser's 17 warning kinds into three groups. The mock had six.
+- Built as drawn without an answer from Usman: the wording for two updates with the same data date, and disabling Compare updates when the same file is loaded twice.
+- Choices made while building that were not drawn: the screen title "Import two updates"; the sample pair is 10,000 rail activities with no choice of size; progress shows the file name only, not the project name, until the file is read; "attention" notices are marked by a heavier left border and a darker surface, since there is no warning colour.
+
+**Worth Usman's attention**
+
+- Compare updates leads to a placeholder. The update summary is the next screen.
+- Not done, and listed in `docs/spec/import-robustness.md`: the retained logic notice, export of the report, the audit log entry, malformed fixtures and the fuzz test. The awkward cases were checked by hand in the browser with files made from the 1,000 activity fixture, not by automated tests.
+- No screenshot or axe tests on the stories yet, and the lint rules for raw colours and spacing still do not exist.
+- The screen was not checked with a 350,000 activity pair in this step, and not on a narrow window beyond the slots stacking.
+
 ## 11 November 2026: import states and import warnings options
 
 **Done**

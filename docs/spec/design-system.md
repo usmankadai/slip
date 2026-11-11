@@ -26,6 +26,8 @@ Each component ships with: implementation, `*.stories.tsx` covering every state,
 - **Agent blocks:** `AgentStep`, `AgentStepsGroup` ("Worked for Xs, N steps"), `AgentText`, `AgentTable`, `AgentChart`, `ProposedEditCard`, `AgentError`, `ScriptedBadge` ("Scripted answer, not AI")
 - **Feedback:** `Skeleton`, `ProgressBar` (with rows / bytes), `EmptyState`, `ErrorState`, `Toast`, `Notice` (persistent warning, for example non-retained-logic files)
 
+Built so far: `Button`, `ProgressBar`, `Notice`, each with stories, a contract in its README and a unit test. Screen stories live beside their feature in `apps/web` and are picked up by the same Storybook (`Screens/Import`).
+
 ## `packages/ui/AGENTS.md` (written in phase 4)
 Guidance aimed at coding agents. For each component: when to use it, when not to, required props, density limits, and a correct and an incorrect example. Plus global rules: use tokens only, use existing components before creating new ones, every new view needs all four states, every number uses a numeric cell.
 
