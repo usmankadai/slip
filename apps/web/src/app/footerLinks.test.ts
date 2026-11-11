@@ -1,24 +1,26 @@
 import { describe, expect, it } from 'vitest';
-import { buildLink, footerLinks } from './footerLinks.ts';
+import { STORYBOOK, buildLink, footerLinks } from './footerLinks.ts';
 
 describe('footerLinks', () => {
-  it('links to the repository, the numbers and the journal', () => {
-    const labels = footerLinks({ commit: '', storybookUrl: '' }).map((link) => link.label);
-    expect(labels).toEqual(['Source code', 'Performance numbers', 'Build journal']);
+  it('links to the repository, the design system, the numbers and the journal', () => {
+    const links = footerLinks({ commit: '', storybookUrl: '' });
+    expect(links.map((link) => link.label)).toEqual([
+      'Source code',
+      'Design system',
+      'Performance numbers',
+      'Build journal',
+    ]);
+    expect(links[1]!.href).toBe(STORYBOOK);
   });
 
-  it('adds the design system when its address is set', () => {
-    const links = footerLinks({ commit: '', storybookUrl: 'https://slip-storybook.vercel.app' });
-    expect(links[1]).toEqual({
-      label: 'Design system',
-      href: 'https://slip-storybook.vercel.app/',
-    });
+  it('uses another design system address when one is set', () => {
+    const links = footerLinks({ commit: '', storybookUrl: 'https://preview.example.com' });
+    expect(links[1]!.href).toBe('https://preview.example.com/');
   });
 
-  it('leaves out a design system address that is not an https URL', () => {
+  it('falls back to the published address when the override is not an https URL', () => {
     for (const bad of ['javascript:alert(1)', 'http://example.com', 'not a url', '//x', ' ']) {
-      const labels = footerLinks({ commit: '', storybookUrl: bad }).map((link) => link.label);
-      expect(labels, bad).not.toContain('Design system');
+      expect(footerLinks({ commit: '', storybookUrl: bad })[1]!.href, bad).toBe(STORYBOOK);
     }
   });
 });

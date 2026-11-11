@@ -1,0 +1,134 @@
+<!doctype html>
+<html lang="en-GB">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Flow: changes, three layouts</title>
+    <link rel="stylesheet" href="wire.css" />
+    <style>
+      .frame { min-height: 420px; }
+      .g { display: grid; grid-template-columns: 130px minmax(0, 1fr) 70px 70px 86px; gap: 6px; align-items: center; padding: 3px 0; border-bottom: 1px solid #e5e5e5; }
+      .c2 .g { grid-template-columns: 52px minmax(0, 1fr) 40px 40px 52px; }
+      .g span { color: #666; }
+      .g .n { text-align: right; font-weight: 600; color: #222; font-variant-numeric: tabular-nums; }
+      .bars { display: grid; gap: 9px; padding-top: 22px; }
+      .bars i { display: block; height: 6px; background: #222; position: relative; }
+      .bars i::before { content: ''; position: absolute; left: -18px; right: 14px; top: 8px; height: 3px; background: #bbb; }
+      .inline { height: 6px; background: linear-gradient(90deg, transparent 20%, #222 20% 70%, transparent 70%); position: relative; }
+      .inline::after { content: ''; position: absolute; left: 8%; width: 46%; top: 8px; height: 2px; background: #bbb; }
+      .fill { align-self: stretch; }
+      .split { display: grid; gap: 12px; flex: 1; }
+    </style>
+  </head>
+  <body>
+    <header>
+      <h1>Changes: three low-fidelity layouts</h1>
+      <p>Hierarchy only: boxes and labels, no identity. The numbered tags show the order the eye should take. A heavy border marks what leads.</p>
+      <p class="question">
+        The planner's question: "Show me exactly what changed."<br />
+        Most prominent: grid and Gantt, filtered to changed activities, with the previous dates as ghost bars.<br />
+        Then: filters by change type; the hidden-row count.<br />
+        Must not: lose the planner's place when a filter or sort changes.
+      </p>
+      <p>Layouts drawn by Claude for Usman to choose between. The UI spec already names a layout (grid left, Gantt centre, a panel on the right, a drawer below); A is that layout, and B and C are the alternatives worth weighing against it.</p>
+    </header>
+
+    <main>
+      <h2>A. Grid and Gantt side by side</h2>
+      <div class="option">
+        <div class="frame">
+          <div class="bar"><b>Slip</b><span>Project · update A to B</span><span>Summary</span><b>Changes</b><span>Health</span><span>Finish update</span><span class="right">Ask</span></div>
+          <div class="body">
+            <div class="box"><div><span class="tag">2</span>Showing <b>4,812 changed</b> of 350,412 · 345,600 unchanged hidden · Dates · Durations · Logic · Added · Search</div></div>
+            <div class="cols c2">
+              <div class="box lead">
+                <div class="t"><span class="tag">1</span>Grid</div>
+                <div class="g"><span>Code</span><span>Name</span><span>Was</span><span>Now</span><span class="n">Slip</span></div>
+                <div class="g"><div>code</div><div>name</div><span>date</span><span>date</span><span class="n">+N d</span></div>
+                <div class="g"><div>code</div><div>name</div><span>date</span><span>date</span><span class="n">+N d</span></div>
+                <div class="g"><div>code</div><div>name</div><span>date</span><span>date</span><span class="n">−N d</span></div>
+                <div class="g"><div>code</div><div>name</div><span>date</span><span>date</span><span class="n">+N d</span></div>
+              </div>
+              <div class="box lead">
+                <div class="t"><span class="tag">1</span>Gantt, same rows, scrolls with the grid</div>
+                <div class="bars"><i style="margin-left: 20%; width: 40%"></i><i style="margin-left: 34%; width: 30%"></i><i style="margin-left: 12%; width: 22%"></i><i style="margin-left: 50%; width: 36%"></i></div>
+                <div class="quiet">Dark: this update. Grey beneath: the previous update.</div>
+              </div>
+            </div>
+            <div class="box quiet"><div class="t"><span class="tag">3</span>Drawer for the selected activity</div><div>General · Changes · Predecessors · Successors</div></div>
+          </div>
+        </div>
+        <dl class="notes">
+          <dt>Leads with</dt><dd>Grid and Gantt as one object: each row is a line of text and a bar. The filter line above says what is hidden.</dd>
+          <dt>Does well</dt><dd>What planners expect from every scheduling tool. The bar shows the move at a glance and the grid gives the exact figures. It is the layout the spec names, and the one that shows the canvas work.</dd>
+          <dt>Costs</dt><dd>Each half gets half the width, so the grid shows five or six columns before it scrolls sideways. Two things to keep in step when scrolling, filtering and selecting. The drawer takes rows away when it is open.</dd>
+        </dl>
+      </div>
+
+      <h2>B. Grid first, with a small timeline in each row</h2>
+      <div class="option">
+        <div class="frame">
+          <div class="bar"><b>Slip</b><span>Project · update A to B</span><span>Summary</span><b>Changes</b><span>Health</span><span>Finish update</span><span class="right">Ask</span></div>
+          <div class="body">
+            <div class="box"><div><span class="tag">2</span>Showing <b>4,812 changed</b> of 350,412 · 345,600 unchanged hidden · Dates · Durations · Logic · Added · Search · <b>Open Gantt</b></div></div>
+            <div class="box lead">
+              <div class="t"><span class="tag">1</span>Grid, full width</div>
+              <div class="g" style="grid-template-columns: 130px minmax(0, 1fr) 70px 70px 86px 64px 64px 160px"><span>Code</span><span>Name</span><span>Was</span><span>Now</span><span class="n">Slip</span><span class="n">Float</span><span>Change</span><span>When</span></div>
+              <div class="g" style="grid-template-columns: 130px minmax(0, 1fr) 70px 70px 86px 64px 64px 160px"><div>code</div><div>name</div><span>date</span><span>date</span><span class="n">+N d</span><span class="n">N d</span><span>flags</span><div class="inline"></div></div>
+              <div class="g" style="grid-template-columns: 130px minmax(0, 1fr) 70px 70px 86px 64px 64px 160px"><div>code</div><div>name</div><span>date</span><span>date</span><span class="n">+N d</span><span class="n">N d</span><span>flags</span><div class="inline"></div></div>
+              <div class="g" style="grid-template-columns: 130px minmax(0, 1fr) 70px 70px 86px 64px 64px 160px"><div>code</div><div>name</div><span>date</span><span>date</span><span class="n">−N d</span><span class="n">N d</span><span>flags</span><div class="inline"></div></div>
+              <div class="g" style="grid-template-columns: 130px minmax(0, 1fr) 70px 70px 86px 64px 64px 160px"><div>code</div><div>name</div><span>date</span><span>date</span><span class="n">+N d</span><span class="n">N d</span><span>flags</span><div class="inline"></div></div>
+            </div>
+            <div class="box quiet"><div class="t"><span class="tag">3</span>Drawer for the selected activity</div></div>
+          </div>
+        </div>
+        <dl class="notes">
+          <dt>Leads with</dt><dd>The exact figures, at full width. Each row carries its own small before and after bar; the full Gantt opens on request.</dd>
+          <dt>Does well</dt><dd>Room for eight or more columns without sideways scrolling. One scrolling surface, so nothing to keep in step. Works before the Gantt is built.</dd>
+          <dt>Costs</dt><dd>The in-row bars share no time axis a planner can read dates from, and relationships cannot be drawn. The Gantt, which reviewers will look for, is one click away and not the first thing seen.</dd>
+        </dl>
+      </div>
+
+      <h2>C. Change types down the left, grid and Gantt beside them</h2>
+      <div class="option">
+        <div class="frame">
+          <div class="bar"><b>Slip</b><span>Project · update A to B</span><span>Summary</span><b>Changes</b><span>Health</span><span>Finish update</span><span class="right">Ask</span></div>
+          <div class="body">
+            <div class="cols" style="grid-template-columns: 170px minmax(0, 1fr)">
+              <div class="box lead">
+                <div class="t"><span class="tag">1</span>What changed</div>
+                <div><b>All changes 4,812</b></div><div>Dates moved 4,812</div><div>Durations 312</div><div>Logic 96</div><div>Constraints 12</div><div>Progressed 2,240</div><div>Added 412</div><div>Removed 130</div>
+                <div class="quiet">Unchanged 345,600</div>
+              </div>
+              <div class="split">
+                <div class="cols c2">
+                  <div class="box"><div class="t"><span class="tag">2</span>Grid</div><div class="line l"></div><div class="line l"></div><div class="line m"></div><div class="line l"></div></div>
+                  <div class="box"><div class="t"><span class="tag">2</span>Gantt</div><div class="bars" style="padding-top: 4px"><i style="margin-left: 20%; width: 40%"></i><i style="margin-left: 34%; width: 30%"></i><i style="margin-left: 12%; width: 22%"></i></div></div>
+                </div>
+                <div class="box quiet"><div class="t"><span class="tag">3</span>Drawer for the selected activity</div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <dl class="notes">
+          <dt>Leads with</dt><dd>The kinds of change, as a list that is also the filter. It is the summary screen's "What changed" box, kept on screen.</dd>
+          <dt>Does well</dt><dd>The hidden-row count is always visible as its own line, and what is being shown is never in doubt. Moving between kinds of change is one click each.</dd>
+          <dt>Costs</dt><dd>A third column on a screen that is already short of width; the grid and Gantt get less than in A. Filters that are not change types (status, critical, text) still need a bar above.</dd>
+        </dl>
+      </div>
+
+      <h2>What all three share</h2>
+      <div class="option">
+        <div class="body" style="min-width: 0; padding: 0">
+          <div class="box"><div class="t">Fixed by the spec, not a choice here</div>
+            <div>Filtered to changed activities by default. The count of hidden rows is always visible. Selection is shared between grid, Gantt and drawer. Arrow keys move through rows, Enter opens the drawer.</div>
+            <div>Keeping the planner's place: when a filter or sort changes, the selected activity stays selected and is scrolled back into view if it is still in the result. If it is not, the nearest row keeps its position and a line says the selection is hidden.</div>
+          </div>
+        </div>
+        <dl class="notes">
+          <dt>Built in two steps whichever is chosen</dt><dd>The grid first, then the Gantt (which needs its own exploration, 02, on ghost bars). With A or C the first step is the grid alone at full width, with the Gantt's place left for it.</dd>
+        </dl>
+      </div>
+    </main>
+  </body>
+</html>

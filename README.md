@@ -2,7 +2,10 @@
 
 A schedule update review workspace for large construction and infrastructure programmes. Load two updates of the same Primavera P6 schedule and see what changed, why key dates slipped, and whether the schedule can still be trusted.
 
-Early in the build: the spec and the XER parser exist; no screens yet. See [docs/journal.md](docs/journal.md) for what is done and who did what.
+- **The app:** https://slip.usmankadai.dev
+- **The design system (Storybook):** https://slip-design-system.usmankadai.dev
+
+Part built. Two screens work: importing two updates, and the update summary. The changes grid, Gantt, slip trace, health view, narrative and assistant panel are not built yet. See [docs/journal.md](docs/journal.md) for what is done and who did what.
 
 ## Run it
 

@@ -1,6 +1,8 @@
 /** The links in the app footer. Built from build-time values, which are checked before use. */
 
 const REPOSITORY = 'https://github.com/usmankadai/slip';
+/** The design system's Storybook, deployed as its own project (D21). VITE_STORYBOOK_URL overrides it. */
+export const STORYBOOK = 'https://slip-design-system.usmankadai.dev';
 
 export interface FooterLink {
   label: string;
@@ -10,7 +12,7 @@ export interface FooterLink {
 export interface BuildInfo {
   /** Short commit the build was made from, or '' for a local build. */
   commit: string;
-  /** Where the design system's Storybook is published, or '' when it is not. */
+  /** An override for where the design system's Storybook is published, or '' to use the default. */
   storybookUrl: string;
 }
 
@@ -30,8 +32,9 @@ export function footerLinks(build: BuildInfo): FooterLink[] {
     { label: 'Performance numbers', href: `${REPOSITORY}/blob/main/docs/perf.md` },
     { label: 'Build journal', href: `${REPOSITORY}/blob/main/docs/journal.md` },
   ];
-  const storybook = httpsUrl(build.storybookUrl);
-  if (storybook) links.splice(1, 0, { label: 'Design system', href: storybook });
+  // A value that is set but is not an https address is ignored, and the published address is used.
+  const storybook = httpsUrl(build.storybookUrl) ?? STORYBOOK;
+  links.splice(1, 0, { label: 'Design system', href: storybook });
   return links;
 }
 

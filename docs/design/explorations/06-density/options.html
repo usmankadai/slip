@@ -1,0 +1,151 @@
+<!doctype html>
+<html lang="en-GB">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Density: options</title>
+    <style>
+      /* A record of what was looked at. The product reads these values from packages/ui/src/tokens.css. */
+      :root {
+        --s0: #fbfaf7; --s1: #f4f2ec; --s2: #ebe8e0; --t1: #1c1b18; --t2: #55524a; --t3: #6c685d;
+        --b1: #e2ded3; --b2: #898477; --late4: #db6b2c; --late5: #b8321f; --early4: #4c8cda;
+      }
+      * { box-sizing: border-box; }
+      body { margin: 0; background: var(--s0); color: var(--t1); font: 13px/20px Inter, system-ui, -apple-system, 'Segoe UI', sans-serif; }
+      header, main { max-width: 1180px; margin: 0 auto; padding: 0 32px; }
+      header { padding-top: 24px; }
+      main { padding-bottom: 64px; }
+      h1 { font-size: 20px; line-height: 28px; margin: 0 0 4px; }
+      h2 { font-size: 16px; line-height: 24px; margin: 40px 0 8px; }
+      p { margin: 0 0 8px; color: var(--t2); max-width: 760px; }
+      .option { display: grid; grid-template-columns: minmax(0, 1fr) 300px; gap: 24px; align-items: start; }
+      .stage { min-width: 0; overflow-x: auto; display: grid; gap: 4px; }
+      .cap { font-size: 11px; line-height: 16px; color: var(--t3); margin-top: 8px; }
+      .notes { margin: 0; font-size: 12px; line-height: 16px; }
+      .notes dt { font-weight: 600; margin-top: 8px; }
+      .notes dt:first-child { margin-top: 0; }
+      .notes dd { margin: 0; color: var(--t2); }
+
+      .grid { border: 1px solid var(--b1); min-width: 720px; font-variant-numeric: tabular-nums; font-size: var(--size); }
+      .r { display: grid; grid-template-columns: 150px minmax(0, 1fr) 96px 96px 150px 88px; align-items: center; height: var(--row); border-bottom: 1px solid var(--b1); }
+      .r:last-child { border-bottom: 0; }
+      .r > span { padding: 0 var(--pad); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+      .h { background: var(--s2); color: var(--t2); font-weight: 500; }
+      .code { font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: calc(var(--size) - 1px); }
+      .date { color: var(--t2); }
+      .num { text-align: right; }
+      .slip { display: grid !important; grid-template-columns: 1fr 52px; gap: 8px; align-items: center; }
+      .slip b { text-align: right; font-weight: 600; }
+      .track { height: 8px; position: relative; background: linear-gradient(var(--b2), var(--b2)) center / 1px 100% no-repeat; }
+      .track i { position: absolute; top: 1px; height: 6px; }
+      .two { line-height: 16px; }
+      .two small { display: block; font-size: 11px; color: var(--t3); }
+      table.cmp { border-collapse: collapse; font-size: 12px; line-height: 16px; width: 100%; max-width: 760px; }
+      table.cmp th, table.cmp td { text-align: left; padding: 5px 8px; border-bottom: 1px solid var(--b1); }
+      table.cmp th { background: var(--s2); color: var(--t2); font-weight: 500; }
+      table.cmp td.n { text-align: right; font-variant-numeric: tabular-nums; }
+      @media (max-width: 900px) { .option { grid-template-columns: 1fr; } }
+    </style>
+  </head>
+  <body>
+    <header>
+      <h1>Exploration 06: density</h1>
+      <p>Compact is the default: 24px rows and 12px text, fixed in the identity. This page is about the other setting. What should "comfortable" change, and what must stay the same in both? Each option shows the same eight real rows from the generated rail schedule, compact above and comfortable below.</p>
+      <p>The identity (D16) already says comfortable is 32px rows with 13px text. That is option B. A and C are drawn to test whether it is the right definition.</p>
+    </header>
+    <main id="main"></main>
+
+    <script>
+      const ROWS = [
+        ['P03-A002-ENB-0110', 'Install catenary, section 2', 'Section 2 · Electrification', '14 Sep 2026', '12 Oct 2026', 20, '0.00d'],
+        ['P03-A002-TRK-0170', 'Tamp and align track, section 2', 'Section 2 · Track', '2 Nov 2026', '26 Nov 2026', 18, '0.00d'],
+        ['P03-A002-CIV-0220', 'Backfill retaining wall, section 2', 'Section 2 · Civils', '20 Jul 2026', '11 Aug 2026', 16, '2.50d'],
+        ['P02-A003-CIV-0160', 'Pour ballast, section 3', 'Section 3 · Civils', '17 Aug 2026', '2 Jul 2026', -46, '278.00d'],
+        ['P01-A001-TRK-0060', 'Erect ballast, section 1', 'Section 1 · Track', '6 Jul 2026', '6 Jul 2026', 0, '7.00d'],
+        ['P03-A005-ENB-0200', 'Commission catenary, section 5', 'Section 5 · Electrification', '16 Sep 2026', '7 Jul 2026', -51, '122.00d'],
+        ['P02-A002-TRK-0160', 'Lay sleepers, section 2', 'Section 2 · Track', '3 Aug 2026', '10 Aug 2026', 5, '14.00d'],
+        ['MS-COMPLETE', 'Project completion', 'Milestones', '7 May 2027', '10 Aug 2027', 67, '0.00d'],
+      ];
+      const bar = (days) => {
+        if (days === 0) return '';
+        const length = Math.sqrt(Math.min(Math.abs(days), 40) / 40) * 50;
+        const colour = days > 0 ? (days >= 40 ? 'var(--late5)' : 'var(--late4)') : 'var(--early4)';
+        const at = days > 0 ? 'left: 50%' : `left: ${50 - length}%`;
+        return `<i style="${at}; width: ${length}%; background: ${colour}"></i>`;
+      };
+      const slip = (days) => `${days > 0 ? '+' : days < 0 ? '−' : ''}${Math.abs(days)}d`;
+      const grid = ({ row, size, pad, twoLine = false }) => `
+        <div class="grid" style="--row: ${row}px; --size: ${size}px; --pad: ${pad}px">
+          <div class="r h"><span>Activity code</span><span>Name</span><span>Was</span><span>Now</span><span>Finish slip</span><span class="num">Total float</span></div>
+          ${ROWS.map(([code, name, wbs, was, now, days, float]) => `
+            <div class="r">
+              <span class="code">${code}</span>
+              <span class="${twoLine ? 'two' : ''}">${name}${twoLine ? `<small>${wbs}</small>` : ''}</span>
+              <span class="date">${was}</span><span class="date">${now}</span>
+              <span class="slip"><span class="track">${bar(days)}</span><b>${slip(days)}</b></span>
+              <span class="num">${float}</span>
+            </div>`).join('')}
+        </div>`;
+      const fits = (row) => Math.floor((720 - row) / row);
+      const COMPACT = { row: 24, size: 12, pad: 8 };
+      const OPTIONS = [
+        {
+          title: 'A. Taller rows only',
+          comfortable: { row: 32, size: 12, pad: 8 },
+          says: '32px rows. Text, padding and columns exactly as compact.',
+          notes: [
+            ['Changes', 'Row height.'],
+            ['Does well', 'Nothing moves sideways when the planner switches: every column edge and every truncation stays put. Simplest to build and to test.'],
+            ['Costs', 'The text is no easier to read, which is the usual reason for asking for comfortable. It only adds air.'],
+          ],
+        },
+        {
+          title: 'B. Taller rows, larger text, more padding',
+          comfortable: { row: 32, size: 13, pad: 12 },
+          says: '32px rows, 13px text, 12px cell padding. The definition in D16.',
+          notes: [
+            ['Changes', 'Row height, text size and cell padding.'],
+            ['Does well', 'Easier to read at a distance or on a shared screen. Still one line per activity, so a row means the same thing in both settings.'],
+            ['Costs', 'At the same column widths, larger text and wider padding leave less room: names truncate sooner. Either columns widen with density, or the planner sees a little less of each name.'],
+          ],
+        },
+        {
+          title: 'C. Two lines per row',
+          comfortable: { row: 40, size: 12, pad: 8, twoLine: true },
+          says: '40px rows. The second line carries the WBS path; text stays 12px.',
+          notes: [
+            ['Changes', 'Row height, and what a row contains.'],
+            ['Does well', 'Uses the extra height for information, not air: where the activity sits is visible without a WBS column.'],
+            ['Costs', 'Density now changes content, so a screenshot in one setting does not match the other. Fewest rows on screen. The second line only helps columns that have something to add; numbers gain nothing.'],
+          ],
+        },
+      ];
+
+      const main = document.getElementById('main');
+      main.innerHTML =
+        OPTIONS.map((option) => `
+          <h2>${option.title}</h2>
+          <div class="option">
+            <div class="stage">
+              <div class="cap">Compact: 24px rows, 12px text. About ${fits(24)} rows in a 720px tall grid.</div>
+              ${grid(COMPACT)}
+              <div class="cap">Comfortable: ${option.says} About ${fits(option.comfortable.row)} rows in a 720px tall grid.</div>
+              ${grid(option.comfortable)}
+            </div>
+            <dl class="notes">${option.notes.map(([term, text]) => `<dt>${term}</dt><dd>${text}</dd>`).join('')}</dl>
+          </div>`).join('') +
+        `<h2>What never changes, in any option</h2>
+         <table class="cmp">
+           <thead><tr><th>Thing</th><th>Why it is fixed</th></tr></thead>
+           <tbody>
+             <tr><td>Which columns are shown, their order and their width</td><td>They are the planner's own setting. Density must not undo it.</td></tr>
+             <tr><td>Number formats and units</td><td>"+67d" and "7.00d" read the same everywhere.</td></tr>
+             <tr><td>The slip bar's scale and thickness</td><td>A bar must mean the same in every view (exploration 01).</td></tr>
+             <tr><td>Colours and the 11px floor for text</td><td>Identity, not density.</td></tr>
+             <tr><td>The Gantt's row height follows the grid's</td><td>A row is one line of text and one bar; they cannot drift apart.</td></tr>
+             <tr><td>Chrome outside the grid: toolbar, drawer, panels</td><td>Density is for data. The surrounding controls stay one size.</td></tr>
+           </tbody>
+         </table>`;
+    </script>
+  </body>
+</html>
