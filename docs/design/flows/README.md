@@ -27,6 +27,8 @@ Made by Usman on 11 November 2026 by accepting Claude's three recommendations as
 - **Layout A**, grid and Gantt side by side. It is the layout the UI spec names and the one planners expect. Built in two steps: the grid first at full width, then the Gantt beside it once exploration 02 (ghost bars) is done.
 - **Density B** ([exploration 06](../explorations/06-density/README.md)) and **scale honesty A with B's scrolling readout** ([exploration 07](../explorations/07-scale-honesty/README.md)).
 
+The Gantt half of this screen waits on [exploration 02, two schedules on one Gantt](../explorations/02-two-schedules-on-one-gantt/README.md): three options drawn, not decided. Claude's recommendation is C (only the difference), with the previous bar drawn in full for the selected activity.
+
 The states of the changes screen were not drawn as a low-fidelity page before the grid was built; they exist as stories (`Screens/Changes`).
 
 ## States
