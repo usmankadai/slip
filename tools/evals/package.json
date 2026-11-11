@@ -1,0 +1,22 @@
+{
+  "name": "@slip/evals",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "list": "node src/cli.ts --list",
+    "live": "node --env-file-if-exists=../../.env src/cli.ts"
+  },
+  "dependencies": {
+    "@slip/agent": "workspace:*",
+    "@slip/api": "workspace:*",
+    "@slip/engine": "workspace:*",
+    "@slip/gen": "workspace:*",
+    "@slip/xer": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/node": "^24.19.2",
+    "typescript": "^6.0.3"
+  }
+}

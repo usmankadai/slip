@@ -144,6 +144,7 @@ function streamTurn(
           ms: deps.now() - started,
           call: callsUsed + 1,
           stop: end.stopReason ?? 'none',
+          model: end.model,
           tools: toolCalls.length,
           inputTokens: end.usage.input,
           outputTokens: end.usage.output,

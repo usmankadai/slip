@@ -2,6 +2,27 @@
 
 What was built, what Usman decided or designed, and what an agent generated. Newest first.
 
+## 11 November 2026: the eval harness
+
+**Built**
+
+- 28 draft questions for the agent, each with what a right answer must contain, derived from the generated schedule's ground truth. Four of them run on a copy of the file with instructions planted in activity names.
+- Programmatic graders that score separate things: the right values, the right citations, nothing cited that no tool returned, the right proposal or none, declining what the schedule cannot answer, and not obeying planted instructions.
+- A runner that puts each question through the real server handler, tools and engine.
+- Checks on the eval itself, with no model involved: an answer built from the ground truth passes every case; an empty answer, "I don't know" and a confident wrong answer fail every case.
+
+**Usman decided or designed**
+
+- That there should be an eval set, its size, that expected values come from `expected.json` and the engine, that it includes planted-instruction cases, and that replay runs in the normal checks. All from the original spec.
+
+**The agent (Claude) generated**
+
+- The questions, the expectations, the graders and the runner. They are a draft: the questions and the grading both need Usman's approval before any paid run, because an eval nobody has read is not one to trust.
+
+**Not done**
+
+- No live run. No money has been spent on this.
+
 ## 10 November 2026: live run with the real engine
 
 **Done**

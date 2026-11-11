@@ -17,3 +17,6 @@ playwright-report/
 fixtures/synthetic/*
 !fixtures/synthetic/.gitkeep
 !fixtures/synthetic/*-1k/
+
+# Eval runs are regenerated; the published summary is docs/evals.md
+tools/evals/results/

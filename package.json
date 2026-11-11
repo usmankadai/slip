@@ -20,7 +20,10 @@
     "gen-xer": "node tools/gen-xer/src/cli.ts",
     "check:secrets": "node scripts/check-bundle-secrets.ts",
     "perf": "pnpm --filter @slip/perf run local",
-    "perf:ci": "pnpm --filter @slip/perf run ci"
+    "perf:ci": "pnpm --filter @slip/perf run ci",
+    "evals": "pnpm --filter @slip/evals run live",
+    "evals:list": "pnpm --filter @slip/evals run list",
+    "evals:replay": "vitest run tools/evals"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",

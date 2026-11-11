@@ -12,6 +12,8 @@ export type ModelEvent =
   | {
       type: 'end';
       stopReason: string | null;
+      /** The model that served the turn, as the API reports it. */
+      model: string;
       /** The assistant's content blocks, to be replayed unchanged on the next request. */
       content: unknown[];
       usage: { input: number; output: number; cacheRead: number; cacheWrite: number };
@@ -89,6 +91,7 @@ export async function* streamFromClaude(
   yield {
     type: 'end',
     stopReason: message.stop_reason,
+    model: message.model,
     content: message.content,
     usage: {
       input: message.usage.input_tokens,
