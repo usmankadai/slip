@@ -140,6 +140,31 @@ importers:
         specifier: ^6.0.3
         version: 6.0.3
 
+  tools/evals:
+    dependencies:
+      '@slip/agent':
+        specifier: workspace:*
+        version: link:../../packages/agent
+      '@slip/api':
+        specifier: workspace:*
+        version: link:../../apps/api
+      '@slip/engine':
+        specifier: workspace:*
+        version: link:../../packages/engine
+      '@slip/gen':
+        specifier: workspace:*
+        version: link:../../packages/gen
+      '@slip/xer':
+        specifier: workspace:*
+        version: link:../../packages/xer
+    devDependencies:
+      '@types/node':
+        specifier: ^24.19.2
+        version: 24.19.2
+      typescript:
+        specifier: ^6.0.3
+        version: 6.0.3
+
   tools/gen-xer:
     dependencies:
       '@slip/gen':

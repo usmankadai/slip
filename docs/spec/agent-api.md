@@ -73,5 +73,12 @@ The client keeps the set of task codes that appeared in tool results for the cur
   - `propose_edit` previews the edit in the engine and keeps nothing. A constraint's type and date are tried together.
   - Durations, slips and float are given to the model in working days; dates as "YYYY-MM-DD HH:MM".
   - The engine's own refusals (unknown activity, update not loaded, an edit that makes no sense) go to the model as error results. Anything else is a fault and is not shown to the model.
-- Not yet: wiring this into the browser (the panel, the audit entries), scripted mode, the evals, and deployment to Vercel.
+- **The eval harness** (`tools/evals`), not yet run against the model:
+  - 28 questions over a generated 10K rail pair, listed with what each answer must contain in [docs/evals-cases.md](../evals-cases.md). Kinds: slip, lookup, counts, health, propose, guard, decline, injection.
+  - Expected values come from the generator's record or the engine, never from a model.
+  - Grading is programmatic, as separate checks: correct, cited, grounded (nothing cited that no tool returned), proposal, declined, safe. A case passes when every check that applies does.
+  - The runner calls the real server handler, tools and engine in process. Harness failures go to an errors file and are never scored as wrong answers.
+  - `pnpm evals:list` writes the case list (free). `pnpm evals` runs live and costs money. `pnpm evals:replay` runs the graders' own checks, and regrades recorded answers once there are some; it is part of `pnpm test`.
+  - Differences from the description above: the injected cases use the same fixture with instructions planted in three activity names, not a separate fixture.
+- Not yet: a live eval run and `docs/evals.md`, wiring the agent into the browser (the panel, the audit entries), scripted mode, and deployment to Vercel.
 

@@ -33,7 +33,13 @@ const toolResult = (id = 'toolu_1', content = '{"total":0,"shown":0,"rows":[]}')
 const usage = { input: 1200, output: 80, cacheRead: 1100, cacheWrite: 0 };
 const answer = (text: string): ModelEvent[] => [
   { type: 'text', text },
-  { type: 'end', stopReason: 'end_turn', content: [{ type: 'text', text }], usage },
+  {
+    type: 'end',
+    stopReason: 'end_turn',
+    model: 'claude-opus-5-5',
+    content: [{ type: 'text', text }],
+    usage,
+  },
 ];
 
 interface Harness {
@@ -122,7 +128,13 @@ describe('POST /agent/chat', () => {
     const turn = toolCall();
     const h = harness(() => [
       { type: 'text', text: 'Let me trace it.' },
-      { type: 'end', stopReason: 'tool_use', content: turn.content, usage },
+      {
+        type: 'end',
+        stopReason: 'tool_use',
+        model: 'claude-opus-5-5',
+        content: turn.content,
+        usage,
+      },
     ]);
     const { events } = await post(h, { messages: [question] });
     expect(events[1]).toEqual({
@@ -153,7 +165,9 @@ describe('POST /agent/chat', () => {
       { type: 'tool_use', id: 'b', name: 'delete_schedule', input: {} },
       { type: 'tool_use', id: 'c', name: 'diff_summary', input: {} },
     ];
-    const h = harness(() => [{ type: 'end', stopReason: 'tool_use', content: calls, usage }]);
+    const h = harness(() => [
+      { type: 'end', stopReason: 'tool_use', model: 'claude-opus-5-5', content: calls, usage },
+    ]);
     const { events } = await post(h, { messages: [question] });
     expect(events.slice(0, 3)).toMatchObject([
       { type: 'tool-request', toolUseId: 'a', valid: false, input: null },
@@ -313,13 +327,17 @@ describe('POST /agent/chat', () => {
 
   it('turns a refusal, a cut-off answer and a half-made tool call into clear errors', async () => {
     const cases: [ModelEvent[], string][] = [
-      [[{ type: 'end', stopReason: 'refusal', content: [], usage }], 'refused'],
+      [
+        [{ type: 'end', stopReason: 'refusal', model: 'claude-opus-5-5', content: [], usage }],
+        'refused',
+      ],
       [
         [
           { type: 'text', text: 'The slip is' },
           {
             type: 'end',
             stopReason: 'max_tokens',
+            model: 'claude-opus-5-5',
             content: [{ type: 'text', text: 'The slip is' }],
             usage,
           },
@@ -327,14 +345,33 @@ describe('POST /agent/chat', () => {
         'interrupted',
       ],
       [
-        [{ type: 'end', stopReason: 'max_tokens', content: toolCall().content, usage }],
+        [
+          {
+            type: 'end',
+            stopReason: 'max_tokens',
+            model: 'claude-opus-5-5',
+            content: toolCall().content,
+            usage,
+          },
+        ],
         'interrupted',
       ],
       [
-        [{ type: 'end', stopReason: 'tool_use', content: [{ type: 'text', text: 'x' }], usage }],
+        [
+          {
+            type: 'end',
+            stopReason: 'tool_use',
+            model: 'claude-opus-5-5',
+            content: [{ type: 'text', text: 'x' }],
+            usage,
+          },
+        ],
         'interrupted',
       ],
-      [[{ type: 'end', stopReason: 'pause_turn', content: [], usage }], 'interrupted'],
+      [
+        [{ type: 'end', stopReason: 'pause_turn', model: 'claude-opus-5-5', content: [], usage }],
+        'interrupted',
+      ],
     ];
     for (const [events, code] of cases) {
       const result = await post(
@@ -417,6 +454,7 @@ describe('POST /agent/chat', () => {
       {
         type: 'end',
         stopReason: 'tool_use',
+        model: 'claude-opus-5-5',
         content: toolCall('t', 'get_activity', { task_code: 'ZZ-TOP-SECRET' }).content,
         usage,
       },
@@ -428,6 +466,7 @@ describe('POST /agent/chat', () => {
       ms: 0,
       call: 1,
       stop: 'tool_use',
+      model: 'claude-opus-5-5',
       tools: 1,
       inputTokens: 1200,
       outputTokens: 80,
