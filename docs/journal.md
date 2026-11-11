@@ -2,6 +2,29 @@
 
 What was built, what Usman decided or designed, and what an agent generated. Newest first.
 
+## 11 November 2026: tokens and Storybook
+
+**Done**
+
+- `packages/ui` exists. `tokens.css` holds the D16 colour values and the space, type, density, shape, elevation and motion tokens. Inter and JetBrains Mono are self-hosted from npm packages.
+- A test reads the token file and enforces the contrast rules in D16: primary text at 7:1, muted text only where it passes, bars and glyphs only from scale steps 4 and 5, inverse text on step 5.
+- Storybook runs with five foundation pages: colour, slip scale, type, density, space and shape. Every value shown is read from the tokens. Building Storybook is now part of `pnpm check`.
+
+**Usman decided or designed**
+
+- The colour values, type scale, radii and densities, through D16 and the choices recorded below. Nothing new in this step.
+
+**The agent (Claude) generated**
+
+- The package, the test, the stories and their wording.
+- Token values the spec did not give, chosen without asking: line heights (16, 16, 20, 20, 24, 28px), font weights (400, 500, 600), cell padding (8px compact, 12px comfortable), the one floating shadow, the z-index order, the easing curve, and the 2px focus ring in the accent colour. These are small, but they are design values and are Usman's to change.
+
+**Worth Usman's attention**
+
+- Float and status colours are not in the tokens. They are data colours and nothing has been drawn for them; they need the same treatment as the slip scale before the grid is built.
+- Storybook is not deployed. No components yet, so no screenshot or axe tests on stories yet either; the spec asks for both once components exist.
+- The custom lint rules (`no-raw-color`, `no-raw-spacing`) do not exist yet, so "no raw values outside tokens.css" is held by care, not by a check.
+
 ## 11 November 2026: the four design choices, made by accepting the recommendations
 
 **Done**

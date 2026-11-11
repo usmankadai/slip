@@ -1,0 +1,123 @@
+/*
+ * Slip design tokens. The only file where raw colour and size values may appear.
+ * Colour values and the rules for using them: docs/decisions/D16-visual-identity.md.
+ * The rules are enforced by packages/ui/test/tokens.test.ts.
+ */
+
+:root {
+  /* Surfaces: base, panel, header, hover */
+  --surface-0: #fbfaf7;
+  --surface-1: #f4f2ec;
+  --surface-2: #ebe8e0;
+  --surface-3: #dedacf;
+
+  /* Text. Muted is not for use on --surface-3. */
+  --text-primary: #1c1b18;
+  --text-secondary: #55524a;
+  --text-muted: #6c685d;
+  --text-inverse: #fbfaf7;
+
+  --border-subtle: #e2ded3;
+  --border-strong: #898477;
+
+  /* The one accent: selection, focus and primary actions. Never in a data cell or a Gantt bar. */
+  --accent: #5b3fd6;
+  --focus-ring: #5b3fd6;
+
+  /*
+   * Slip, in working days: under 5, under 10, under 20, under 40, 40 or more.
+   * Steps 1 to 3 are fills behind dark text. Bars and glyphs use steps 4 and 5.
+   * Dark text on steps 1 to 4, inverse text on step 5.
+   */
+  --slip-late-1: #fbe9c9;
+  --slip-late-2: #f6cf8a;
+  --slip-late-3: #eda44a;
+  --slip-late-4: #db6b2c;
+  --slip-late-5: #b8321f;
+  --slip-late-text: #8f2a12;
+
+  --slip-early-1: #dcebfa;
+  --slip-early-2: #b3d2f4;
+  --slip-early-3: #7fb0ea;
+  --slip-early-4: #4c8cda;
+  --slip-early-5: #1b56a8;
+  --slip-early-text: #174a91;
+
+  --slip-none: #b9b5aa;
+
+  /* Critical always carries the hatch as well as the colour. */
+  --critical: #9b1c1c;
+  --critical-hatch: repeating-linear-gradient(135deg, var(--critical) 0 2px, transparent 2px 5px);
+
+  /* Space, 4px scale */
+  --space-0: 0;
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-7: 28px;
+  --space-8: 32px;
+
+  /* Type */
+  --font-sans: 'Inter Variable', system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono Variable', ui-monospace, monospace;
+
+  --text-xs: 11px;
+  --text-sm: 12px;
+  --text-base: 13px;
+  --text-md: 14px;
+  --text-lg: 16px;
+  --text-xl: 20px;
+
+  --leading-xs: 16px;
+  --leading-sm: 16px;
+  --leading-base: 20px;
+  --leading-md: 20px;
+  --leading-lg: 24px;
+  --leading-xl: 28px;
+
+  --weight-regular: 400;
+  --weight-medium: 500;
+  --weight-semibold: 600;
+
+  /* Shape: controls, cards, the grid */
+  --radius-control: 4px;
+  --radius-card: 6px;
+  --radius-grid: 0;
+
+  /* Elevation: borders everywhere, a shadow only on floating layers */
+  --shadow-floating: 0 4px 16px rgb(28 27 24 / 14%);
+
+  --z-base: 0;
+  --z-sticky: 10;
+  --z-drawer: 20;
+  --z-popover: 30;
+  --z-toast: 40;
+
+  /* Motion: state changes and panels. Data never animates. */
+  --duration-state: 120ms;
+  --duration-panel: 200ms;
+  --easing-standard: cubic-bezier(0.2, 0, 0, 1);
+
+  /* Density. Compact is the default. */
+  --row-height: 24px;
+  --cell-padding-x: 8px;
+  --grid-text: var(--text-sm);
+  --grid-leading: var(--leading-sm);
+}
+
+[data-density='comfortable'] {
+  --row-height: 32px;
+  --cell-padding-x: 12px;
+  --grid-text: var(--text-base);
+  --grid-leading: var(--leading-base);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --duration-state: 0ms;
+    --duration-panel: 0ms;
+  }
+}
