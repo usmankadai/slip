@@ -1,0 +1,199 @@
+<!doctype html>
+<html lang="en-GB">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Identity: colour value options</title>
+    <style>
+      * { box-sizing: border-box; }
+      body { margin: 0; background: #fbfaf7; color: #1c1b18; font: 14px/1.5 Inter, system-ui, -apple-system, 'Segoe UI', sans-serif; }
+      header, main, footer { max-width: 1180px; margin: 0 auto; padding: 0 32px; }
+      header { padding-top: 24px; }
+      h1 { font-size: 20px; margin: 0 0 4px; }
+      h2 { font-size: 16px; margin: 32px 0 4px; }
+      h3 { font-size: 14px; margin: 0 0 8px; }
+      p { margin: 0 0 8px; color: #55524a; max-width: 760px; }
+      .controls { position: sticky; top: 0; z-index: 2; background: #f4f2ec; border-block: 1px solid #e2ded3; margin-top: 12px; }
+      .controls div { max-width: 1180px; margin: 0 auto; padding: 8px 32px; display: flex; gap: 24px; flex-wrap: wrap; font-size: 12px; }
+      fieldset { border: 0; padding: 0; margin: 0; display: flex; gap: 4px; align-items: center; flex-wrap: wrap; }
+      legend { float: left; margin-right: 8px; color: #55524a; padding: 0; }
+      label input { position: absolute; opacity: 0; }
+      label span { display: inline-block; padding: 4px 8px; border: 1px solid #e2ded3; border-radius: 4px; background: #fbfaf7; cursor: pointer; }
+      label input:checked + span { border-color: #5b3fd6; color: #5b3fd6; background: #fff; }
+      label input:focus-visible + span { outline: 2px solid #5b3fd6; outline-offset: 2px; }
+      .pair { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+      .panel { border: 1px solid; border-radius: 6px; padding: 16px; min-width: 0; }
+      .steps { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0; border: 1px solid; margin-bottom: 12px; }
+      .steps > div { padding: 8px; font-size: 11px; height: 64px; }
+      .mono { font-family: 'JetBrains Mono', ui-monospace, 'SF Mono', Menlo, monospace; font-size: 11px; }
+      .sample { font-size: 12px; margin: 0 0 4px; max-width: none; }
+      table { border-collapse: collapse; width: 100%; font-size: 12px; font-variant-numeric: tabular-nums; margin-top: 8px; }
+      th, td { text-align: left; padding: 4px 8px; border-bottom: 1px solid #e2ded3; white-space: nowrap; }
+      th { font-weight: 600; color: #55524a; }
+      .num { text-align: right; }
+      .ok, .fail { font-weight: 600; }
+      .fail { color: #8f2a12; }
+      .scale { display: grid; grid-template-columns: repeat(11, 1fr); border: 1px solid #e2ded3; }
+      .scale div { height: 72px; padding: 6px; font-size: 11px; display: flex; flex-direction: column; justify-content: space-between; }
+      .chips { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; margin: 8px 0; }
+      .chip { display: inline-flex; align-items: center; height: 28px; padding: 0 12px; border-radius: 4px; font-size: 12px; }
+      .crit { background-image: repeating-linear-gradient(135deg, transparent 0 3px, rgba(255, 255, 255, 0.55) 3px 5px); }
+      .bars { display: grid; gap: 6px; max-width: 520px; margin: 8px 0; }
+      .bars div { height: 12px; border-radius: 1px; }
+      .wide { overflow-x: auto; }
+      footer { padding-bottom: 48px; font-size: 13px; }
+      @media (max-width: 900px) { .pair { grid-template-columns: 1fr; } }
+    </style>
+  </head>
+  <body>
+    <svg width="0" height="0" style="position: absolute" aria-hidden="true">
+      <filter id="protanopia" color-interpolation-filters="linearRGB"><feColorMatrix values="0.152286 1.052583 -0.204868 0 0 0.114503 0.786281 0.099216 0 0 -0.003882 -0.048116 1.051998 0 0 0 0 0 1 0" /></filter>
+      <filter id="deuteranopia" color-interpolation-filters="linearRGB"><feColorMatrix values="0.367322 0.860646 -0.227968 0 0 0.280085 0.672501 0.047413 0 0 -0.011820 0.042940 0.968881 0 0 0 0 0 1 0" /></filter>
+      <filter id="tritanopia" color-interpolation-filters="linearRGB"><feColorMatrix values="1.255528 -0.076749 -0.178779 0 0 -0.078411 0.930809 0.147602 0 0 0.004733 0.691367 0.303900 0 0 0 0 0 1 0" /></filter>
+    </svg>
+
+    <header>
+      <h1>Identity: colour value options</h1>
+      <p>
+        D16 fixed the character of the identity (warm neutral surfaces, one violet accent, warm for late, blue for early) and
+        left the exact values open. This page proposes values and checks them. Contrast ratios are computed on the page from
+        the values shown, so they cannot go stale.
+      </p>
+      <p>Values proposed by Claude for Usman to accept, change or reject. The decision goes in the README beside this file.</p>
+    </header>
+
+    <div class="controls">
+      <div><fieldset id="vision"><legend>Seen as</legend></fieldset></div>
+    </div>
+
+    <main id="main"></main>
+
+    <footer>
+      <p>
+        Thresholds: 7:1 for primary text (the identity's own rule), 4.5:1 for other text (WCAG AA), 3:1 for marks and borders
+        that carry meaning. Colour-blind views use the Machado, Oliveira and Fernandes (2009) simulation at full severity.
+      </p>
+    </footer>
+
+    <script>
+      const NEUTRALS = [
+        { id: 'A', name: 'A. Warm paper', note: 'A yellow-leaning off-white. Clearly warm beside a white window; the identity as D16 describes it.',
+          s: ['#FBFAF7', '#F4F2EC', '#EBE8E0', '#DEDACF'], tp: '#1C1B18', ts: '#55524A', tm: '#6C685D', bs: '#E2DED3', bg: '#898477' },
+        { id: 'B', name: 'B. Cool stone', note: 'Almost neutral, a trace of warmth. Safer beside data colour, but closer to every other enterprise tool.',
+          s: ['#FAFAF9', '#F2F2F0', '#E8E8E5', '#DADAD6'], tp: '#1A1A19', ts: '#515150', tm: '#686865', bs: '#E0E0DC', bg: '#848480' },
+      ];
+      const ACCENT = '#5B3FD6';
+      const LATE = ['#FBE9C9', '#F6CF8A', '#EDA44A', '#DB6B2C', '#B8321F'];
+      const EARLY = ['#DCEBFA', '#B3D2F4', '#7FB0EA', '#4C8CDA', '#1B56A8'];
+      const LATE_TEXT = '#8F2A12', EARLY_TEXT = '#174A91', CRITICAL = '#9B1C1C', NONE = '#B9B5AA';
+      const BANDS = ['under 5', 'under 10', 'under 20', 'under 40', '40 or more'];
+
+      const lum = (hex) => {
+        const c = [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16) / 255).map((x) => (x <= 0.04045 ? x / 12.92 : ((x + 0.055) / 1.055) ** 2.4));
+        return 0.2126 * c[0] + 0.7152 * c[1] + 0.0722 * c[2];
+      };
+      const ratio = (a, b) => { const la = lum(a), lb = lum(b); return (Math.max(la, lb) + 0.05) / (Math.min(la, lb) + 0.05); };
+      const check = (fg, bg, need) => { const r = ratio(fg, bg); return `<td class="num ${r >= need ? 'ok' : 'fail'}">${r.toFixed(2)}${r >= need ? '' : ' fails'}</td>`; };
+      const ink = (bg) => (ratio('#1C1B18', bg) >= ratio('#FFFFFF', bg) ? '#1C1B18' : '#FFFFFF');
+
+      const neutralPanel = (n) => `
+        <div class="panel" style="background:${n.s[0]};border-color:${n.bs};color:${n.tp}">
+          <h3>${n.name}</h3>
+          <p style="color:${n.ts}">${n.note}</p>
+          <div class="steps" style="border-color:${n.bs}">${n.s.map((hex, i) => `<div style="background:${hex}"><div>${['Base', 'Panel', 'Header', 'Hover'][i]}</div><div class="mono">${hex}</div></div>`).join('')}</div>
+          <p class="sample" style="color:${n.tp}">Primary text: Backfill ballast, section 2 <span class="mono">${n.tp}</span></p>
+          <p class="sample" style="color:${n.ts}">Secondary text: data date 1 July 2026 <span class="mono">${n.ts}</span></p>
+          <p class="sample" style="color:${n.tm}">Muted text: 0d, no change <span class="mono">${n.tm}</span></p>
+          <div class="chips">
+            <span class="chip" style="border:1px solid ${n.bs}">Border <span class="mono">&nbsp;${n.bs}</span></span>
+            <span class="chip" style="border:1px solid ${n.bg}">Strong border <span class="mono">&nbsp;${n.bg}</span></span>
+            <span class="chip" style="background:${ACCENT};color:#fff">Compare updates</span>
+            <span class="chip" style="outline:2px solid ${ACCENT};outline-offset:1px;background:#fff">Focused</span>
+          </div>
+          <div class="wide"><table>
+            <thead><tr><th>Pair</th><th class="num">Needs</th><th class="num">On base</th><th class="num">On panel</th><th class="num">On header</th></tr></thead>
+            <tbody>
+              <tr><td>Primary text</td><td class="num">7</td>${n.s.slice(0, 3).map((bg) => check(n.tp, bg, 7)).join('')}</tr>
+              <tr><td>Secondary text</td><td class="num">4.5</td>${n.s.slice(0, 3).map((bg) => check(n.ts, bg, 4.5)).join('')}</tr>
+              <tr><td>Muted text</td><td class="num">4.5</td>${n.s.slice(0, 3).map((bg) => check(n.tm, bg, 4.5)).join('')}</tr>
+              <tr><td>Strong border</td><td class="num">3</td>${n.s.slice(0, 3).map((bg) => check(n.bg, bg, 3)).join('')}</tr>
+              <tr><td>Accent text</td><td class="num">4.5</td>${n.s.slice(0, 3).map((bg) => check(ACCENT, bg, 4.5)).join('')}</tr>
+              <tr><td>Late text</td><td class="num">4.5</td>${n.s.slice(0, 3).map((bg) => check(LATE_TEXT, bg, 4.5)).join('')}</tr>
+              <tr><td>Early text</td><td class="num">4.5</td>${n.s.slice(0, 3).map((bg) => check(EARLY_TEXT, bg, 4.5)).join('')}</tr>
+            </tbody>
+          </table></div>
+        </div>`;
+
+      const scaleCell = (hex, label) => `<div style="background:${hex};color:${ink(hex)}"><span>${label}</span><span class="mono">${hex}</span></div>`;
+      const use = (fg, bg, need) => { const r = ratio(fg, bg); return `<td class="num">${r.toFixed(2)} <strong>${r >= need ? 'yes' : 'no'}</strong></td>`; };
+      const stepRow = (name, hex) => `<tr><td><span class="mono">${hex}</span> ${name}</td>${use('#1C1B18', hex, 4.5)}${use('#FFFFFF', hex, 4.5)}${use(hex, '#FFFFFF', 3)}${use(hex, NEUTRALS[0].s[0], 3)}</tr>`;
+
+      document.getElementById('main').innerHTML = `
+        <h2>1. Neutrals: two options</h2>
+        <p>The one real choice on this page. Everything else below is the same in both.</p>
+        <div class="pair">${NEUTRALS.map(neutralPanel).join('')}</div>
+        <p style="margin-top:12px">
+          The first draft of muted text and the strong border fell just short on the header step (4.22 and 2.93), so both were
+          darkened until they pass. The hover step is not in the table: it is for controls, and muted text and strong borders
+          are not used on it (muted text reaches about 4:1 there). A hovered grid row uses the panel step.
+        </p>
+
+        <h2>2. Slip scale</h2>
+        <p>Five steps each way around a neutral middle. Steps are bands of working days, the same bands the grid options use.</p>
+        <div class="scale">
+          ${EARLY.slice().reverse().map((hex, i) => scaleCell(hex, 'Earlier, ' + BANDS[4 - i])).join('')}
+          ${scaleCell(NONE, 'No change')}
+          ${LATE.map((hex, i) => scaleCell(hex, 'Later, ' + BANDS[i])).join('')}
+        </div>
+        <p style="margin-top:12px">As bars on a white grid row, lightest to darkest:</p>
+        <div class="pair">
+          <div class="bars">${LATE.map((hex, i) => `<div style="background:${hex};width:${20 + i * 20}%"></div>`).join('')}</div>
+          <div class="bars">${EARLY.map((hex, i) => `<div style="background:${hex};width:${20 + i * 20}%"></div>`).join('')}</div>
+        </div>
+        <div class="wide"><table>
+          <thead><tr><th>Step</th><th class="num">Dark text on it (4.5)</th><th class="num">White text on it (4.5)</th><th class="num">As a mark on white (3)</th><th class="num">As a mark on base A (3)</th></tr></thead>
+          <tbody>${LATE.map((hex, i) => stepRow('late ' + (i + 1), hex)).join('')}${EARLY.map((hex, i) => stepRow('early ' + (i + 1), hex)).join('')}${stepRow('no change', NONE)}</tbody>
+        </table></div>
+        <p style="margin-top:12px">
+          What the table means in practice. Steps 1 to 3 are too pale to stand alone as a bar or glyph, so they are fills behind
+          dark text only. A bar or glyph uses steps 4 and 5. Dark text works on steps 1 to 4 and white text on step 5. No step
+          is ever the only signal: the sign and the number are always there.
+        </p>
+
+        <h2>3. Accent, critical and the two risks worth seeing</h2>
+        <div class="chips">
+          <span class="chip" style="background:${ACCENT};color:#fff">Accent ${ACCENT}</span>
+          <span class="chip" style="background:${EARLY[4]};color:#fff">Early 5 ${EARLY[4]}</span>
+          <span class="chip" style="background:${LATE[4]};color:#fff">Late 5 ${LATE[4]}</span>
+          <span class="chip crit" style="background:${CRITICAL};color:#fff">Critical ${CRITICAL}</span>
+        </div>
+        <div class="wide"><table>
+          <thead><tr><th>Pair</th><th class="num">Needs</th><th class="num">Ratio</th></tr></thead>
+          <tbody>
+            <tr><td>White text on accent</td><td class="num">4.5</td>${check('#FFFFFF', ACCENT, 4.5)}</tr>
+            <tr><td>White text on critical</td><td class="num">4.5</td>${check('#FFFFFF', CRITICAL, 4.5)}</tr>
+            <tr><td>Accent against early 5 (should differ)</td><td class="num">none</td><td class="num">${ratio(ACCENT, EARLY[4]).toFixed(2)}</td></tr>
+            <tr><td>Critical against late 5 (should differ)</td><td class="num">none</td><td class="num">${ratio(CRITICAL, LATE[4]).toFixed(2)}</td></tr>
+          </tbody>
+        </table></div>
+        <p style="margin-top:12px">
+          <strong>Risk 1: violet and blue.</strong> Switch to deuteranopia or protanopia above. The accent and the deep early
+          blue come close together. The accent must therefore never appear as a fill inside a data cell or on a Gantt bar; it is
+          for controls, focus rings and selection outlines only.
+        </p>
+        <p>
+          <strong>Risk 2: critical and late red.</strong> They are close in every view, by design of D16, which gives critical a
+          pattern. The hatch above is that pattern. Critical is never shown by colour alone.
+        </p>`;
+
+      const set = document.getElementById('vision');
+      [['none', 'Full colour'], ['deuteranopia', 'Deuteranopia'], ['protanopia', 'Protanopia'], ['tritanopia', 'Tritanopia'], ['grey', 'No colour']].forEach(([value, label], index) => {
+        set.insertAdjacentHTML('beforeend', `<label><input type="radio" name="vision" value="${value}" ${index === 0 ? 'checked' : ''}><span>${label}</span></label>`);
+      });
+      set.addEventListener('change', (event) => {
+        const value = event.target.value;
+        document.getElementById('main').style.filter = value === 'none' ? '' : value === 'grey' ? 'grayscale(1)' : `url(#${value})`;
+      });
+    </script>
+  </body>
+</html>

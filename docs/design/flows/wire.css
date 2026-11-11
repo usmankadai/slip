@@ -1,0 +1,42 @@
+/* Low-fidelity wireframe kit: boxes and labels only. No identity colour on purpose. */
+* { box-sizing: border-box; }
+body { margin: 0; background: #fafafa; color: #222; font: 14px/1.5 system-ui, -apple-system, 'Segoe UI', sans-serif; }
+header, main { max-width: 1180px; margin: 0 auto; padding: 0 32px; }
+header { padding-top: 24px; }
+main { padding-bottom: 64px; }
+h1 { font-size: 20px; margin: 0 0 4px; }
+h2 { font-size: 16px; margin: 40px 0 8px; }
+p { margin: 0 0 8px; color: #555; max-width: 760px; }
+.question { border-left: 3px solid #222; padding: 4px 12px; margin: 12px 0; color: #222; }
+.option { display: grid; grid-template-columns: minmax(0, 1fr) 300px; gap: 24px; align-items: start; }
+.notes { font-size: 13px; margin: 0; }
+.notes dt { font-weight: 600; margin-top: 8px; }
+.notes dt:first-child { margin-top: 0; }
+.notes dd { margin: 0; color: #555; }
+
+.frame { border: 1.5px solid #222; background: #fff; min-height: 460px; display: flex; flex-direction: column; font-size: 12px; overflow-x: auto; }
+.bar { display: flex; gap: 16px; align-items: center; padding: 6px 12px; border-bottom: 1px solid #999; color: #666; }
+.bar b { color: #222; }
+.bar .right { margin-left: auto; }
+.body { flex: 1; padding: 16px; display: grid; gap: 12px; align-content: start; min-width: 560px; }
+.cols { display: grid; gap: 12px; }
+.c2 { grid-template-columns: 1fr 1fr; }
+.c3 { grid-template-columns: 1fr 1fr 1fr; }
+.c21 { grid-template-columns: 2fr 1fr; }
+.box { border: 1px dashed #777; padding: 8px 10px; display: grid; gap: 6px; align-content: start; }
+.box > .t { font-weight: 600; }
+.lead { border: 2px solid #222; }
+.quiet { color: #777; border-color: #bbb; }
+.line { height: 8px; background: #ddd; border-radius: 1px; }
+.line.s { width: 40%; } .line.m { width: 65%; } .line.l { width: 90%; }
+.row { display: grid; grid-template-columns: 1fr 88px 88px 64px; gap: 8px; align-items: center; padding: 4px 0; border-bottom: 1px solid #e5e5e5; }
+.row:last-child { border-bottom: 0; }
+.row span { color: #666; }
+.row .n { text-align: right; font-variant-numeric: tabular-nums; color: #222; font-weight: 600; }
+.btn { display: inline-block; border: 1.5px solid #222; padding: 4px 12px; justify-self: start; font-weight: 600; }
+.btn.off { border-color: #bbb; color: #999; }
+.big { font-size: 15px; font-weight: 600; }
+.tall { min-height: 96px; }
+.num { counter-increment: order; }
+.tag { display: inline-block; border: 1px solid #222; border-radius: 9px; padding: 0 6px; font-size: 10px; font-weight: 600; margin-right: 4px; }
+@media (max-width: 900px) { .option { grid-template-columns: 1fr; } }

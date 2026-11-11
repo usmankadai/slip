@@ -2,6 +2,32 @@
 
 What was built, what Usman decided or designed, and what an agent generated. Newest first.
 
+## 11 November 2026: first design options, nothing chosen yet
+
+**Done**
+
+- The design track was started, since no product screen can be built until its design exists. Four pages of options are in `docs/design/`, each with a write-up beside it:
+  - Colour values for the identity in D16: two sets of neutrals, the accent, the late and early scales, with contrast ratios computed on the page and colour-blind views.
+  - Exploration 01, slip in a grid cell: four treatments over 17 real rows from the 1,000 activity rail pair, at both densities.
+  - Three low-fidelity layouts for the import screen and three for the update summary.
+- The checks changed two values: muted text and the strong border were just short on the header surface and were darkened until they pass.
+- A `design` preview serves `docs/design` so the pages can be opened in a browser.
+
+**Usman decided or designed**
+
+- To start the design track now, and that the first step is options for him to choose between.
+- Nothing on the pages yet. Every decision in them is open and is his.
+
+**The agent (Claude) generated**
+
+- All four pages, every option on them, the proposed colour values, and the write-ups. Each write-up carries a recommendation, labelled as Claude's.
+
+**Worth Usman's attention**
+
+- Four choices are waiting: neutrals A or B (and whether the other values stand), the slip cell treatment, the import layout, the summary layout. The reasons matter as much as the picks; the case study needs them in his words.
+- The options were drawn without any planner research. A planner's view of the slip cell in particular would be worth having before it is settled.
+- The exploration write-ups link to live pages, not images. Screenshots should be added when a decision is recorded, so the rejected options survive later changes to the pages.
+
 ## 11 November 2026: shorter answers, measured
 
 **Done**

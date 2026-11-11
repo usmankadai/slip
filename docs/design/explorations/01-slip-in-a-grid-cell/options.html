@@ -1,0 +1,226 @@
+<!doctype html>
+<html lang="en-GB">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Slip in a grid cell: options</title>
+    <style>
+      :root {
+        --s0: #fbfaf7; --s1: #f4f2ec; --s2: #ebe8e0; --s3: #dedacf;
+        --tp: #1c1b18; --ts: #55524a; --tm: #6c685d;
+        --bs: #e2ded3; --bg: #898477;
+        --accent: #5b3fd6;
+        --late-1: #fbe9c9; --late-2: #f6cf8a; --late-3: #eda44a; --late-4: #db6b2c; --late-5: #b8321f; --late-text: #8f2a12;
+        --early-1: #dcebfa; --early-2: #b3d2f4; --early-3: #7fb0ea; --early-4: #4c8cda; --early-5: #1b56a8; --early-text: #174a91;
+        --row: 24px; --pad: 8px; --size: 12px;
+      }
+      [data-neutral='B'] {
+        --s0: #fafaf9; --s1: #f2f2f0; --s2: #e8e8e5; --s3: #dadad6;
+        --tp: #1a1a19; --ts: #515150; --tm: #686865; --bs: #e0e0dc; --bg: #848480;
+      }
+      [data-density='comfortable'] { --row: 32px; --pad: 12px; --size: 13px; }
+      * { box-sizing: border-box; }
+      body { margin: 0; background: var(--s0); color: var(--tp); font: 14px/1.5 Inter, system-ui, -apple-system, 'Segoe UI', sans-serif; }
+      header { padding: 24px 32px 8px; max-width: 1180px; margin: 0 auto; }
+      h1 { font-size: 20px; margin: 0 0 4px; }
+      h2 { font-size: 16px; margin: 0 0 4px; }
+      p { margin: 0 0 8px; color: var(--ts); max-width: 760px; }
+      .controls { position: sticky; top: 0; z-index: 2; background: var(--s1); border-block: 1px solid var(--bs); }
+      .controls div { max-width: 1180px; margin: 0 auto; padding: 8px 32px; display: flex; gap: 24px; flex-wrap: wrap; font-size: 12px; }
+      fieldset { border: 0; padding: 0; margin: 0; display: flex; gap: 4px; align-items: center; }
+      legend { float: left; margin-right: 8px; color: var(--ts); padding: 0; }
+      label { display: inline-flex; align-items: center; }
+      label input { position: absolute; opacity: 0; }
+      label span { padding: 4px 8px; border: 1px solid var(--bs); border-radius: 4px; background: var(--s0); cursor: pointer; }
+      label input:checked + span { border-color: var(--accent); color: var(--accent); background: #fff; }
+      label input:focus-visible + span { outline: 2px solid var(--accent); outline-offset: 2px; }
+      main { max-width: 1180px; margin: 0 auto; padding: 16px 32px 64px; display: grid; gap: 32px; }
+      section { display: grid; grid-template-columns: minmax(0, 1fr) 300px; gap: 24px; align-items: start; }
+      section > :first-child { min-width: 0; overflow-x: auto; }
+      table { min-width: 640px; }
+      .notes { font-size: 13px; }
+      .notes dt { font-weight: 600; margin-top: 8px; }
+      .notes dd { margin: 0; color: var(--ts); }
+      table { border-collapse: collapse; table-layout: fixed; width: 100%; font-size: var(--size); font-variant-numeric: tabular-nums; border: 1px solid var(--bs); background: #fff; }
+      th { text-align: left; font-weight: 600; color: var(--ts); background: var(--s1); border-bottom: 1px solid var(--bs); height: var(--row); padding: 0 var(--pad); white-space: nowrap; }
+      th.slip-a, th.slip-b, th.slip-c, th.slip-d { background: var(--s1); color: var(--ts); font-weight: 600; }
+      th.slip-b { padding-right: var(--pad); }
+      td { height: var(--row); padding: 0 var(--pad); border-bottom: 1px solid var(--bs); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+      tr:last-child td { border-bottom: 0; }
+      .code { font-family: 'JetBrains Mono', ui-monospace, 'SF Mono', Menlo, monospace; font-size: calc(var(--size) - 1px); width: 150px; }
+      .date { width: 92px; color: var(--ts); }
+      .num { text-align: right; }
+      .float { width: 64px; }
+      .neg { color: var(--late-text); }
+      .muted { color: var(--tm); }
+      .tag { font-size: 10px; letter-spacing: 0.02em; text-transform: uppercase; border: 1px solid var(--bg); color: var(--ts); border-radius: 3px; padding: 0 4px; }
+
+      /* A: signed number */
+      .slip-a { width: 72px; }
+      .slip-a.late { color: var(--late-text); font-weight: 600; }
+      .slip-a.early { color: var(--early-text); font-weight: 600; }
+
+      /* B: number and diverging bar */
+      .slip-b { width: 168px; padding: 0 var(--pad) 0 0; }
+      .slip-b .wrap { display: grid; grid-template-columns: 96px 48px; justify-content: end; align-items: center; gap: 8px; height: 100%; }
+      .slip-b .track { position: relative; height: 10px; }
+      .slip-b .track::before { content: ''; position: absolute; left: 50%; top: -3px; bottom: -3px; width: 1px; background: var(--bg); }
+      .slip-b .bar { position: absolute; top: 0; bottom: 0; border-radius: 1px; }
+      .slip-b .bar.late { left: 50%; background: var(--late-4); }
+      .slip-b .bar.early { right: 50%; background: var(--early-4); }
+      .slip-b .n { text-align: right; }
+
+      /* C: stepped heat cell */
+      .slip-c { width: 72px; font-weight: 600; }
+      .slip-c.l1 { background: var(--late-1); } .slip-c.l2 { background: var(--late-2); } .slip-c.l3 { background: var(--late-3); }
+      .slip-c.l4 { background: var(--late-4); } .slip-c.l5 { background: var(--late-5); color: #fff; }
+      .slip-c.e1 { background: var(--early-1); } .slip-c.e2 { background: var(--early-2); } .slip-c.e3 { background: var(--early-3); }
+      .slip-c.e4 { background: var(--early-4); } .slip-c.e5 { background: var(--early-5); color: #fff; }
+      .slip-c.none { font-weight: 400; }
+
+      /* D: direction glyph and number */
+      .slip-d { width: 84px; }
+      .slip-d .wrap { display: inline-grid; grid-template-columns: 16px 44px; align-items: center; justify-items: end; }
+      .slip-d svg { display: block; }
+      .slip-d .late { fill: var(--late-5); } .slip-d .early { fill: var(--early-5); }
+      .legend { display: flex; gap: 12px; flex-wrap: wrap; font-size: 12px; color: var(--ts); margin-top: 8px; align-items: center; }
+      .legend i { display: inline-block; width: 28px; height: 14px; vertical-align: middle; border: 1px solid var(--bs); }
+      footer { max-width: 1180px; margin: 0 auto; padding: 0 32px 48px; font-size: 13px; color: var(--ts); }
+      @media (max-width: 900px) { section { grid-template-columns: 1fr; } }
+    </style>
+  </head>
+  <body>
+    <svg width="0" height="0" style="position: absolute" aria-hidden="true">
+      <filter id="protanopia" color-interpolation-filters="linearRGB"><feColorMatrix values="0.152286 1.052583 -0.204868 0 0 0.114503 0.786281 0.099216 0 0 -0.003882 -0.048116 1.051998 0 0 0 0 0 1 0" /></filter>
+      <filter id="deuteranopia" color-interpolation-filters="linearRGB"><feColorMatrix values="0.367322 0.860646 -0.227968 0 0 0.280085 0.672501 0.047413 0 0 -0.011820 0.042940 0.968881 0 0 0 0 0 1 0" /></filter>
+      <filter id="tritanopia" color-interpolation-filters="linearRGB"><feColorMatrix values="1.255528 -0.076749 -0.178779 0 0 -0.078411 0.930809 0.147602 0 0 0.004733 0.691367 0.303900 0 0 0 0 0 1 0" /></filter>
+    </svg>
+
+    <header>
+      <h1>Exploration 01: showing slip in a grid cell</h1>
+      <p>
+        Four ways to show how far an activity's finish moved between two updates, at the grid's real row height. The rows are
+        real: 17 activities from the generated 1,000 activity rail pair, chosen to cover large and small slips, no change,
+        earlier finishes, a new activity and a finished one.
+      </p>
+      <p>Options drawn by Claude for Usman to choose between. The decision is in the README beside this file.</p>
+    </header>
+
+    <div class="controls">
+      <div>
+        <fieldset id="density"><legend>Density</legend></fieldset>
+        <fieldset id="neutral"><legend>Neutrals</legend></fieldset>
+        <fieldset id="vision"><legend>Seen as</legend></fieldset>
+      </div>
+    </div>
+
+    <main id="main"></main>
+
+    <footer>
+      <p>
+        Colour-blind views use the Machado, Oliveira and Fernandes (2009) simulation at full severity. Type falls back to the
+        system font where Inter and JetBrains Mono are not installed.
+      </p>
+    </footer>
+
+    <script>
+      const ROWS = [
+        { code: 'P03-A002-TRK-0170', name: 'Survey catenary, section 2', finish: '2027-07-14', slip: 67, float: -57 },
+        { code: 'P03-A002-TRK-0180', name: 'Backfill ballast, section 2', finish: '2027-07-19', slip: 67, float: -57 },
+        { code: 'P03-A002-TRK-0190', name: 'Test ballast, section 2', finish: '2027-07-27', slip: 67, float: -57 },
+        { code: 'P03-A002-CIV-0220', name: 'Commission points machine, section 2', finish: '2027-04-20', slip: 49, float: -57 },
+        { code: 'P03-A002-TRK-0010', name: 'Backfill mast foundations, section 2', finish: '2027-04-23', slip: 49, float: -57 },
+        { code: 'P03-A002-ENB-0110', name: 'Excavate track panels, section 2', finish: '2026-09-22', slip: 20, float: -57 },
+        { code: 'P03-A002-ENB-0120', name: 'Deliver cable troughing, section 2', finish: '2026-09-30', slip: 20, float: -57 },
+        { code: 'P03-A001-CIV-0140', name: 'Fabricate track panels, section 1', finish: '2026-11-16', slip: 7, float: 55 },
+        { code: 'P03-A001-CIV-0150', name: 'Fabricate platform edge, section 1', finish: '2026-11-24', slip: 7, float: 55 },
+        { code: 'P03-A001-CIV-0160', name: 'Inspect signal gantry, section 1', finish: '2026-11-19', slip: 7, float: 60 },
+        { code: 'P01-A001-TRK-0060', name: 'Erect ballast, section 1', finish: '2026-07-06', slip: 0, float: 7 },
+        { code: 'P01-A001-TRK-0070', name: 'Cure cable troughing, section 1', finish: '2026-07-13', slip: 0, float: 9.63 },
+        { code: 'P03-A005-ENB-0200', name: 'Commission catenary, section 5', finish: '2026-07-07', slip: -51, float: 122 },
+        { code: 'P02-A003-CIV-0160', name: 'Pour ballast, section 3', finish: '2026-07-02', slip: -46, float: 278 },
+        { code: 'P02-A003-CIV-0170', name: 'Backfill sleepers, section 3', finish: '2026-07-14', slip: -46, float: 278 },
+        { code: 'P02-A002-CIV-N0001', name: 'Additional works following dewater sleepers, section 2', finish: '2026-08-14', slip: null, float: 361, added: true },
+        { code: 'MS-START', name: 'Contract start', finish: '2026-01-05', slip: 0, float: null, done: true },
+      ];
+      const MAX = 67;
+      const text = (value) => (value === null ? '' : `${value > 0 ? '+' : value < 0 ? '−' : ''}${Math.abs(value)}d`);
+      const step = (value) => { const size = Math.abs(value); return size < 5 ? 1 : size < 10 ? 2 : size < 20 ? 3 : size < 40 ? 4 : 5; };
+      const side = (value) => (value > 0 ? 'late' : value < 0 ? 'early' : 'none');
+      const esc = (value) => String(value).replace(/[&<>"]/g, (char) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[char]);
+
+      const cells = {
+        a: (row) => row.added ? `<td class="num slip-a"><span class="tag">new</span></td>`
+          : `<td class="num slip-a ${side(row.slip)} ${row.slip === 0 ? 'muted' : ''}">${text(row.slip)}</td>`,
+        b: (row) => {
+          if (row.added) return `<td class="slip-b"><div class="wrap"><div class="track"></div><div class="n"><span class="tag">new</span></div></div></td>`;
+          const width = Math.sqrt(Math.abs(row.slip) / MAX) * 50;
+          const bar = row.slip === 0 ? '' : `<div class="bar ${side(row.slip)}" style="width:${width.toFixed(1)}%"></div>`;
+          return `<td class="slip-b"><div class="wrap"><div class="track">${bar}</div><div class="n ${row.slip === 0 ? 'muted' : ''}">${text(row.slip)}</div></div></td>`;
+        },
+        c: (row) => row.added ? `<td class="num slip-c none"><span class="tag">new</span></td>`
+          : row.slip === 0 ? `<td class="num slip-c none muted">0d</td>`
+          : `<td class="num slip-c ${row.slip > 0 ? 'l' : 'e'}${step(row.slip)}">${text(row.slip)}</td>`,
+        d: (row) => {
+          if (row.added) return `<td class="num slip-d"><span class="tag">new</span></td>`;
+          if (row.slip === 0) return `<td class="num slip-d muted"><span class="wrap"><span></span><span>0d</span></span></td>`;
+          const size = 5 + step(row.slip) * 1.6;
+          const points = row.slip > 0 ? `0,0 ${size},${size / 2} 0,${size}` : `${size},0 0,${size / 2} ${size},${size}`;
+          return `<td class="num slip-d"><span class="wrap"><svg width="${size}" height="${size}" aria-hidden="true"><polygon class="${side(row.slip)}" points="${points}"/></svg><span>${text(row.slip)}</span></span></td>`;
+        },
+      };
+
+      const OPTIONS = [
+        { id: 'a', title: 'A. Signed number', head: 'Finish slip',
+          does: 'Adds nothing to the grid. The sign carries direction, so it works without colour. The cell is as narrow as a number.',
+          costs: 'Magnitude has to be read, row by row. Scanning three hundred rows for the worst ones means reading three hundred numbers.',
+          legend: 'Warm text is later, blue text is earlier, grey is no change.' },
+        { id: 'b', title: 'B. Number and diverging bar', head: 'Finish slip',
+          does: 'Magnitude and direction read at a glance down the column: bars to the right are later, to the left earlier. The eye finds the worst rows without reading.',
+          costs: 'Needs about 170px, more than twice option A. The bar needs a scale: here a square root scale to the largest slip in the view, which changes as the view is filtered. Bars are a second thing to look at in every row.',
+          legend: 'Bar length is the square root of the slip, to the largest in view (67 days).' },
+        { id: 'c', title: 'C. Stepped heat cell', head: 'Finish slip',
+          does: 'The column reads like a heat map. Five steps of intensity for under 5, 10, 20 and 40 days, and 40 or more. No extra width.',
+          costs: 'Colour fills the grid. More than half of activities change in an update, so the changes view would be mostly coloured cells, and the quiet working surface in the identity is gone. Small slips are pale and easy to miss.',
+          legend: '<i style="background:var(--late-1)"></i> under 5 <i style="background:var(--late-2)"></i> under 10 <i style="background:var(--late-3)"></i> under 20 <i style="background:var(--late-4)"></i> under 40 <i style="background:var(--late-5)"></i> 40 or more days, and the same in blue for earlier.' },
+        { id: 'd', title: 'D. Direction glyph and number', head: 'Finish slip',
+          does: 'A triangle points the way the bar moved on the Gantt: right for later, left for earlier. Shape carries direction, so colour is a bonus. Its size steps with magnitude. Only a little wider than A.',
+          costs: 'Five sizes of a small triangle are hard to tell apart; magnitude still mostly comes from the number. One more mark per row.',
+          legend: 'Triangle size steps at 5, 10, 20 and 40 days.' },
+      ];
+
+      const main = document.getElementById('main');
+      main.innerHTML = OPTIONS.map((option) => `
+        <section>
+          <div>
+            <h2>${option.title}</h2>
+            <table>
+              <thead><tr><th class="code">Activity ID</th><th>Name</th><th class="date">Finish</th><th class="num slip-${option.id}">${option.head}</th><th class="num float">Float</th></tr></thead>
+              <tbody>${ROWS.map((row) => `<tr>
+                <td class="code">${esc(row.code)}</td><td title="${esc(row.name)}">${esc(row.name)}</td><td class="date">${row.finish}</td>
+                ${cells[option.id](row)}
+                <td class="num float ${row.float !== null && row.float < 0 ? 'neg' : ''} ${row.done ? 'muted' : ''}">${row.float === null ? '' : text(row.float).replace('+', '')}</td>
+              </tr>`).join('')}</tbody>
+            </table>
+            <div class="legend">${option.legend}</div>
+          </div>
+          <dl class="notes">
+            <dt>Does well</dt><dd>${option.does}</dd>
+            <dt>Costs</dt><dd>${option.costs}</dd>
+          </dl>
+        </section>`).join('');
+
+      function choice(id, options, apply) {
+        const set = document.getElementById(id);
+        options.forEach(([value, label], index) => {
+          set.insertAdjacentHTML('beforeend', `<label><input type="radio" name="${id}" value="${value}" ${index === 0 ? 'checked' : ''}><span>${label}</span></label>`);
+        });
+        set.addEventListener('change', (event) => apply(event.target.value));
+      }
+      choice('density', [['compact', 'Compact, 24px'], ['comfortable', 'Comfortable, 32px']], (value) => (document.body.dataset.density = value));
+      choice('neutral', [['A', 'A, warm paper'], ['B', 'B, cool stone']], (value) => (document.body.dataset.neutral = value));
+      choice('vision', [['none', 'Full colour'], ['deuteranopia', 'Deuteranopia'], ['protanopia', 'Protanopia'], ['tritanopia', 'Tritanopia'], ['grey', 'No colour']],
+        (value) => (main.style.filter = value === 'none' ? '' : value === 'grey' ? 'grayscale(1)' : `url(#${value})`));
+    </script>
+  </body>
+</html>

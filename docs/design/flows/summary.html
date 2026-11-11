@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="en-GB">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Flow: update summary, three layouts</title>
+    <link rel="stylesheet" href="wire.css" />
+  </head>
+  <body>
+    <header>
+      <h1>Update summary: three low-fidelity layouts</h1>
+      <p>Hierarchy only: boxes and labels, no identity. The numbered tags show the order the eye should take. A heavy border marks what leads.</p>
+      <p class="question">
+        The planner's question: "What happened this month?"<br />
+        Most prominent: the milestones that moved, each with a signed working-day delta, worst first.<br />
+        Then: critical path joined and left; change counts by category; health delta.<br />
+        Must not: become a dashboard of equal-weight tiles. Milestones lead.
+      </p>
+      <p>Layouts drawn by Claude for Usman to choose between.</p>
+    </header>
+
+    <main>
+      <h2>A. Milestones full width, the rest in a strip below</h2>
+      <div class="option">
+        <div class="frame">
+          <div class="bar"><b>Slip</b><span>Project name · update A to update B</span><b>Summary</b><span>Changes</span><span>Health</span><span>Finish update</span><span class="right">Ask</span></div>
+          <div class="body">
+            <div class="box lead">
+              <div class="t"><span class="tag">1</span>Milestones that moved, worst first</div>
+              <div class="row"><span>Milestone</span><span>Was</span><span>Now</span><span class="n">Slip</span></div>
+              <div class="row"><div>Milestone name · trace</div><span>date</span><span>date</span><span class="n">+N d</span></div>
+              <div class="row"><div>Milestone name · trace</div><span>date</span><span>date</span><span class="n">+N d</span></div>
+              <div class="row"><div>Milestone name · trace</div><span>date</span><span>date</span><span class="n">−N d</span></div>
+              <div class="quiet">N milestones did not move · show all</div>
+            </div>
+            <div class="cols c3">
+              <div class="box"><div class="t"><span class="tag">2</span>Critical path</div><div>N joined, N left</div><div class="line m"></div></div>
+              <div class="box"><div class="t"><span class="tag">3</span>What changed</div><div>Counts by category: dates, durations, logic, constraints, progress, added, removed</div></div>
+              <div class="box"><div class="t"><span class="tag">4</span>Health</div><div>Checks that got worse, checks that got better</div><div class="line s"></div></div>
+            </div>
+          </div>
+        </div>
+        <dl class="notes">
+          <dt>Leads with</dt><dd>The milestone table, across the whole width, with room for both dates and the slip.</dd>
+          <dt>Does well</dt><dd>The simplest reading order: top, then down. The table has room for a small before and after bar per milestone later. Works at narrow widths.</dd>
+          <dt>Costs</dt><dd>The strip below is three equal tiles, which is the start of the dashboard the spec warns against. With many moved milestones the strip falls below the fold and the secondary facts are not seen.</dd>
+        </dl>
+      </div>
+
+      <h2>B. Milestones on the left, the rest in a rail</h2>
+      <div class="option">
+        <div class="frame">
+          <div class="bar"><b>Slip</b><span>Project name · update A to update B</span><b>Summary</b><span>Changes</span><span>Health</span><span>Finish update</span><span class="right">Ask</span></div>
+          <div class="body">
+            <div class="cols c21">
+              <div class="box lead tall">
+                <div class="t"><span class="tag">1</span>Milestones that moved, worst first</div>
+                <div class="row"><span>Milestone</span><span>Was</span><span>Now</span><span class="n">Slip</span></div>
+                <div class="row"><div>Milestone name · trace</div><span>date</span><span>date</span><span class="n">+N d</span></div>
+                <div class="row"><div>Milestone name · trace</div><span>date</span><span>date</span><span class="n">+N d</span></div>
+                <div class="row"><div>Milestone name · trace</div><span>date</span><span>date</span><span class="n">+N d</span></div>
+                <div class="row"><div>Milestone name · trace</div><span>date</span><span>date</span><span class="n">−N d</span></div>
+                <div class="quiet">N milestones did not move · show all</div>
+              </div>
+              <div class="cols">
+                <div class="box"><div class="t"><span class="tag">2</span>Critical path</div><div>N joined, N left · see them</div></div>
+                <div class="box"><div class="t"><span class="tag">3</span>What changed</div><div>A short list, one line per category with its count; each line opens the changes view with that filter</div><div class="line l"></div><div class="line m"></div><div class="line m"></div></div>
+                <div class="box"><div class="t"><span class="tag">4</span>Health</div><div>N checks worse, N better · the worst one named</div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <dl class="notes">
+          <dt>Leads with</dt><dd>The milestone list, two thirds of the width and the full height.</dd>
+          <dt>Does well</dt><dd>Everything is visible without scrolling, and the rail is plainly secondary: narrower, lighter, and a list of ways into other screens, not a set of tiles. The milestone list can grow without pushing anything away.</dd>
+          <dt>Costs</dt><dd>The milestone table is narrower, so less room for a before and after bar. The rail competes with the agent panel for the right-hand edge when that is open. Needs a stacked layout below about 1,000px.</dd>
+        </dl>
+      </div>
+
+      <h2>C. One sentence, then the evidence</h2>
+      <div class="option">
+        <div class="frame">
+          <div class="bar"><b>Slip</b><span>Project name · update A to update B</span><b>Summary</b><span>Changes</span><span>Health</span><span>Finish update</span><span class="right">Ask</span></div>
+          <div class="body">
+            <div class="box lead">
+              <div class="t"><span class="tag">1</span>The month in one sentence</div>
+              <div class="big">"Milestone name moved N working days later. N of N milestones moved; N activities joined the critical path."</div>
+              <div class="quiet">Built from the engine's numbers by a fixed template, not by the model. Each figure is a link.</div>
+            </div>
+            <div class="box">
+              <div class="t"><span class="tag">2</span>Milestones that moved, worst first</div>
+              <div class="row"><div>Milestone name · trace</div><span>date</span><span>date</span><span class="n">+N d</span></div>
+              <div class="row"><div>Milestone name · trace</div><span>date</span><span>date</span><span class="n">+N d</span></div>
+              <div class="row"><div>Milestone name · trace</div><span>date</span><span>date</span><span class="n">−N d</span></div>
+            </div>
+            <div class="box quiet"><div class="t"><span class="tag">3</span>Also this month</div><div>Three plain lines: critical path joined and left · changes by category · health checks worse and better. Each opens its screen.</div></div>
+          </div>
+        </div>
+        <dl class="notes">
+          <dt>Leads with</dt><dd>A written headline: the answer to "what happened this month" in the form the planner will have to give it to the client.</dd>
+          <dt>Does well</dt><dd>Furthest from a dashboard. Sets up the Finish update screen, which is also prose with evidence. Readable by someone who is not a planner.</dd>
+          <dt>Costs</dt><dd>A sentence is slower to scan than a table and hides the second-worst milestone. A template sentence reads stiffly in odd cases (nothing moved, forty things moved). Planners may not trust a sentence before they have seen the numbers.</dd>
+        </dl>
+      </div>
+    </main>
+  </body>
+</html>
