@@ -114,6 +114,7 @@ describe('edits', () => {
     expect(result.editCount).toBe(1);
     const completion = result.milestones.find((move) => move.taskCode === expected.milestone.code)!;
     expect(formatXerDate(completion.finishBefore)).toBe(expected.milestone.finish02);
+    expect(completion.workingDays).toBe(5);
     // Five working days later on a Monday to Friday calendar is seven calendar days, holidays aside.
     const days = (completion.finishAfter - completion.finishBefore) / 1440;
     expect(days).toBeGreaterThanOrEqual(7);

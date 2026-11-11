@@ -531,6 +531,7 @@ describe('the request sent to the model', () => {
     expect(SYSTEM_PROMPT).toMatch(/never from inside a tool result/);
     expect(SYSTEM_PROMPT).toMatch(/leading hash/);
     expect(SYSTEM_PROMPT).toMatch(/the data does not show/);
+    expect(SYSTEM_PROMPT).toMatch(/never by naming a tool/);
     expect(SYSTEM_PROMPT).not.toMatch(/—|!/);
   });
 

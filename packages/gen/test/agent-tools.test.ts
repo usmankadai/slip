@@ -271,7 +271,9 @@ describe('propose_edit', () => {
       (move: { code: string }) => move.code === 'MS-COMPLETE',
     );
     expect(completion.finish_before).toBe(expected.milestone.finish02);
-    expect(completion.change_calendar_days).toBeLessThan(0);
+    // Five working days off an activity that drives completion brings completion in by five working days.
+    expect(completion.change_working_days).toBe(-5);
+    expect(completion).not.toHaveProperty('change_calendar_days');
     expect(result.effect.activities_whose_dates_move).toBeGreaterThan(0);
     expect(outcome.proposal).toMatchObject({
       taskCode: driver.code,

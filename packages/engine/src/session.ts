@@ -29,7 +29,7 @@ import {
 } from './edits.ts';
 import { runHealth, type HealthCheck } from './health/health.ts';
 import { traceSlip, type TraceOptions, type TraceResult } from './trace.ts';
-import type { WorkClock } from './worktime.ts';
+import { workBetween, type WorkClock } from './worktime.ts';
 
 export type Slot = 'a' | 'b';
 
@@ -200,7 +200,14 @@ export interface EditResult {
   projectFinishBefore: number;
   projectFinishAfter: number;
   /** Milestones whose date moved, the biggest move first, with their codes. At most 50. */
-  milestones: { activity: number; taskCode: string; finishBefore: number; finishAfter: number }[];
+  milestones: {
+    activity: number;
+    taskCode: string;
+    finishBefore: number;
+    finishAfter: number;
+    /** The move in working days on the milestone's own calendar. Negative is earlier. */
+    workingDays: number;
+  }[];
   /** Edits in force after this request. */
   editCount: number;
 }
@@ -488,10 +495,19 @@ export class EngineSession {
     const data = withEdits(b.base, edits);
     const after = runCpm(data, b.clocks);
     const changed = changedActivities(before, after);
-    const milestones = milestoneMoves(data, before, after, changed).map((move) => ({
-      ...move,
-      taskCode: stringAt(data.strings, data.taskCode[move.activity]!),
-    }));
+    const fallbackClock = b.clocks.length - 1;
+    const usualClock =
+      data.calendars.defaultIndex >= 0 ? data.calendars.defaultIndex : fallbackClock;
+    const milestones = milestoneMoves(data, before, after, changed).map((move) => {
+      const index = data.calendarIndex[move.activity]!;
+      const clock = b.clocks[index >= 0 && index < fallbackClock ? index : usualClock]!;
+      const minutes = workBetween(clock, move.finishBefore, move.finishAfter);
+      return {
+        ...move,
+        taskCode: stringAt(data.strings, data.taskCode[move.activity]!),
+        workingDays: Math.round((minutes / (clock.calendar.dayMinutes || 480)) * 100) / 100,
+      };
+    });
     if (keep) {
       b.data = data;
       b.edits = edits;
