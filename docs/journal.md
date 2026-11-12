@@ -2,6 +2,34 @@
 
 What was built, what Usman decided or designed, and what an agent generated. Newest first.
 
+## 12 November 2026: the Gantt
+
+**Done**
+
+- A canvas Gantt beside the changes grid, on the same rows. Each activity has its bar for this update, and only the difference from the previous one: a tail from where the finish was, warm for later and blue for earlier, with a tick at the previous finish and at the previous start when it moved. The previous bar is drawn in full for the selected activity.
+- Critical bars are hatched, progress is filled, milestones are diamonds, the data date is a dashed line. A bar or a previous finish that is out of view is shown as an arrow at that edge.
+- The Gantt has no vertical scroll of its own: it paints exactly the rows the grid shows, so the two cannot drift apart. Selection and arrow keys are shared.
+- Three time scales; drag or scroll sideways to move through time; the axis fits itself to the rows on screen when a view first loads, and moves to show a selected activity's bar.
+- The positions of every mark come from a pure function with 23 tests; the painter only draws them.
+
+**Usman decided or designed**
+
+- Option C for the ghost bars ("C, your pick"), on the agent's recommendation. No reasons of his own.
+
+**The agent (Claude) generated**
+
+- All the code, tests and copy.
+- Found while building, and decided without asking: with the axis at the data date, the worst movers finish years later and every bar was off the right edge, so the axis now fits itself to the rows on screen. That behaviour, and moving the axis when a row is selected, were not in the exploration.
+- Other choices not drawn: the three scales and their pixel widths, the split between grid and chart (11 to 9), the "Grid only" switch, the bar's height, and the wording of the chart's description.
+
+**Worth Usman's attention**
+
+- Not built: relationship lines, tooltips, the drawer, and visual regression tests for the canvas. The table in `docs/spec/ui.md` says what each canvas rule's state is.
+- A new activity still has no mark of its own on the chart.
+- After scrolling a long way down, the bars can be off the edge again, shown as arrows, until "Fit to rows" is pressed. Whether the axis should follow the rows by itself is a design question; it does not, because a time axis that moves while you scroll is hard to read.
+- The grid now has about half the width, so it scrolls sideways sooner. That is the accepted cost of layout A.
+- Checked by hand in the browser at 10,000 and 350,000 activities. No automated test looks at what the canvas draws.
+
 ## 11 November 2026: options for the Gantt's ghost bars
 
 **Done**

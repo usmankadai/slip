@@ -1,6 +1,6 @@
 # Exploration 02: two schedules on one Gantt
 
-Status: **options drawn, waiting for Usman's decision.**
+Status: **decided on 11 November 2026: option C, only the difference, with the previous bar drawn in full for the selected activity.**
 
 ## Problem
 
@@ -26,9 +26,11 @@ Things the mock made visible:
 
 ## Decision
 
-Not made. This is Usman's to choose.
+**Option C, only the difference, with the previous bar drawn in full for the selected activity.** Chosen by Usman on 11 November 2026 ("C, your pick"), on Claude's recommendation and without reasons of his own. The reasoning is Claude's: C fits the identity, since colour appears only where a date moved and a warm mark always means late; and it is the only option that keeps a one-day move visible at month zoom. Drawing the old bar for the one selected row gives the exact previous dates on demand without adding noise to every other row.
 
-Claude's recommendation: **C, with the previous bar drawn in full (as in A) for the selected activity only.** C is the option that fits the identity: colour appears only where a date moved, so a warm mark always means late. It is also the only one that survives month zoom. Its weakness is that the old bar cannot be seen; drawing it for the one selected row gives the exact previous dates on demand without adding noise to the other thousand rows. This is the least conventional choice, so it is the one most in need of a planner's reaction before it is settled.
+A was rejected for doubling the marks on activities that did not move. B was rejected because a duration that grows with the start unchanged is hidden behind the bar.
+
+Still open, and Usman's: how a new activity is marked on the chart (nothing marks it in this version; the grid's "What changed" column says Added), and the colour of an ordinary bar (a dark neutral, as drawn).
 
 ## What changed
 

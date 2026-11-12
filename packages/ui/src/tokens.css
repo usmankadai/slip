@@ -49,6 +49,14 @@
   --critical: #9b1c1c;
   --critical-hatch: repeating-linear-gradient(135deg, var(--critical) 0 2px, transparent 2px 5px);
 
+  /*
+   * Gantt. An ordinary bar is a dark neutral, so warm and blue are kept for dates that moved.
+   * The previous update's bar is the no-change grey.
+   */
+  --gantt-bar: var(--text-secondary);
+  --gantt-progress: var(--text-primary);
+  --gantt-ghost: var(--slip-none);
+
   /* Space, 4px scale */
   --space-0: 0;
   --space-1: 4px;

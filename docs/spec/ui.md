@@ -30,3 +30,23 @@ Canvas is invisible to assistive technology and to axe, so these rules replace w
 - **Hit testing** goes through a spatial index of the visible bars, not a loop over all activities.
 - Hover tooltips have a keyboard equivalent (shown for the focused bar).
 - Visual regression tests cover the canvas at DPR 1 and 2.
+
+## What the Gantt does today (12 November 2026)
+
+Built in `apps/web/src/features/changes/gantt`, following exploration 02, option C.
+
+| Rule above | State |
+|---|---|
+| The grid is the accessible equivalent; `role="img"` and a label | Done. The label gives the rows and the dates in view and says the grid holds every date |
+| Keyboard: focusable, arrow keys move the shared selection, drawn focus ring | Done. The ring uses `--focus-ring`. Its contrast against the bar has not been measured |
+| Sharpness: backing store by device pixel ratio, redraw on change, 1px lines snapped | Done |
+| Motion | Nothing animates |
+| Colour from tokens, resolved once | Done, read when the chart mounts. There is no theme change to react to yet |
+| Late and early distinguishable under colour-blindness; critical differs by pattern | Late and early also differ by which side of the bar the tail is on. Critical bars are hatched. Checked in the exploration's simulated views, not on the built chart, and no screenshots are kept in `docs/decisions/` |
+| Text on canvas uses the token font, 11px or more | Done |
+| Hit testing through a spatial index | Not needed yet: a click selects a row, found from its vertical position. A spatial index is for when bars themselves are targets |
+| Hover tooltips with a keyboard equivalent | Not built. There are no tooltips |
+| Visual regression at DPR 1 and 2 | Not built |
+
+Not built: relationship lines, the today line, summary bars, and zoom by gesture. The time axis has three fixed scales, is dragged or scrolled sideways, fits itself to the rows on screen when a view first loads, and moves to show a selected activity's bar.
+

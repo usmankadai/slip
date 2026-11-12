@@ -5,9 +5,10 @@
  */
 import { useCallback, useEffect, useRef, useState } from 'react';
 import type { FilterSpec, SortSpec } from '@slip/engine';
-import { NONE } from '@slip/xer';
+import { NONE, Status, TaskType } from '@slip/xer';
 import { engine } from '../../app/engine.ts';
 import { EngineRequestError } from '../../workers/engineClient.ts';
+import type { GanttRow } from './gantt/geometry.ts';
 import { fetchRange } from './virtual.ts';
 
 export interface GridRow {
@@ -23,6 +24,8 @@ export interface GridRow {
   /** Total float in hundredths of a working day, or NONE. */
   float: number;
   flags: number;
+  /** What the Gantt draws for this activity. */
+  gantt: GanttRow;
 }
 
 export type GridStatus = 'loading' | 'ready' | 'error';
@@ -66,6 +69,12 @@ export function useGridRows(filter: FilterSpec, sort: SortSpec | null) {
               'finishDeltaDays',
               'totalFloatDays',
               'flags',
+              'start',
+              'previousStart',
+              'originalDuration',
+              'remainingDuration',
+              'status',
+              'type',
             ],
             filter,
             sort,
@@ -78,7 +87,29 @@ export function useGridRows(filter: FilterSpec, sort: SortSpec | null) {
             const rows: GridRow[] = [];
             for (let k = 0; k < result.indices.length; k++) {
               const slip = result.numbers.finishDeltaDays?.[k] ?? NONE;
+              const value = (column: keyof typeof result.numbers) =>
+                result.numbers[column]?.[k] ?? NONE;
+              const state = value('status');
+              const type = value('type');
+              const float = value('totalFloatDays');
+              const original = value('originalDuration');
+              const remaining = value('remainingDuration');
+              const progress =
+                state === Status.Complete
+                  ? 1
+                  : state === Status.Active && original > 0 && remaining !== NONE
+                    ? 1 - remaining / original
+                    : 0;
               rows.push({
+                gantt: {
+                  start: value('start'),
+                  finish: value('finish'),
+                  previousStart: value('previousStart'),
+                  previousFinish: value('previousFinish'),
+                  milestone: type === TaskType.StartMilestone || type === TaskType.FinishMilestone,
+                  critical: float !== NONE && float <= 0 && state !== Status.Complete,
+                  progress,
+                },
                 activity: result.indices[k]!,
                 code: result.text.code?.[k] ?? '',
                 name: result.text.name?.[k] ?? '',

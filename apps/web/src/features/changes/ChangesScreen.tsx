@@ -1,10 +1,20 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { SortSpec } from '@slip/engine';
 import { Button, Notice, SegmentedControl, type Density } from '@slip/ui';
+import { NONE } from '@slip/xer';
 import { engine } from '../../app/engine.ts';
 import { longDate, plural } from '../../shared/format.ts';
 import type { SlotFacts } from '../import/types.ts';
 import { ChangesGrid } from './ChangesGrid.tsx';
+import { Gantt } from './gantt/Gantt.tsx';
+import {
+  PX_PER_DAY,
+  originFor,
+  originToFit,
+  originToReveal,
+  timeAt,
+  type Zoom,
+} from './gantt/scale.ts';
 import { GridMessage } from './GridMessage.tsx';
 import styles from './changes.module.css';
 import {
@@ -27,6 +37,19 @@ const DENSITY_OPTIONS = [
   { value: 'compact' as const, label: 'Compact' },
   { value: 'comfortable' as const, label: 'Comfortable' },
 ];
+const ZOOM_OPTIONS = [
+  { value: 'weeks' as const, label: 'Weeks' },
+  { value: 'months' as const, label: 'Months' },
+  { value: 'years' as const, label: 'Years' },
+];
+const GANTT_OPTIONS = [
+  { value: 'shown' as const, label: 'Grid and Gantt' },
+  { value: 'hidden' as const, label: 'Grid only' },
+];
+/** Where the data date sits across the chart when it is first shown or asked for. */
+const DATA_DATE_AT = 0.2;
+/** A guess at the chart's width before it has been measured, for the first placement only. */
+const ASSUMED_WIDTH = 520;
 const SEARCH_DELAY_MS = 250;
 
 export function ChangesScreen({
@@ -47,6 +70,18 @@ export function ChangesScreen({
   const [lostSelection, setLostSelection] = useState(false);
   const [position, setPosition] = useState({ first: 0, last: 0 });
   const [removed, setRemoved] = useState(0);
+  const [gantt, setGantt] = useState<'shown' | 'hidden'>('shown');
+  const [zoom, setZoom] = useState<Zoom>('months');
+  const dataDate = pair.b.dataDate === NONE ? 0 : pair.b.dataDate;
+  const [origin, setOrigin] = useState(() =>
+    originFor(dataDate, DATA_DATE_AT, ASSUMED_WIDTH, PX_PER_DAY.months),
+  );
+  const scale = useMemo(() => ({ origin, pxPerDay: PX_PER_DAY[zoom] }), [origin, zoom]);
+  const [width, setWidth] = useState(ASSUMED_WIDTH);
+  /** The rows on screen, 0-based, for fitting the time axis to them. */
+  const onScreen = useRef({ start: 0, end: 0 });
+  /** True once the axis has been fitted to the first rows of a view. */
+  const fitted = useRef(false);
   /** The selected activity, kept so the planner's place survives a new filter or sort. */
   const selectedActivity = useRef<number | null>(null);
 
@@ -124,9 +159,60 @@ export function ChangesScreen({
     [],
   );
   const onRows = useCallback(
-    (start: number, end: number) => need(start, end, total),
+    (start: number, end: number) => {
+      onScreen.current = { start, end };
+      need(start, end, total);
+    },
     [need, total],
   );
+
+  /** Puts the earliest bar among the rows on screen near the left edge of the chart. */
+  const fitToRows = useCallback(
+    (pxPerDay: number) => {
+      const starts: number[] = [];
+      for (let row = onScreen.current.start; row < onScreen.current.end; row++) {
+        const bar = rowAt(row)?.gantt;
+        if (bar) starts.push(bar.start === NONE ? bar.finish : bar.start);
+      }
+      const next = originToFit(starts, width, pxPerDay, NONE);
+      if (next !== null) setOrigin(next);
+      return next !== null;
+    },
+    [rowAt, width],
+  );
+
+  // When the rows of a new view first arrive, show their bars; otherwise the chart may be empty.
+  useEffect(() => {
+    fitted.current = false;
+  }, [viewKey]);
+  useEffect(() => {
+    if (status === 'ready' && !fitted.current && selectedRow === null) {
+      fitted.current = fitToRows(PX_PER_DAY[zoom]);
+    }
+  }, [status, fitToRows, zoom, selectedRow]);
+
+  // Selecting an activity brings its bar into view, moving the axis only if it has to.
+  const selectedBar = selected?.gantt;
+  useEffect(() => {
+    if (!selectedBar || selectedBar.finish === NONE) return;
+    const start = selectedBar.start === NONE ? selectedBar.finish : selectedBar.start;
+    setOrigin((current) =>
+      originToReveal(
+        start,
+        selectedBar.finish,
+        { origin: current, pxPerDay: PX_PER_DAY[zoom] },
+        width,
+      ),
+    );
+    // Runs when the selection changes, not when the axis is dragged afterwards.
+  }, [selectedBar]);
+
+  /** Changes the time scale, keeping the moment at the middle of the chart where it is. */
+  const changeZoom = (next: Zoom) => {
+    const middle = timeAt(width / 2, scale);
+    setZoom(next);
+    setOrigin(originFor(middle, 0.5, width, PX_PER_DAY[next]));
+  };
   const onPosition = useCallback((first: number, last: number) => setPosition({ first, last }), []);
   const onSelectRow = useCallback((row: number) => {
     setSelectedRow(row);
@@ -176,6 +262,31 @@ export function ChangesScreen({
           />
         </label>
         <div className={styles.push}>
+          {gantt === 'shown' ? (
+            <>
+              <SegmentedControl
+                label="Time scale"
+                options={ZOOM_OPTIONS}
+                value={zoom}
+                onChange={changeZoom}
+              />
+              <Button variant="quiet" onClick={() => fitToRows(scale.pxPerDay)}>
+                Fit to rows
+              </Button>
+              <Button
+                variant="quiet"
+                onClick={() => setOrigin(originFor(dataDate, DATA_DATE_AT, width, scale.pxPerDay))}
+              >
+                Go to data date
+              </Button>
+            </>
+          ) : null}
+          <SegmentedControl
+            label="Layout"
+            options={GANTT_OPTIONS}
+            value={gantt}
+            onChange={setGantt}
+          />
           <SegmentedControl
             label="Density"
             options={DENSITY_OPTIONS}
@@ -218,6 +329,29 @@ export function ChangesScreen({
           selectedRow={selectedRow}
           onSelectRow={onSelectRow}
           reveal={reveal}
+          aside={
+            gantt === 'hidden'
+              ? undefined
+              : (rows) => (
+                  <Gantt
+                    rowHeight={rows.rowHeight}
+                    firstRow={rows.firstRow}
+                    offset={rows.offset}
+                    rows={Array.from({ length: rows.count }, (_, k) =>
+                      status === 'loading' ? undefined : rowAt(rows.firstRow + k)?.gantt,
+                    )}
+                    total={status === 'loading' ? 0 : total}
+                    selectedRow={selectedRow}
+                    onSelectRow={onSelectRow}
+                    scale={scale}
+                    onPan={setOrigin}
+                    dataDate={dataDate}
+                    onScrollRows={rows.scrollBy}
+                    onKeyDown={rows.onKeyDown}
+                    onWidth={setWidth}
+                  />
+                )
+          }
         />
       )}
 

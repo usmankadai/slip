@@ -43,3 +43,5 @@ The changes grid is windowed: only the rows on screen are in the document (about
 
 One hand-run check, not a published number: on the 350,000 activity rail pair, in the development build, in the desktop app's browser pane on the build machine, a three second sweep from the first row to the last held a 95th percentile frame time of 8.4ms on a 120Hz display, and sorting all 350,350 activities by name took about 0.3s. The perf suite does not measure scrolling yet; until it does, the budget row for scroll is unverified.
 
+With the Gantt beside the grid (12 November 2026), the same hand-run sweep on the 350,000 activity pair held a 95th percentile frame time of 8.5ms. The Gantt paints only the rows the grid is showing, about 25 bars a frame, so its cost does not grow with the schedule. Still not measured by the perf suite.
+
