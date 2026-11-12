@@ -10,7 +10,7 @@ To view: run the `design` preview (or `pnpm --filter @slip/web exec vite ../../d
 | Update summary | [summary.html](summary.html): A milestones full width with a strip below, B milestones with a rail, C one sentence then the evidence | Decided 11 November 2026 | B, milestones with a rail |
 | Changes | [changes.html](changes.html): A grid and Gantt side by side, B grid first with a small timeline in each row, C change types down the left | Decided 11 November 2026 | A, grid and Gantt side by side |
 | Slip trace | Not drawn as a layout. [Exploration 03](../explorations/03-trace-view/README.md) has three treatments: A ranked causes, B the driving path, C a waterfall | Decided 12 November 2026 | A leading, B beneath as evidence |
-| Health | not drawn | | |
+| Health | [health.html](health.html): A what changed first then the rest, B all 14 in DCMA order with the change marked, C checks on the left and the chosen check on the right | Waiting for Usman | |
 | Finish update | not drawn | | |
 
 ## Decisions
@@ -19,6 +19,12 @@ Both were decided by Usman on 11 November 2026 by accepting Claude's recommendat
 
 - **Import: A, two slots side by side**, including the "do these two belong together" line. It is what the spec asks for (two slots), and it keeps each warning beside the file it is about. B is the stronger answer to "can I trust it" and stays the fallback if the import report turns out to need the full width; exploration 08 (import warnings) will show that.
 - **Update summary: B, milestones with a rail.** It is the one where the secondary facts are plainly secondary and still on screen. A's strip of three tiles is the dashboard the spec warns against. C's sentence is a good idea that belongs on the Finish update screen.
+
+## Health: waiting for a decision
+
+Three layouts drawn on 12 November 2026. Claude's recommendation, a suggestion only: **A**, what changed first, then the rest. It is the hierarchy the design spec asks for (the checks that changed or got worse lead), it keeps all 14 on the page, and each row is a way in to the changes grid filtered to that check. When nothing changed it falls back to B's table. C's definition of each check is worth keeping as a line under the check's name.
+
+Open whichever is chosen: what "worse" means for a check that fails in both updates, and for the two ratio checks, which have no count of activities.
 
 ## Changes: decisions
 
