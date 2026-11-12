@@ -1,0 +1,225 @@
+<!doctype html>
+<html lang="en-GB">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>The trace view: options</title>
+    <style>
+      /* A record of what was looked at. The product reads these values from packages/ui/src/tokens.css. */
+      :root {
+        --s0: #fbfaf7; --s1: #f4f2ec; --s2: #ebe8e0; --t1: #1c1b18; --t2: #55524a; --t3: #6c685d;
+        --b1: #e2ded3; --b2: #898477; --accent: #5b3fd6;
+        --late4: #db6b2c; --late5: #b8321f; --early4: #4c8cda; --none: #b9b5aa;
+      }
+      * { box-sizing: border-box; }
+      body { margin: 0; background: var(--s0); color: var(--t1); font: 13px/20px Inter, system-ui, -apple-system, 'Segoe UI', sans-serif; font-variant-numeric: tabular-nums; }
+      header, main { max-width: 1180px; margin: 0 auto; padding: 0 32px; }
+      header { padding-top: 24px; }
+      main { padding-bottom: 64px; }
+      h1 { font-size: 20px; line-height: 28px; margin: 0 0 4px; }
+      h2 { font-size: 16px; line-height: 24px; margin: 40px 0 8px; }
+      p { margin: 0 0 8px; color: var(--t2); max-width: 760px; }
+      .controls { position: sticky; top: 0; z-index: 2; background: var(--s0); border-bottom: 1px solid var(--b1); padding: 8px 0; margin: 16px 0 0; display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+      .controls button { font: inherit; padding: 2px 10px; border: 1px solid var(--b2); border-radius: 4px; background: var(--s0); color: var(--t1); cursor: pointer; }
+      .controls button[aria-pressed='true'] { background: var(--t1); color: var(--s0); border-color: var(--t1); }
+      .option { display: grid; grid-template-columns: minmax(0, 1fr) 300px; gap: 24px; align-items: start; }
+      .stage { min-width: 0; overflow-x: auto; }
+      .notes { margin: 0; font-size: 12px; line-height: 16px; }
+      .notes dt { font-weight: 600; margin-top: 8px; }
+      .notes dt:first-child { margin-top: 0; }
+      .notes dd { margin: 0; color: var(--t2); }
+
+      .panel { min-width: 640px; border: 1px solid var(--b1); border-radius: 6px; background: var(--s0); padding: 16px; display: grid; gap: 10px; }
+      .label { font-size: 11px; line-height: 16px; color: var(--t3); }
+      .answer { font-size: 16px; line-height: 24px; font-weight: 600; margin: 0; }
+      .sub { font-size: 12px; line-height: 16px; color: var(--t2); margin: 0; }
+      .code { font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 11px; color: var(--t3); }
+      .kind { font-size: 11px; color: var(--t2); border: 1px solid var(--b1); border-radius: 4px; padding: 0 6px; white-space: nowrap; }
+      .row { display: grid; align-items: center; gap: 8px; padding: 5px 0; border-bottom: 1px solid var(--b1); font-size: 12px; line-height: 16px; }
+      .row:last-child { border-bottom: 0; }
+      .rank { grid-template-columns: 20px minmax(0, 1fr) 110px 180px 52px 44px; }
+      .head { color: var(--t2); font-weight: 500; background: var(--s2); padding: 5px 8px; margin: 0 -8px; border-bottom: 0; }
+      .n { text-align: right; font-weight: 600; }
+      .pct { text-align: right; color: var(--t2); }
+      .muted { color: var(--t3); }
+      .bar { height: 8px; position: relative; background: var(--s2); }
+      .bar i { position: absolute; top: 0; height: 100%; }
+      .late { background: var(--late4); }
+      .early { background: var(--early4); }
+      .inh { background: var(--none); }
+      .fold { font-size: 12px; line-height: 16px; color: var(--t2); border-top: 1px solid var(--b1); padding-top: 8px; }
+      .link { color: var(--accent); text-decoration: underline; }
+      .chain { grid-template-columns: 16px minmax(0, 1fr) 110px 200px 60px; }
+      .dot { width: 9px; height: 9px; border-radius: 50%; border: 2px solid var(--b2); background: var(--s0); justify-self: center; }
+      .dot.own { border-color: var(--late4); background: var(--late4); }
+      .dot.rec { border-color: var(--early4); background: var(--early4); }
+      .dot.end { border-radius: 0; transform: rotate(45deg); border-color: var(--t1); background: var(--t1); }
+      .pass { color: var(--t3); font-style: normal; padding-left: 24px; }
+      .wf { grid-template-columns: minmax(0, 220px) minmax(0, 1fr) 52px; }
+      .axis { display: grid; grid-template-columns: minmax(0, 220px) minmax(0, 1fr) 52px; gap: 8px; font-size: 11px; color: var(--t3); }
+      .axis div { display: flex; justify-content: space-between; }
+      .wfbar { height: 12px; position: relative; background: linear-gradient(var(--b1), var(--b1)) left / 1px 100% no-repeat; }
+      .wfbar i { position: absolute; top: 2px; height: 8px; }
+      .wfbar u { position: absolute; top: 0; height: 12px; width: 1px; background: var(--b2); }
+      .total i { background: var(--t1); }
+      @media (max-width: 900px) { .option { grid-template-columns: 1fr; } }
+    </style>
+  </head>
+  <body>
+    <header>
+      <h1>Exploration 03: the trace view</h1>
+      <p>A planner picks a milestone that moved and asks why. The engine walks back along the driving path and works out, for each activity on it, how much slip that activity added of its own (it took longer, or its logic changed) as distinct from the slip it merely passed on from its predecessor. The answer is usually a handful of activities out of a chain of dozens. The design spec is firm about the hierarchy: the ranked causes are the answer, and the chain is the evidence.</p>
+      <p>Each option shows the same trace. The first case uses the real figures from the generated 1,000 activity rail schedule: project completion slipped 67 working days, caused by four activities adding 20, 18, 16 and 13 days. The activities between them on the path, and all the names, are made up. The second case is made up to test the awkward parts: an activity that recovered time, and a tail of small contributors.</p>
+      <div class="controls" id="controls">
+        <span>Case:</span>
+        <button data-case="clean" aria-pressed="true">Four causes, +67d</button>
+        <button data-case="messy" aria-pressed="false">A recovery and many small ones, +41d</button>
+      </div>
+    </header>
+    <main id="main"></main>
+
+    <script>
+      const KIND = { duration: 'Duration grew', progress: 'Taking longer', logic: 'Logic changed', recovered: 'Recovered time' };
+      // `path` is the driving path from where the trace stops to the milestone. `own` is in working days.
+      const CASES = {
+        clean: {
+          milestone: 'Project completion', code: 'MS-COMPLETE', slip: 67, was: '7 May 2027', now: '10 August 2027',
+          stop: 'The path starts at the data date: the first activity has not started when it could have.',
+          path: [
+            { code: 'P03-A002-CIV-0010', name: 'Survey formation, section 2', own: 0 },
+            { code: 'P03-A002-CIV-0040', name: 'Excavate cutting, section 2', own: 13, kind: 'progress' },
+            { code: 'P03-A002-CIV-0090', name: 'Lay drainage, section 2', own: 0 },
+            { code: 'P03-A002-CIV-0150', name: 'Form subgrade, section 2', own: 0 },
+            { code: 'P03-A002-CIV-0220', name: 'Backfill retaining wall, section 2', own: 16, kind: 'duration' },
+            { code: 'P03-A002-TRK-0120', name: 'Lay sleepers, section 2', own: 0 },
+            { code: 'P03-A002-TRK-0170', name: 'Tamp and align track, section 2', own: 18, kind: 'duration' },
+            { code: 'P03-A002-ENB-0060', name: 'Erect masts, section 2', own: 0 },
+            { code: 'P03-A002-ENB-0110', name: 'Install catenary, section 2', own: 20, kind: 'duration' },
+            { code: 'P03-A002-TST-0200', name: 'Test and commission, section 2', own: 0 },
+            { code: 'MS-P03', name: 'Phase 3 complete', own: 0 },
+          ],
+        },
+        messy: {
+          milestone: 'Section 3 handover', code: 'MS-S3-HO', slip: 41, was: '12 February 2027', now: '9 April 2027',
+          stop: 'The path starts at a constraint: the first activity cannot start before 4 January 2027.',
+          path: [
+            { code: 'P02-A003-CIV-0020', name: 'Possession 4 begins', own: 0 },
+            { code: 'P02-A003-CIV-0060', name: 'Break out old slab, section 3', own: 24, kind: 'duration' },
+            { code: 'P02-A003-CIV-0100', name: 'Pour new slab, section 3', own: 2, kind: 'progress' },
+            { code: 'P02-A003-CIV-0140', name: 'Cure slab, section 3', own: 0 },
+            { code: 'P02-A003-TRK-0050', name: 'Lay sleepers, section 3', own: -12, kind: 'recovered' },
+            { code: 'P02-A003-TRK-0090', name: 'Lay rail, section 3', own: 1, kind: 'progress' },
+            { code: 'P02-A003-TRK-0130', name: 'Weld rail, section 3', own: 15, kind: 'logic' },
+            { code: 'P02-A003-TRK-0160', name: 'Stress rail, section 3', own: 1, kind: 'progress' },
+            { code: 'P02-A003-SIG-0040', name: 'Install signals, section 3', own: 9, kind: 'progress' },
+            { code: 'P02-A003-SIG-0080', name: 'Test signals, section 3', own: 1, kind: 'progress' },
+            { code: 'P02-A003-TST-0010', name: 'Enter service tests, section 3', own: 0 },
+          ],
+        },
+      };
+      const signed = (days) => `${days > 0 ? '+' : days < 0 ? '−' : ''}${Math.abs(days)}d`;
+      const head = (c) => `
+        <div><div class="label">Why did this milestone move?</div>
+          <p class="answer">${c.milestone} <span class="code">${c.code}</span> finishes ${signed(c.slip)} later</p>
+          <p class="sub">${c.was} to ${c.now}. ${c.path.length} activities on the driving path.</p></div>`;
+      const SMALL = 3;
+
+      const OPTIONS = [
+        {
+          title: 'A. Ranked causes, with the chain folded away',
+          render(c) {
+            const causes = c.path.filter((a) => a.own !== 0).sort((x, y) => Math.abs(y.own) - Math.abs(x.own));
+            const big = causes.filter((a) => Math.abs(a.own) >= SMALL);
+            const small = causes.filter((a) => Math.abs(a.own) < SMALL);
+            const added = causes.filter((a) => a.own > 0).reduce((s, a) => s + a.own, 0);
+            const scale = Math.max(...causes.map((a) => Math.abs(a.own)));
+            const row = (a, k) => `<div class="row rank"><span class="muted">${k + 1}</span><span>${a.name} <span class="code">${a.code}</span></span><span><span class="kind">${KIND[a.kind]}</span></span>
+              <span class="bar"><i class="${a.own > 0 ? 'late' : 'early'}" style="left: 0; width: ${(Math.abs(a.own) / scale) * 100}%"></i></span><span class="n">${signed(a.own)}</span><span class="pct">${a.own > 0 ? Math.round((a.own / added) * 100) + '%' : ''}</span></div>`;
+            const smallTotal = small.reduce((s, a) => s + a.own, 0);
+            return `<div class="panel">${head(c)}
+              <div><div class="row rank head"><span></span><span>Cause</span><span>What happened</span><span>Added of its own</span><span class="n">Days</span><span class="pct">Share</span></div>
+              ${big.map(row).join('')}
+              ${small.length ? `<div class="row rank"><span></span><span class="muted">${small.length} more activities, each under ${SMALL} days · <span class="link">Show</span></span><span></span><span></span><span class="n">${signed(smallTotal)}</span><span></span></div>` : ''}</div>
+              <div class="fold">${c.path.filter((a) => a.own === 0).length} activities on the path passed the slip on without adding to it. ${c.stop} · <span class="link">Show the driving path</span></div></div>`;
+          },
+          notes: [
+            ['Leads with', 'The few activities that caused the slip, largest first, each with what happened and its share.'],
+            ['Own and inherited', 'Only own slip is shown. Activities that merely passed slip on are counted in one line and kept out of the list.'],
+            ['Does well', 'It is the answer, in the order a planner would report it. Short however long the chain is. A recovery is one more row, in blue, pointing the same way so sizes can be compared. Small contributors fold into one line.'],
+            ['Costs', 'Sequence is lost: nothing shows which cause came first or how they sit along the path. Shares are of slip added, so with a recovery they do not sum to the milestone figure and need a word of explanation. The evidence is a click away.'],
+          ],
+        },
+        {
+          title: 'B. The driving path, with own and inherited slip on each activity',
+          render(c) {
+            let running = 0;
+            const peak = Math.max(c.slip, ...c.path.reduce((acc, a) => (acc.push((acc.at(-1) ?? 0) + a.own), acc), []));
+            const out = [];
+            let passed = 0;
+            const flush = () => { if (passed) out.push(`<div class="row chain"><span></span><span class="pass">${passed} ${passed === 1 ? 'activity' : 'activities'} passed it on unchanged</span><span></span><span></span><span></span></div>`); passed = 0; };
+            c.path.forEach((a, index) => {
+              const before = running;
+              running += a.own;
+              if (a.own === 0 && index !== 0) { passed++; return; }
+              flush();
+              const inherited = Math.min(before, running);
+              const own = Math.abs(a.own);
+              out.push(`<div class="row chain"><span class="dot ${a.own > 0 ? 'own' : a.own < 0 ? 'rec' : ''}"></span><span>${a.name} <span class="code">${a.code}</span></span><span>${a.kind ? `<span class="kind">${KIND[a.kind]}</span>` : '<span class="muted">Start of path</span>'}</span>
+                <span class="bar"><i class="inh" style="left: 0; width: ${(inherited / peak) * 100}%"></i><i class="${a.own > 0 ? 'late' : 'early'}" style="left: ${(inherited / peak) * 100}%; width: ${(own / peak) * 100}%"></i></span><span class="n">${a.own ? signed(a.own) : ''}</span></div>`);
+            });
+            flush();
+            out.push(`<div class="row chain"><span class="dot end"></span><span><b>${c.milestone}</b> <span class="code">${c.code}</span></span><span></span><span class="bar"><i class="inh" style="left: 0; width: ${(c.slip / peak) * 100}%"></i></span><span class="n">${signed(c.slip)}</span></div>`);
+            return `<div class="panel">${head(c)}
+              <div><div class="row chain head"><span></span><span>Driving path, earliest first</span><span>What happened</span><span>Slip here: inherited, then own</span><span class="n">Own</span></div>${out.join('')}</div>
+              <div class="fold">${c.stop}</div></div>`;
+          },
+          notes: [
+            ['Leads with', 'The path, in the order the work happens, from where the trace stops to the milestone.'],
+            ['Own and inherited', 'Both, on every activity: a grey bar for the slip it arrived with and a coloured piece for what it added or recovered. The bar grows down the page.'],
+            ['Does well', 'Shows how the slip built up and where a recovery clawed some back. Nothing is hidden: it is the evidence itself. Runs of activities that added nothing fold into one line.'],
+            ['Costs', 'The planner has to find the answer in it. The largest cause is wherever it falls on the path, not at the top. Grows with the length of the chain. This is the layout the spec warns against leading with.'],
+          ],
+        },
+        {
+          title: 'C. A waterfall of contributions',
+          render(c) {
+            const causes = c.path.filter((a) => a.own !== 0);
+            let running = 0;
+            const peak = Math.max(c.slip, ...causes.reduce((acc, a) => (acc.push((acc.at(-1) ?? 0) + a.own), acc), []));
+            const pct = (days) => (days / peak) * 100;
+            const rows = causes.map((a) => {
+              const from = Math.min(running, running + a.own);
+              const row = `<div class="row wf"><span>${a.name}</span><span class="wfbar"><u style="left: ${pct(running)}%"></u><i class="${a.own > 0 ? 'late' : 'early'}" style="left: ${pct(from)}%; width: ${pct(Math.abs(a.own))}%"></i></span><span class="n">${signed(a.own)}</span></div>`;
+              running += a.own;
+              return row;
+            }).join('');
+            return `<div class="panel">${head(c)}
+              <div><div class="axis"><span></span><div><span>0</span><span>${Math.round(peak / 2)}d</span><span>${peak}d</span></div><span></span></div>
+              ${rows}
+              <div class="row wf total"><span><b>${c.milestone}</b></span><span class="wfbar"><i style="left: 0; width: ${pct(c.slip)}%"></i></span><span class="n">${signed(c.slip)}</span></div></div>
+              <div class="fold">Contributors only, in path order. ${c.path.filter((a) => a.own === 0).length} activities passed the slip on unchanged. ${c.stop}</div></div>`;
+          },
+          notes: [
+            ['Leads with', 'How the contributions add up to the total, each bar starting where the last one ended.'],
+            ['Own and inherited', 'Own slip is each bar. Inherited slip is where the bar starts. Nothing needs a legend.'],
+            ['Does well', 'The sum is visible: the pieces plainly make the whole, and a recovery steps back. Keeps path order without listing the activities that added nothing.'],
+            ['Costs', 'Largest first and path order cannot both be shown: sorted by size it stops being a true build-up, and in path order the biggest cause is not first. Many small contributors make many thin steps. Less room for the activity name and what happened.'],
+          ],
+        },
+      ];
+
+      const main = document.getElementById('main');
+      function draw(which) {
+        const c = CASES[which];
+        main.innerHTML = OPTIONS.map((o) => `<h2>${o.title}</h2><div class="option"><div class="stage">${o.render(c)}</div><dl class="notes">${o.notes.map(([t, d]) => `<dt>${t}</dt><dd>${d}</dd>`).join('')}</dl></div>`).join('');
+      }
+      document.getElementById('controls').addEventListener('click', (event) => {
+        const button = event.target.closest('button');
+        if (!button) return;
+        for (const other of document.querySelectorAll('#controls button')) other.setAttribute('aria-pressed', String(other === button));
+        draw(button.dataset.case);
+      });
+      draw('clean');
+    </script>
+  </body>
+</html>

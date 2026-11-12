@@ -9,7 +9,7 @@ To view: run the `design` preview (or `pnpm --filter @slip/web exec vite ../../d
 | Import | [import.html](import.html): A two slots side by side, B one ledger with two rows, C one file at a time | Decided 11 November 2026 | A, two slots side by side |
 | Update summary | [summary.html](summary.html): A milestones full width with a strip below, B milestones with a rail, C one sentence then the evidence | Decided 11 November 2026 | B, milestones with a rail |
 | Changes | [changes.html](changes.html): A grid and Gantt side by side, B grid first with a small timeline in each row, C change types down the left | Decided 11 November 2026 | A, grid and Gantt side by side |
-| Slip trace | not drawn | | |
+| Slip trace | Not drawn as a layout. [Exploration 03](../explorations/03-trace-view/README.md) has three treatments: A ranked causes, B the driving path, C a waterfall | Waiting for Usman | |
 | Health | not drawn | | |
 | Finish update | not drawn | | |
 
