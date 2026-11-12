@@ -2,6 +2,28 @@
 
 What was built, what Usman decided or designed, and what an agent generated. Newest first.
 
+## 12 November 2026: options for the trace view
+
+**Done**
+
+- Exploration 03, the trace view: three treatments of the same trace, with a switch between the real case from the 1,000 activity fixture (four causes, +67 days) and a made-up one with a recovery and several small contributors.
+
+**Usman decided or designed**
+
+- To draw these next. Nothing on the page yet.
+
+**The agent (Claude) generated**
+
+- The page, the options, the write-up and the recommendation (ranked causes leading, the driving path beneath as evidence).
+- In the real case only the four causes and their figures are real. The other activities on the path and every name are made up, and the page says so.
+- Words for the kinds of cause ("Duration grew", "Taking longer", "Logic changed", "Recovered time"). The engine has six kinds; four were drawn.
+
+**Worth Usman's attention**
+
+- One choice is waiting. The trace screen is not built until it is made.
+- What "share" means when an activity recovered time is unresolved. The mock shows share of slip added and gives the recovery none.
+- No low-fidelity layout exists for the trace screen as a whole; this exploration covers the main panel only.
+
 ## 12 November 2026: the Gantt
 
 **Done**
