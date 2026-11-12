@@ -5,6 +5,7 @@ import {
   useRef,
   useState,
   type KeyboardEvent,
+  type ReactNode,
 } from 'react';
 import type { SortSpec } from '@slip/engine';
 import { DeltaCell, ROW_HEIGHT, Skeleton, type Density } from '@slip/ui';
@@ -40,6 +41,22 @@ export interface ChangesGridProps {
   onSelectRow: (row: number) => void;
   /** Change `nonce` to bring `row` into view, for example after the sort changes. */
   reveal: { row: number; nonce: number } | null;
+  /**
+   * Something drawn beside the grid on the same rows, such as the Gantt. It is told which
+   * rows are on screen, and given the grid's scrolling and key handling so the two act as one.
+   */
+  aside?: (rows: AsideRows) => ReactNode;
+}
+
+export interface AsideRows {
+  /** Position in the view of the first row drawn, and how far it is scrolled off the top. */
+  firstRow: number;
+  offset: number;
+  /** How many rows are drawn. */
+  count: number;
+  rowHeight: number;
+  scrollBy: (deltaY: number) => void;
+  onKeyDown: (event: KeyboardEvent) => void;
 }
 
 const READOUT_MS = 900;
@@ -110,6 +127,7 @@ export function ChangesGrid({
   selectedRow,
   onSelectRow,
   reveal,
+  aside,
 }: ChangesGridProps) {
   const scroller = useRef<HTMLDivElement>(null);
   const [scrollTop, setScrollTop] = useState(0);
@@ -208,69 +226,81 @@ export function ChangesGrid({
   }
 
   return (
-    <div className={styles.gridFrame} data-density={density}>
-      <div
-        ref={scroller}
-        className={styles.scroller}
-        role="grid"
-        aria-label="Activities"
-        aria-rowcount={total + 1}
-        aria-colcount={COLUMNS.length + 1}
-        tabIndex={0}
-        onKeyDown={onKeyDown}
-        onScroll={(event) => {
-          setScrollTop(event.currentTarget.scrollTop);
-          setScrolling(true);
-          clearTimeout(readoutTimer.current);
-          readoutTimer.current = window.setTimeout(() => setScrolling(false), READOUT_MS);
-        }}
-      >
-        <div role="row" aria-rowindex={1} className={`${styles.row} ${styles.head}`}>
-          <span role="columnheader" className={`${styles.cell} ${styles.rowNumber}`}>
-            Row
-          </span>
-          {COLUMNS.map((column) => {
-            const sorted = column.sortBy !== null && sort?.column === column.sortBy;
-            const direction = sorted
-              ? sort.direction === 'asc'
-                ? 'ascending'
-                : 'descending'
-              : undefined;
-            return (
-              <span
-                key={column.id}
-                role="columnheader"
-                aria-sort={direction}
-                className={`${styles.cell} ${column.numeric ? styles.numeric : ''}`}
-              >
-                {column.sortBy ? (
-                  <button type="button" className={styles.sort} onClick={() => onSort(column)}>
-                    {column.label}
-                    <span aria-hidden="true">
-                      {sorted ? (sort.direction === 'asc' ? ' ▲' : ' ▼') : ''}
-                    </span>
-                  </button>
-                ) : (
-                  column.label
-                )}
-              </span>
-            );
-          })}
-        </div>
-        <div className={styles.spacer} style={{ height: scrollHeight(viewport) }}>
-          <div
-            className={styles.layer}
-            style={{ height: Math.min(height, total * rowHeight), top: rowHeight }}
-          >
-            <div style={{ transform: `translateY(${-visible.offset}px)` }}>{rows}</div>
+    <div className={`${styles.gridFrame} ${aside ? styles.withAside : ''}`} data-density={density}>
+      <div className={styles.gridPane}>
+        <div
+          ref={scroller}
+          className={styles.scroller}
+          role="grid"
+          aria-label="Activities"
+          aria-rowcount={total + 1}
+          aria-colcount={COLUMNS.length + 1}
+          tabIndex={0}
+          onKeyDown={onKeyDown}
+          onScroll={(event) => {
+            setScrollTop(event.currentTarget.scrollTop);
+            setScrolling(true);
+            clearTimeout(readoutTimer.current);
+            readoutTimer.current = window.setTimeout(() => setScrolling(false), READOUT_MS);
+          }}
+        >
+          <div role="row" aria-rowindex={1} className={`${styles.row} ${styles.head}`}>
+            <span role="columnheader" className={`${styles.cell} ${styles.rowNumber}`}>
+              Row
+            </span>
+            {COLUMNS.map((column) => {
+              const sorted = column.sortBy !== null && sort?.column === column.sortBy;
+              const direction = sorted
+                ? sort.direction === 'asc'
+                  ? 'ascending'
+                  : 'descending'
+                : undefined;
+              return (
+                <span
+                  key={column.id}
+                  role="columnheader"
+                  aria-sort={direction}
+                  className={`${styles.cell} ${column.numeric ? styles.numeric : ''}`}
+                >
+                  {column.sortBy ? (
+                    <button type="button" className={styles.sort} onClick={() => onSort(column)}>
+                      {column.label}
+                      <span aria-hidden="true">
+                        {sorted ? (sort.direction === 'asc' ? ' ▲' : ' ▼') : ''}
+                      </span>
+                    </button>
+                  ) : (
+                    column.label
+                  )}
+                </span>
+              );
+            })}
+          </div>
+          <div className={styles.spacer} style={{ height: scrollHeight(viewport) }}>
+            <div
+              className={styles.layer}
+              style={{ height: Math.min(height, total * rowHeight), top: rowHeight }}
+            >
+              <div style={{ transform: `translateY(${-visible.offset}px)` }}>{rows}</div>
+            </div>
           </div>
         </div>
+        {scrolling && total > rowsInView(viewport) ? (
+          <div className={styles.readout} aria-hidden="true">
+            {scrollReadout(visible.start + 1, total)}
+          </div>
+        ) : null}
       </div>
-      {scrolling && total > rowsInView(viewport) ? (
-        <div className={styles.readout} aria-hidden="true">
-          {scrollReadout(visible.start + 1, total)}
-        </div>
-      ) : null}
+      {aside?.({
+        firstRow: visible.start,
+        offset: visible.offset,
+        count: visible.end - visible.start,
+        rowHeight,
+        scrollBy: (deltaY) => {
+          if (scroller.current) scroller.current.scrollTop += deltaY;
+        },
+        onKeyDown,
+      })}
     </div>
   );
 }

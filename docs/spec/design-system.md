@@ -8,6 +8,7 @@ Part of the Slip spec. Start at [CLAUDE.md](../../CLAUDE.md).
 - Semantic data colours: `--slip-late-1..5`, `--slip-early-1..5`, `--slip-none`, `--float-neg`, `--float-zero`, `--float-low`, `--float-high`, `--critical`, `--status-notstarted/active/complete`
 - Space: `--space-0..8` on a 4px scale
 - Type: `--font-sans`, `--font-mono`, sizes `--text-xs..xl`, line heights
+- Gantt: `--gantt-bar`, `--gantt-progress`, `--gantt-ghost`
 - Density: `--row-height`, `--cell-padding-x`, switched by `[data-density="compact" | "comfortable"]`
 - Radius, shadow, z-index, motion duration and easing
 
