@@ -1,6 +1,7 @@
 import { Button, DeltaCell, Notice, Skeleton } from '@slip/ui';
 import { count, longDate, plural } from '../../shared/format.ts';
 import type { ChangeKind } from '../changes/model.ts';
+import type { TraceTarget } from '../trace/TraceView.tsx';
 import {
   changeLines,
   criticalSentence,
@@ -26,6 +27,8 @@ export interface SummaryViewProps {
   onBack: () => void;
   /** Opens the changes grid on a kind of change. */
   onChanges: (kind: ChangeKind) => void;
+  /** Opens the slip trace for a milestone. */
+  onTrace: (target: TraceTarget) => void;
 }
 
 function Milestones({
@@ -34,12 +37,14 @@ function Milestones({
   latestFinish,
   onRetry,
   onBack,
+  onTrace,
 }: {
   milestones: Loadable<MilestoneList>;
   changes: Loadable<ChangeCounts>;
   latestFinish: string;
   onRetry: () => void;
   onBack: () => void;
+  onTrace: (target: TraceTarget) => void;
 }) {
   if (milestones.status === 'loading') {
     return (
@@ -118,6 +123,9 @@ function Milestones({
             <th scope="col" className={styles.slipHead}>
               Finish slip
             </th>
+            <th scope="col">
+              <span className={styles.hidden}>Trace</span>
+            </th>
           </tr>
         </thead>
         <tbody>
@@ -134,6 +142,17 @@ function Milestones({
               <td className={styles.date}>{longDate(row.now)}</td>
               <td className={styles.slip}>
                 <DeltaCell days={row.days} />
+              </td>
+              <td className={styles.traceCell}>
+                <Button
+                  variant="quiet"
+                  aria-label={`Trace ${row.name}`}
+                  onClick={() =>
+                    onTrace({ code: row.code, name: row.name, was: row.was, now: row.now })
+                  }
+                >
+                  Trace
+                </Button>
               </td>
             </tr>
           ))}
@@ -189,6 +208,7 @@ export function SummaryView({
   onRetry,
   onBack,
   onChanges,
+  onTrace,
 }: SummaryViewProps) {
   const all = state.recalculation ? [...notices, state.recalculation] : notices;
   const empty = state.changes.status === 'ready' && nothingChanged(state.changes.value);
@@ -220,6 +240,7 @@ export function SummaryView({
           latestFinish={state.latestFinish}
           onRetry={onRetry}
           onBack={onBack}
+          onTrace={onTrace}
         />
         {empty ? null : (
           <div className={styles.rail}>

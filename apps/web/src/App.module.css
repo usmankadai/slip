@@ -2,4 +2,19 @@
   min-height: 100vh;
   display: grid;
   grid-template-rows: 1fr auto;
+  position: relative;
+}
+
+.inPlace {
+  display: grid;
+  min-width: 0;
+}
+
+/* Out of sight but still laid out at full size, so its scroll position survives. */
+.setAside {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  visibility: hidden;
+  pointer-events: none;
 }

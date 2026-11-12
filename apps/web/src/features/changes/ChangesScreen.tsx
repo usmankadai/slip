@@ -5,6 +5,7 @@ import { NONE } from '@slip/xer';
 import { engine } from '../../app/engine.ts';
 import { longDate, plural } from '../../shared/format.ts';
 import type { SlotFacts } from '../import/types.ts';
+import type { TraceTarget } from '../trace/TraceView.tsx';
 import { ChangesGrid } from './ChangesGrid.tsx';
 import { Gantt } from './gantt/Gantt.tsx';
 import {
@@ -56,10 +57,13 @@ export function ChangesScreen({
   pair,
   initialKind,
   onBack,
+  onTrace,
 }: {
   pair: { a: SlotFacts; b: SlotFacts };
   initialKind: ChangeKind;
   onBack: () => void;
+  /** Opens the slip trace for the selected activity. */
+  onTrace: (target: TraceTarget) => void;
 }) {
   const [filter, setFilter] = useState<GridFilter>({ kind: initialKind, text: '' });
   const [typed, setTyped] = useState('');
@@ -219,6 +223,12 @@ export function ChangesScreen({
     setLostSelection(false);
   }, []);
 
+  const traceSelected = () => {
+    if (selected) {
+      onTrace({ code: selected.code, name: selected.name, was: selected.was, now: selected.now });
+    }
+  };
+
   const line = statusLine({ ...position, total, unfiltered });
   const showAll = () => {
     setTyped('');
@@ -226,7 +236,16 @@ export function ChangesScreen({
   };
 
   return (
-    <main className={styles.screen}>
+    <main
+      className={styles.screen}
+      onKeyDown={(event) => {
+        // "t" traces the selected activity, unless the planner is typing in the search box.
+        const typing = event.target instanceof HTMLInputElement;
+        if (event.key === 't' && !typing && !event.metaKey && !event.ctrlKey && !event.altKey) {
+          traceSelected();
+        }
+      }}
+    >
       <header className={styles.header}>
         <div>
           <h1 className={styles.title}>{pair.b.projectName || 'Project with no name'}</h1>
@@ -262,6 +281,13 @@ export function ChangesScreen({
           />
         </label>
         <div className={styles.push}>
+          <Button
+            disabled={!selected}
+            title="Trace the selected activity (t)"
+            onClick={traceSelected}
+          >
+            Trace selected
+          </Button>
           {gantt === 'shown' ? (
             <>
               <SegmentedControl

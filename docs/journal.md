@@ -2,6 +2,35 @@
 
 What was built, what Usman decided or designed, and what an agent generated. Newest first.
 
+## 12 November 2026: the slip trace screen
+
+**Done**
+
+- The fourth product screen. For an activity that moved: the causes, largest first, each with what happened, the working days it added of its own, and its share; then the driving path beneath, opened on request, with what each activity inherited in grey and what it added in colour.
+- Reached from each milestone row on the summary ("Trace") and from the selected row in the grid ("Trace selected", or the `t` key).
+- States: loading, error, an activity that did not move, an activity new in update B, a trace that reached its size limit, and causes that do not add up to the slip (the difference is stated).
+- Going back from a trace returns to the same rows, selection and scroll position in the grid.
+- The engine's trace result now carries each activity's finish slip in working days.
+- Checked against the 1,000 activity fixture: project completion shows +67 working days from four causes of 20, 18, 16 and 13 days on the activity codes in `expected.json`.
+
+**Usman decided or designed**
+
+- A leading with B beneath ("A with B beneath"), on the agent's recommendation. No reasons of his own.
+
+**The agent (Claude) generated**
+
+- All the code, tests, stories and copy.
+- Rules that were open in the exploration, settled without asking: share is each cause's part of the slip added, and a recovery has none; the five largest causes are always listed, and smaller ones under 3 working days fold into one line; the path is listed furthest back first; inherited slip is the activity's own finish slip less what it added.
+- Words for all six kinds of cause, and their opposites when time was recovered.
+- Where the screen sits: a full screen with a way back, since no layout for it was drawn.
+
+**Worth Usman's attention**
+
+- The focused network view of the driving path is not built; the path is a list. The spec allows that to be cut, but it has not been cut by decision.
+- The driving path can branch. The list flattens it by distance from the milestone, so two activities side by side in the network appear one after the other. The inherited figure is still each activity's own.
+- Only the straight-path case has been seen in the browser. A branching path, a recovery and a truncated trace are covered by unit tests and stories with made-up data, not by a real schedule.
+- No trace is possible for a removed activity, and nothing says so.
+
 ## 12 November 2026: options for the trace view
 
 **Done**

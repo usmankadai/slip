@@ -1,6 +1,6 @@
 # Exploration 03: the trace view
 
-Status: **options drawn, waiting for Usman's decision.**
+Status: **decided on 12 November 2026: A, ranked causes, leading, with B, the driving path, beneath it as the evidence.**
 
 ## Problem
 
@@ -25,9 +25,13 @@ Things the mock made visible:
 
 ## Decision
 
-Not made. This is Usman's to choose.
+**A leading, with B beneath it, opened on request.** Chosen by Usman on 12 November 2026 ("A with B beneath"), on Claude's recommendation and without reasons of his own. The reasoning is Claude's: it is the hierarchy the spec asks for, the answer first in rank order and then the path for anyone who wants to check it. C was not chosen because it cannot be both largest first and in path order; its idea survives in B, where each activity's bar starts from the slip it inherited.
 
-Claude's recommendation: **A leading, with B beneath it as the evidence**, opened on request and folded as drawn. That is the hierarchy the spec asks for: the answer first, in rank order, then the path for anyone who wants to check it. C's idea is worth keeping in a smaller form: in B, the grey and coloured bar already shows each bar starting where the last ended.
+Settled while building, by Claude, and open to change:
+
+- **Share** is each cause's part of the slip that was added. An activity that recovered time has no share. When the causes do not add up to the milestone's slip, a line says how many days are not explained.
+- **Folding.** The five largest causes are always listed; beyond that, causes under 3 working days fold into one line that can be opened.
+- **Order in B** is furthest back first. The driving path can branch, so "inherited" is the activity's own finish slip less what it added, not a running total.
 
 ## What changed
 
