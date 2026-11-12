@@ -1,0 +1,143 @@
+<!doctype html>
+<html lang="en-GB">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Flow: health, three layouts</title>
+    <link rel="stylesheet" href="wire.css" />
+    <style>
+      .frame { min-height: 0; }
+      .say { color: #222; }
+      .c { display: grid; grid-template-columns: 22px minmax(0, 1fr) 70px 70px 96px 90px; gap: 8px; align-items: center; padding: 4px 0; border-bottom: 1px solid #e5e5e5; }
+      .c:last-child { border-bottom: 0; }
+      .c span { color: #666; }
+      .c .n { text-align: right; font-variant-numeric: tabular-nums; color: #222; }
+      .c b.n { font-weight: 600; }
+      .h { font-weight: 600; }
+      .h span { color: #222; }
+      .mark { display: inline-block; width: 8px; height: 8px; background: #222; }
+      .mark.ok { background: none; border: 1.5px solid #999; }
+      .group { font-weight: 600; padding-top: 6px; }
+      .sel { background: #f0f0f0; outline: 1.5px solid #222; }
+      .list div { padding: 4px 6px; border-bottom: 1px solid #e5e5e5; display: flex; justify-content: space-between; gap: 8px; }
+    </style>
+  </head>
+  <body>
+    <header>
+      <h1>Health: three low-fidelity layouts</h1>
+      <p>Hierarchy only: boxes and labels, no identity. The numbered tags show the order the eye should take. A heavy border marks what leads. The check names and thresholds are the real ones the engine uses; the figures are made up.</p>
+      <p class="question">
+        The planner's question: "Is this schedule getting better or worse?"<br />
+        Most prominent: the checks that changed status or got worse since the last update, first.<br />
+        Then: all 14 checks with before and after; click through to the activities behind each.<br />
+        Must not: reduce everything to one score with no way in.
+      </p>
+      <p>Layouts drawn by Claude for Usman to choose between. A filled square marks a check that fails; an empty one, a check that passes. Two of the 14 are reported only, with no pass or fail, and one (resources) cannot be assessed yet.</p>
+    </header>
+
+    <main>
+      <h2>A. What changed first, then the rest</h2>
+      <div class="option">
+        <div class="frame">
+          <div class="bar"><b>Slip</b><span>Project · update A to B</span><span>Summary</span><span>Changes</span><b>Health</b><span>Finish update</span><span class="right">Ask</span></div>
+          <div class="body">
+            <div class="box lead">
+              <div class="t"><span class="tag">1</span>"2 checks got worse, 1 got better"</div>
+              <div class="c h"><span></span><span>Check</span><span class="n">Update A</span><span class="n">Update B</span><span class="n">Change</span><span></span></div>
+              <div class="group">Worse</div>
+              <div class="c"><i class="mark"></i><div>Hard constraints <span>· passes at 5% or less</span></div><span class="n">4.1%</span><b class="n">6.3%</b><b class="n">+12 activities</b><span>See them</span></div>
+              <div class="c"><i class="mark"></i><div>Negative float <span>· passes at none</span></div><span class="n">286</span><b class="n">622</b><b class="n">+336 activities</b><span>See them</span></div>
+              <div class="group">Better</div>
+              <div class="c"><i class="mark ok"></i><div>Missing logic <span>· passes at 5% or less</span></div><span class="n">5.4%</span><b class="n">4.8%</b><b class="n">−21 activities</b><span>See them</span></div>
+            </div>
+            <div class="box">
+              <div class="t"><span class="tag">2</span>The other 11 checks, unchanged in status</div>
+              <div class="c"><i class="mark"></i><div>High float</div><span class="n">18.2%</span><span class="n">18.0%</span><span class="n">−8</span><span>See them</span></div>
+              <div class="c"><i class="mark ok"></i><div>Leads</div><span class="n">0</span><span class="n">0</span><span class="n">0</span><span></span></div>
+              <div class="c"><i class="mark ok"></i><div>Lags</div><span class="n">2.1%</span><span class="n">2.1%</span><span class="n">0</span><span>See them</span></div>
+              <div class="quiet">… 8 more, in DCMA order …</div>
+            </div>
+          </div>
+        </div>
+        <dl class="notes">
+          <dt>Leads with</dt><dd>A sentence that answers the question, then the checks that moved, grouped as worse and better.</dd>
+          <dt>Does well</dt><dd>The answer is the first thing read. A check that got worse while still failing (negative float) is caught as well as one that crossed its threshold. Each row has its own way in to the activities. All 14 are still on the page.</dd>
+          <dt>Costs</dt><dd>The checks are out of DCMA order, which is the order assessors know them by. "Worse" needs a rule for a check that fails in both updates. When nothing changed, the lead box is empty and the page becomes layout B.</dd>
+        </dl>
+      </div>
+
+      <h2>B. All 14 in DCMA order, with the change marked</h2>
+      <div class="option">
+        <div class="frame">
+          <div class="bar"><b>Slip</b><span>Project · update A to B</span><span>Summary</span><span>Changes</span><b>Health</b><span>Finish update</span><span class="right">Ask</span></div>
+          <div class="body">
+            <div class="box"><div class="say"><span class="tag">2</span>"2 checks got worse, 1 got better. 4 fail in update B."</div></div>
+            <div class="box lead">
+              <div class="t"><span class="tag">1</span>The 14 checks</div>
+              <div class="c h"><span>#</span><span>Check</span><span class="n">Update A</span><span class="n">Update B</span><span class="n">Change</span><span></span></div>
+              <div class="c"><span>1</span><div><i class="mark ok"></i> Missing logic</div><span class="n">5.4%</span><b class="n">4.8%</b><b class="n">Better</b><span>See them</span></div>
+              <div class="c"><span>2</span><div><i class="mark ok"></i> Leads</div><span class="n">0</span><span class="n">0</span><span class="n"></span><span></span></div>
+              <div class="c"><span>3</span><div><i class="mark ok"></i> Lags</div><span class="n">2.1%</span><span class="n">2.1%</span><span class="n"></span><span>See them</span></div>
+              <div class="c"><span>4</span><div><i class="mark ok"></i> Relationship types</div><span class="n">94%</span><span class="n">94%</span><span class="n"></span><span>See them</span></div>
+              <div class="c"><span>5</span><div><i class="mark"></i> Hard constraints</div><span class="n">4.1%</span><b class="n">6.3%</b><b class="n">Worse</b><span>See them</span></div>
+              <div class="c"><span>6</span><div><i class="mark"></i> High float</div><span class="n">18.2%</span><span class="n">18.0%</span><span class="n"></span><span>See them</span></div>
+              <div class="c"><span>7</span><div><i class="mark"></i> Negative float</div><span class="n">286</span><b class="n">622</b><b class="n">Worse</b><span>See them</span></div>
+              <div class="quiet">… 8 to 14 …</div>
+            </div>
+          </div>
+        </div>
+        <dl class="notes">
+          <dt>Leads with</dt><dd>The standard table, in the standard order, with a column that says which rows moved.</dd>
+          <dt>Does well</dt><dd>What an assessor expects to see and can check against any other DCMA report. Stable: a check is always in the same place month to month. Nothing to explain.</dd>
+          <dt>Costs</dt><dd>The answer is spread through the table; the planner scans a column to find it. The sentence above carries the hierarchy and is easy to skip. Closest of the three to a scorecard.</dd>
+        </dl>
+      </div>
+
+      <h2>C. Checks on the left, the chosen check on the right</h2>
+      <div class="option">
+        <div class="frame">
+          <div class="bar"><b>Slip</b><span>Project · update A to B</span><span>Summary</span><span>Changes</span><b>Health</b><span>Finish update</span><span class="right">Ask</span></div>
+          <div class="body">
+            <div class="cols" style="grid-template-columns: 250px minmax(0, 1fr)">
+              <div class="box lead list">
+                <div class="t"><span class="tag">1</span>Checks, changed first</div>
+                <div class="sel"><span><i class="mark"></i> Negative float</span><b>Worse</b></div>
+                <div><span><i class="mark"></i> Hard constraints</span><b>Worse</b></div>
+                <div><span><i class="mark ok"></i> Missing logic</span><b>Better</b></div>
+                <div><span><i class="mark"></i> High float</span><span></span></div>
+                <div><span><i class="mark ok"></i> Leads</span><span></span></div>
+                <div class="quiet">… 9 more …</div>
+              </div>
+              <div class="box">
+                <div class="t"><span class="tag">2</span>Negative float</div>
+                <div class="big">286 activities in update A, 622 in update B</div>
+                <div>Unfinished activities with total float below zero. Passes when there are none.</div>
+                <div class="box"><div class="t"><span class="tag">3</span>The 622 activities, in the grid</div><div class="line l"></div><div class="line l"></div><div class="line m"></div><div class="line l"></div><div class="quiet">336 are new to this check since update A</div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <dl class="notes">
+          <dt>Leads with</dt><dd>A short list of checks, changed ones first, and one check opened beside it with its definition and its activities.</dd>
+          <dt>Does well</dt><dd>The way in is the screen: choosing a check shows the activities at once, without leaving. Room to say what a check counts and how it is measured, which the other two have no place for.</dd>
+          <dt>Costs</dt><dd>Before and after for all 14 cannot be seen together; the planner clicks through them one at a time. The grid is squeezed into part of the screen when the changes screen already has a full one. Most to build.</dd>
+        </dl>
+      </div>
+
+      <h2>What all three share</h2>
+      <div class="option">
+        <div class="body" style="min-width: 0; padding: 0">
+          <div class="box"><div class="t">Not a choice here</div>
+            <div>No single score. Pass and fail are marked by a shape as well as a word, never by colour alone: warm colours mean late in Slip, and a failed check is not a late activity.</div>
+            <div>"See them" opens the changes grid showing the activities counted against that check. The engine already supports this.</div>
+            <div>Checks that cannot be assessed (resources) or are reported only (critical path test) say so in words and are never shown as passing.</div>
+            <div>The page says which dates the checks used: the ones stored in each file, as the summary does.</div>
+          </div>
+        </div>
+        <dl class="notes">
+          <dt>Open whichever is chosen</dt><dd>What "worse" means for a check that fails in both updates. The summary already uses: fails by more activities. A ratio check (the two indexes) has no activity count, so it needs its own rule.</dd>
+        </dl>
+      </div>
+    </main>
+  </body>
+</html>

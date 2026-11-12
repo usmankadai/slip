@@ -2,6 +2,26 @@
 
 What was built, what Usman decided or designed, and what an agent generated. Newest first.
 
+## 12 November 2026: layouts for the health screen
+
+**Done**
+
+- Three low-fidelity layouts for the health comparison, using the engine's real check names and thresholds with made-up figures.
+
+**Usman decided or designed**
+
+- To draw these next. Nothing on the page yet.
+
+**The agent (Claude) generated**
+
+- The page, the three layouts and the recommendation (A, what changed first).
+
+**Worth Usman's attention**
+
+- One choice is waiting. The health screen is not built until it is made.
+- What "worse" means is open for a check that fails in both updates, and for the two index checks, which are ratios with no count of activities.
+- Three of the 14 checks are not full DCMA tests today: resources cannot be assessed, and the critical path test and the critical path length index depart from the DCMA method. The engine's notes say how. The screen will have to say so plainly.
+
 ## 12 November 2026: the slip trace screen
 
 **Done**
