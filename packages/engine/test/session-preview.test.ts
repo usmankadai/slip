@@ -92,3 +92,18 @@ describe('locate', () => {
     }
   });
 });
+
+describe('trace', () => {
+  it('gives the finish slip of every activity on the path, in working days', () => {
+    const session = new EngineSession();
+    session.handle({ type: 'load', slot: 'a', data: read() });
+    session.handle({ type: 'load', slot: 'b', data: read() });
+    const trace = session.handle({ type: 'trace', activity: 0 });
+    if (trace.type !== 'trace') throw new Error('expected a trace');
+    expect(trace.slipDays).toHaveLength(trace.nodes.length);
+    expect(trace.codes).toHaveLength(trace.nodes.length);
+    // The two updates are the same file, so nothing moved.
+    expect(trace.slipDays.every((days) => days === 0 || days === null)).toBe(true);
+    expect(trace.slipWorkingDays).toBe(0);
+  });
+});

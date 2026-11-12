@@ -198,6 +198,11 @@ export interface TraceSummary extends TraceResult {
   /** Activity code and name for each entry of `nodes`, so a small view needs no second request. */
   codes: string[];
   names: string[];
+  /**
+   * Finish slip of each entry of `nodes`, in working days on its own calendar, or null when
+   * there is nothing to compare (the activity is new). What it inherited is this less what it added.
+   */
+  slipDays: (number | null)[];
 }
 
 export interface EditResult {
@@ -456,6 +461,8 @@ export class EngineSession {
     const target = this.findActivity(b.data, request.activity, request.taskCode);
     const limit = (value: number | undefined, most: number) =>
       value === undefined ? undefined : Math.max(1, Math.min(most, Math.floor(value) || 1));
+    const { finishDelta } = this.ensureDiff();
+    const dayMinutes = this.dayMinutes(b);
     const result = traceSlip(
       a.data,
       b.data,
@@ -475,6 +482,10 @@ export class EngineSession {
       ...result,
       codes: Array.from(result.nodes, (j) => stringAt(b.data.strings, b.data.taskCode[j]!)),
       names: Array.from(result.nodes, (j) => stringAt(b.data.strings, b.data.taskName[j]!)),
+      slipDays: Array.from(result.nodes, (j) => {
+        const minutes = finishDelta[j]!;
+        return minutes === NONE ? null : minutes / dayMinutes(j);
+      }),
     };
   }
 

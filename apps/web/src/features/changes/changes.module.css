@@ -6,7 +6,7 @@
   grid-template-rows: auto auto minmax(0, 1fr) auto;
   gap: var(--space-3);
   /* The grid fills the window; the page itself does not scroll. */
-  height: calc(100vh - var(--space-8) - var(--space-2));
+  height: calc(100vh - var(--space-8) - var(--space-4));
 }
 
 .header {

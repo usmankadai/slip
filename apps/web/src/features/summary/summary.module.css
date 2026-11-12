@@ -167,6 +167,19 @@
   color: var(--text-secondary);
 }
 
+.traceCell {
+  text-align: right;
+  white-space: nowrap;
+}
+
+.hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+}
+
 .fold {
   display: none;
   font-size: var(--text-xs);
