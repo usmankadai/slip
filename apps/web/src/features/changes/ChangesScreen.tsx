@@ -56,6 +56,7 @@ const SEARCH_DELAY_MS = 250;
 export function ChangesScreen({
   pair,
   initialKind,
+  initialText = '',
   check,
   backLabel,
   onBack,
@@ -66,6 +67,8 @@ export function ChangesScreen({
   initialKind: ChangeKind | null;
   /** A health check whose activities to show, when the planner came from the health screen. */
   check?: { id: number; name: string };
+  /** Text to find when the screen opens, such as an activity code from the narrative's evidence. */
+  initialText?: string;
   /** Where Back leads: "summary" or "health". */
   backLabel: string;
   onBack: () => void;
@@ -74,10 +77,10 @@ export function ChangesScreen({
 }) {
   const [filter, setFilter] = useState<GridFilter>({
     kind: initialKind,
-    text: '',
+    text: initialText.slice(0, 200),
     ...(check ? { healthCheck: check.id } : {}),
   });
-  const [typed, setTyped] = useState('');
+  const [typed, setTyped] = useState(initialText.slice(0, 200));
   const [sort, setSort] = useState<SortSpec | null>(DEFAULT_SORT);
   const [density, setDensity] = useState<Density>('compact');
   const [selectedRow, setSelectedRow] = useState<number | null>(null);

@@ -17,12 +17,14 @@ import {
   recalculationNotice,
   type MilestoneRow,
   type SummaryState,
+  type ChangeCounts,
+  type MilestoneList,
 } from './model.ts';
 
 const MILESTONES = [TaskType.StartMilestone, TaskType.FinishMilestone];
 const MOVED = { types: MILESTONES, flagsAny: Change.FinishMoved };
 
-function message(error: unknown): string {
+export function message(error: unknown): string {
   if (error instanceof EngineRequestError) {
     if (error.code === 'out-of-memory') {
       return 'There was not enough memory to compare the two updates. Closing other tabs may help.';
@@ -75,6 +77,36 @@ async function latestFinish(slot: 'a' | 'b'): Promise<number> {
     sort: { column: 'finish', direction: 'desc' },
   });
   return result.numbers.finish?.[0] ?? NONE;
+}
+
+/** The milestones that moved, largest later moves first, as the summary shows them. */
+export async function fetchMilestoneList(): Promise<MilestoneList> {
+  const [later, earlier, total] = await Promise.all([
+    milestones('desc'),
+    milestones('asc'),
+    countRows('b', { types: MILESTONES }),
+  ]);
+  return milestoneList(later.rows, earlier.rows, later.total, total);
+}
+
+/** The change counts the summary shows. */
+export async function fetchChangeCounts(): Promise<ChangeCounts> {
+  const [diff, datesMoved] = await Promise.all([
+    engine().request({ type: 'diff' }),
+    countRows('b', { flagsAny: Change.StartMoved | Change.FinishMoved }),
+  ]);
+  return {
+    datesMoved,
+    durationChanged: diff.counts.DurationChanged,
+    logicChanged: diff.counts.LogicChanged,
+    constraintChanged: diff.counts.ConstraintChanged,
+    progressed: diff.counts.Progressed,
+    added: diff.counts.Added,
+    removed: diff.counts.Removed,
+    activities: diff.activitiesB,
+    joinedCritical: diff.counts.JoinedCriticalPath,
+    leftCritical: diff.counts.LeftCriticalPath,
+  };
 }
 
 export function useSummary() {
