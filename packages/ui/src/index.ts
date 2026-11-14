@@ -16,3 +16,14 @@ export {
 } from './components/SegmentedControl/SegmentedControl.tsx';
 export { ROW_HEIGHT, type Density } from './density.ts';
 export { EntityChip, type EntityChipProps } from './components/EntityChip/EntityChip.tsx';
+export {
+  AgentSteps,
+  type AgentStep,
+  type AgentStepsProps,
+} from './components/AgentSteps/AgentSteps.tsx';
+export {
+  AgentText,
+  type AgentTextPart,
+  type AgentTextProps,
+} from './components/AgentText/AgentText.tsx';
+export { ScriptedBadge } from './components/ScriptedBadge/ScriptedBadge.tsx';

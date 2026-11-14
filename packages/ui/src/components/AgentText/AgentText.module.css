@@ -1,0 +1,23 @@
+.text {
+  margin: var(--space-0);
+  font-size: var(--text-base);
+  line-height: var(--leading-lg);
+  overflow-wrap: anywhere;
+}
+
+.unverified {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  text-decoration: underline wavy var(--text-muted);
+  text-underline-offset: 3px;
+}
+
+.flag {
+  margin-left: var(--space-1);
+  padding: var(--space-0) var(--space-1);
+  border: 1px solid var(--text-primary);
+  border-radius: var(--radius-control);
+  font-size: var(--text-xs);
+  line-height: var(--leading-xs);
+  font-weight: var(--weight-semibold);
+}

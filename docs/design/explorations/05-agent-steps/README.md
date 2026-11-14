@@ -1,6 +1,6 @@
 # Exploration 05: agent steps
 
-Status: **options drawn, waiting for Usman's decision.**
+Status: **decided on 14 November 2026: option A, steps folded into one line, unverified codes marked in place.**
 
 ## Problem
 
@@ -26,9 +26,9 @@ Things the mock made visible:
 
 ## Decision
 
-Not made. This is Usman's to choose.
+**Option A, steps folded into one line; unverified codes marked in place.** Chosen by Usman on 14 November 2026 ("A, steps folded"), on Claude's recommendation and without reasons of his own. The reasoning is Claude's: only activity codes can be checked against the data mechanically, so A marks only what can honestly be checked, where it is written; B and C imply a sentence-by-sentence matching the screen cannot verify.
 
-Claude's recommendation: **A**, with C's idea kept small: the folded steps line opens to the tool calls and their results, which is where a planner who wants the evidence finds it. A marks only what can honestly be checked, in place, and keeps the answer short; that suits a panel that sits beside the real evidence (the grid, the trace) one click away through the chips.
+Built as drawn, with one addition: under an answer with unverified codes, a line says how many there were and why they are marked.
 
 ## What changed
 

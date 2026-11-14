@@ -60,6 +60,9 @@ importers:
 
   apps/web:
     dependencies:
+      '@slip/agent':
+        specifier: workspace:*
+        version: link:../../packages/agent
       '@slip/engine':
         specifier: workspace:*
         version: link:../../packages/engine

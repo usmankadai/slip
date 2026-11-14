@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import { Footer } from './app/Footer.tsx';
+import { AgentDock } from './features/agent/AgentDock.tsx';
 import { AuditScreen } from './features/audit/AuditScreen.tsx';
 import { DevHarness } from './dev/DevHarness.tsx';
 import { ChangesScreen } from './features/changes/ChangesScreen.tsx';
@@ -62,9 +63,9 @@ export function App() {
   const [persisted, setPersisted] = useState<boolean | null>(null);
 
   const audit = useCallback(
-    (type: AuditType, summary: string) => {
+    (type: AuditType, summary: string, actor: 'user' | 'agent' = 'user') => {
       if (!key) return;
-      void appendAudit({ pair: key, actor: 'user', type, summary }).then((ok) => {
+      void appendAudit({ pair: key, actor, type, summary }).then((ok) => {
         if (!ok) setSaved(false);
       });
     },
@@ -244,6 +245,16 @@ export function App() {
           <ImportScreen onCompare={compare} />
         </>
       )}
+      {pair && !reopening ? (
+        <AgentDock
+          key={key}
+          onAudit={audit}
+          onOpenActivity={(code) => {
+            setTrace(null);
+            setChanges({ kind: null, text: code });
+          }}
+        />
+      ) : null}
       <Footer />
     </div>
   );

@@ -11,7 +11,9 @@ export type AuditType =
   | 'narrative-restored'
   | 'narrative-added'
   | 'narrative-removed'
-  | 'narrative-exported';
+  | 'narrative-exported'
+  | 'agent-answer'
+  | 'agent-proposal';
 
 export interface AuditEntry {
   id?: number;
