@@ -107,3 +107,69 @@ describe('trace', () => {
     expect(trace.slipWorkingDays).toBe(0);
   });
 });
+
+describe('edits', () => {
+  const loaded = () => {
+    const session = new EngineSession();
+    session.handle({ type: 'load', slot: 'a', data: read() });
+    session.handle({ type: 'load', slot: 'b', data: read() });
+    return session;
+  };
+  const first = (session: EngineSession) => {
+    const rows = session.handle({
+      type: 'rows',
+      slot: 'b',
+      range: [0, 1],
+      columns: ['code'],
+      sort: { column: 'code', direction: 'asc' },
+    });
+    if (rows.type !== 'rows') throw new Error('expected rows');
+    return rows.indices[0]!;
+  };
+
+  it('previews an edit without changing what any view shows', () => {
+    const session = loaded();
+    const activity = first(session);
+    const before = finishes(session);
+    const diffBefore = session.handle({ type: 'diff' });
+    const preview = session.handle({
+      type: 'applyEdit',
+      activity,
+      field: 'originalDuration',
+      to: 9600,
+      preview: true,
+    });
+    expect(preview).toMatchObject({ type: 'applyEdit', applied: false, editCount: 0 });
+    expect(finishes(session)).toEqual(before);
+    expect(session.handle({ type: 'diff' })).toEqual(diffBefore);
+    expect(session.handle({ type: 'edits' })).toEqual({ type: 'edits', edits: [] });
+  });
+
+  it('applies an edit under a given id, and reverts it', () => {
+    const session = loaded();
+    const activity = first(session);
+    const applied = session.handle({
+      type: 'applyEdit',
+      activity,
+      field: 'originalDuration',
+      to: 9600,
+      id: 'mine',
+    });
+    expect(applied).toMatchObject({
+      applied: true,
+      editCount: 1,
+      edit: { id: 'mine', field: 'originalDuration', to: 9600 },
+    });
+    expect(() =>
+      session.handle({
+        type: 'applyEdit',
+        activity,
+        field: 'originalDuration',
+        to: 4800,
+        id: 'mine',
+      }),
+    ).toThrow('already in use');
+    const reverted = session.handle({ type: 'revertEdit', editId: 'mine' });
+    expect(reverted).toMatchObject({ editCount: 0 });
+  });
+});

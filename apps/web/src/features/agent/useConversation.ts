@@ -4,6 +4,7 @@ import type { ToolEngine } from '@slip/agent/run';
 import { engine } from '../../app/engine.ts';
 import type { AuditType } from '../../storage/auditLog.ts';
 import { ask, type Answer } from './loop.ts';
+import type { ProposalState } from './ProposalView.tsx';
 import { scriptedTransport } from './scripted.ts';
 import type { AgentTransport, Message } from './transport.ts';
 
@@ -19,6 +20,11 @@ export function useConversation(
   const messages = useRef<Message[]>([]);
   const [answers, setAnswers] = useState<Answer[]>([]);
   const [working, setWorking] = useState(false);
+  const [decisions, setDecisions] = useState<Record<string, ProposalState>>({});
+  const onDecision = useCallback(
+    (key: string, state: ProposalState) => setDecisions((all) => ({ ...all, [key]: state })),
+    [],
+  );
   const stop = useRef<AbortController | null>(null);
 
   const onAsk = useCallback(
@@ -70,7 +76,7 @@ export function useConversation(
         for (const proposal of answer.proposals) {
           onAudit(
             'agent-proposal',
-            `Proposed a change to ${proposal.taskCode}: ${proposal.reason.slice(0, 160)} Not applied.`,
+            `Proposed a change to ${proposal.taskCode}: ${proposal.reason.slice(0, 160)} Waiting for your decision.`,
             'agent',
           );
         }
@@ -81,5 +87,13 @@ export function useConversation(
 
   const onStop = useCallback(() => stop.current?.abort(), []);
 
-  return { answers, working, scripted: transport.current.scripted, onAsk, onStop };
+  return {
+    answers,
+    working,
+    scripted: transport.current.scripted,
+    onAsk,
+    onStop,
+    decisions,
+    onDecision,
+  };
 }

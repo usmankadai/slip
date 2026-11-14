@@ -543,15 +543,9 @@ export class EngineSession {
       b.health = null;
       this.diff = null;
       this.views = [];
-    } else if (!b.cpm) {
-      // A preview still leaves update B on recalculated dates, so the next comparison is like for like.
-      b.cpm = before;
-      b.version = ++this.versionCounter;
-      b.columnCache.clear();
-      b.health = null;
-      this.diff = null;
-      this.views = [];
     }
+    // A preview keeps nothing: the planner is only being shown what would happen, so every
+    // view goes on as it was, including whether it uses the file's dates or recalculated ones.
     return {
       edit: { ...subject },
       applied: keep,

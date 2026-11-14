@@ -18,6 +18,9 @@ export function SummaryScreen({
   onHealth,
   onNarrative,
   onAudit,
+  appliedEdits,
+  droppedEdits,
+  onUndoEdits,
 }: {
   pair: ComparedPair;
   onBack: () => void;
@@ -26,6 +29,11 @@ export function SummaryScreen({
   onHealth: () => void;
   onNarrative: () => void;
   onAudit: () => void;
+  /** Changes the planner approved that are in force. */
+  appliedEdits: number;
+  /** Saved changes that could not be applied when the pair was opened. */
+  droppedEdits: number;
+  onUndoEdits: () => void;
 }) {
   const { state, retry } = useSummary();
   return (
@@ -33,8 +41,18 @@ export function SummaryScreen({
       projectName={pair.b.projectName}
       dataDateA={pair.a.dataDate}
       dataDateB={pair.b.dataDate}
-      notices={carriedNotices(pair)}
-      state={state}
+      notices={[
+        ...carriedNotices(pair),
+        ...(droppedEdits > 0
+          ? [
+              `${droppedEdits === 1 ? 'A change you approved earlier' : `${droppedEdits} changes you approved earlier`} could not be applied to these files and ${droppedEdits === 1 ? 'was' : 'were'} left out.`,
+            ]
+          : []),
+      ]}
+      // Once a change is approved, Slip's recalculated dates are the ones that describe the
+      // edited schedule, so the note about the file's dates no longer applies.
+      state={appliedEdits > 0 ? { ...state, recalculation: '' } : state}
+      edits={appliedEdits > 0 ? { count: appliedEdits, onUndoAll: onUndoEdits } : null}
       onRetry={retry}
       onBack={onBack}
       onChanges={onChanges}

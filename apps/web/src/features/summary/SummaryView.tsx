@@ -35,6 +35,8 @@ export interface SummaryViewProps {
   onNarrative: () => void;
   /** Opens the activity log. */
   onAudit: () => void;
+  /** Changes the planner approved that are in force, or null when there are none. */
+  edits?: { count: number; onUndoAll: () => void } | null;
 }
 
 function Milestones({
@@ -218,6 +220,7 @@ export function SummaryView({
   onHealth,
   onNarrative,
   onAudit,
+  edits = null,
 }: SummaryViewProps) {
   const all = state.recalculation ? [...notices, state.recalculation] : notices;
   const empty = state.changes.status === 'ready' && nothingChanged(state.changes.value);
@@ -244,6 +247,20 @@ export function SummaryView({
         </div>
       </header>
 
+      {edits ? (
+        <Notice
+          tone="attention"
+          title={`${edits.count === 1 ? 'A change you approved is' : `${edits.count} changes you approved are`} applied to update B`}
+          action={
+            <Button variant="quiet" onClick={edits.onUndoAll}>
+              Undo {edits.count === 1 ? 'it' : 'all'}
+            </Button>
+          }
+        >
+          The dates below are Slip&apos;s recalculation of the edited schedule, not the dates stored
+          in the file.
+        </Notice>
+      ) : null}
       {all.map((notice) => (
         <Notice key={notice}>{notice}</Notice>
       ))}

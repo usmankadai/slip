@@ -1,6 +1,6 @@
 # Exploration 04: the proposed edit card
 
-Status: **options drawn, waiting for Usman's decision.**
+Status: **decided on 14 November 2026: option B, the milestones it moves as a small table.**
 
 ## Problem
 
@@ -24,9 +24,7 @@ Things the mock made visible:
 
 ## Decision
 
-Not made. This is Usman's to choose.
-
-Claude's recommendation: **B**. The milestones are what a planner is accountable for, and B is the only option where a change that helps one and hurts another is visible before approving. Its height is the cost; one proposal per answer is the usual case.
+**Option B, the milestones it moves, as a small table.** Chosen by Usman on 14 November 2026 ("B, milestone table"), on Claude's recommendation and without reasons of his own. The reasoning is Claude's: milestones are what a planner is accountable for, and B is the only option where a change that helps one and hurts another is visible before approving.
 
 ## What changed
 

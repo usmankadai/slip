@@ -1,7 +1,9 @@
 import { useEffect, useRef, useState, type FormEvent } from 'react';
 import { splitCitations } from '@slip/agent';
 import { AgentSteps, AgentText, Button, Notice, ScriptedBadge } from '@slip/ui';
+import type { EditsController } from '../../app/useEdits.ts';
 import type { Answer } from './loop.ts';
+import { ProposalView, type ProposalState } from './ProposalView.tsx';
 import type { SuggestedQuestion } from './scripted.ts';
 import styles from './agent.module.css';
 
@@ -15,14 +17,26 @@ export interface AgentPanelProps {
   onStop: () => void;
   onOpenActivity: (code: string) => void;
   onClose: () => void;
+  edits: EditsController;
+  /** The planner's decision on each proposal, by answer and proposal number. */
+  decisions: Record<string, ProposalState>;
+  onDecision: (key: string, state: ProposalState) => void;
 }
 
 function AnswerView({
   answer,
+  index,
   onOpenActivity,
+  edits,
+  decisions,
+  onDecision,
 }: {
   answer: Answer;
+  index: number;
   onOpenActivity: (code: string) => void;
+  edits: EditsController;
+  decisions: Record<string, ProposalState>;
+  onDecision: (key: string, state: ProposalState) => void;
 }) {
   const parts = splitCitations(answer.text, new Set(answer.known));
   const unverified = parts.filter((part) => part.kind === 'unverified').length;
@@ -50,12 +64,21 @@ function AnswerView({
             {unverified === 1 ? 'it is' : 'they are'} marked unverified.
           </p>
         ) : null}
-        {answer.proposals.length > 0 ? (
-          <Notice>
-            The assistant proposed {answer.proposals.length === 1 ? 'a change' : 'changes'} to the
-            schedule. Nothing has been changed: approving proposals is not built yet.
-          </Notice>
-        ) : null}
+        {answer.status === 'done'
+          ? answer.proposals.map((proposal, number) => {
+              const key = `${index}:${number}`;
+              return (
+                <ProposalView
+                  key={key}
+                  proposal={proposal}
+                  edits={edits}
+                  decision={decisions[key] ?? { state: 'proposed' }}
+                  onDecision={(state) => onDecision(key, state)}
+                  onSeeActivity={onOpenActivity}
+                />
+              );
+            })
+          : null}
         {answer.scripted && answer.status !== 'working' ? <ScriptedBadge /> : null}
       </div>
     </li>
@@ -72,6 +95,9 @@ export function AgentPanel({
   onStop,
   onOpenActivity,
   onClose,
+  edits,
+  decisions,
+  onDecision,
 }: AgentPanelProps) {
   const [draft, setDraft] = useState('');
   const end = useRef<HTMLDivElement>(null);
@@ -115,7 +141,15 @@ export function AgentPanel({
         ) : (
           <ol className={styles.turns}>
             {answers.map((answer, index) => (
-              <AnswerView key={index} answer={answer} onOpenActivity={onOpenActivity} />
+              <AnswerView
+                key={index}
+                index={index}
+                answer={answer}
+                onOpenActivity={onOpenActivity}
+                edits={edits}
+                decisions={decisions}
+                onDecision={onDecision}
+              />
             ))}
           </ol>
         )}

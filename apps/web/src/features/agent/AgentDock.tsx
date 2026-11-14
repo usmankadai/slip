@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Button } from '@slip/ui';
+import type { EditsController } from '../../app/useEdits.ts';
 import type { AuditType } from '../../storage/auditLog.ts';
 import { AgentPanel } from './AgentPanel.tsx';
 import { SUGGESTED } from './scripted.ts';
@@ -10,9 +11,11 @@ import styles from './agent.module.css';
 export function AgentDock({
   onAudit,
   onOpenActivity,
+  edits,
 }: {
   onAudit: (type: AuditType, summary: string, actor: 'agent') => void;
   onOpenActivity: (code: string) => void;
+  edits: EditsController;
 }) {
   const [open, setOpen] = useState(false);
   const conversation = useConversation(onAudit);
@@ -34,6 +37,7 @@ export function AgentDock({
       <AgentPanel
         {...conversation}
         suggested={SUGGESTED}
+        edits={edits}
         onOpenActivity={(code) => {
           setOpen(false);
           onOpenActivity(code);

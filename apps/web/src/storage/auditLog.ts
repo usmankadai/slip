@@ -13,7 +13,10 @@ export type AuditType =
   | 'narrative-removed'
   | 'narrative-exported'
   | 'agent-answer'
-  | 'agent-proposal';
+  | 'agent-proposal'
+  | 'edit-approved'
+  | 'edit-rejected'
+  | 'edit-undone';
 
 export interface AuditEntry {
   id?: number;

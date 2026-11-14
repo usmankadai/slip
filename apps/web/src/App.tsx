@@ -18,6 +18,7 @@ import { askToPersist, pairKey } from './storage/db.ts';
 import { reopenSchedule } from './storage/reopen.ts';
 import { clearOpenPair, loadOpenPair, saveOpenPair } from './storage/session.ts';
 import { engine } from './app/engine.ts';
+import { useEdits } from './app/useEdits.ts';
 import { Notice } from '@slip/ui';
 import { loadNarrative, saveNarrative } from './storage/narrativeStore.ts';
 import styles from './App.module.css';
@@ -72,6 +73,10 @@ export function App() {
     [key],
   );
 
+  const edits = useEdits(key, audit);
+  /** How many saved changes could not be applied when the pair was last opened. */
+  const [droppedEdits, setDroppedEdits] = useState(0);
+
   // Save the narrative a moment after each change, so typing does not write on every key.
   useEffect(() => {
     if (!key || !blocks || restoring) return;
@@ -80,21 +85,26 @@ export function App() {
   }, [key, blocks, restoring]);
 
   /** Shows a pair whose schedules are already in the engine, and picks up its saved work. */
-  const open = useCallback((next: ComparedPair) => {
-    const nextKey = pairKey(next.a, next.b);
-    setBlocks(null);
-    setSaved(null);
-    setRestoring(true);
-    setPair(next);
-    // A narrative saved for this same pair, in this browser, is picked up again.
-    void loadNarrative(nextKey).then((found) => {
-      if (found) setBlocks(found);
-      setRestoring(false);
-    });
-    void askToPersist().then(setPersisted);
-    // Remembered so a reload can reopen it.
-    void saveOpenPair(next);
-  }, []);
+  const open = useCallback(
+    (next: ComparedPair) => {
+      const nextKey = pairKey(next.a, next.b);
+      setBlocks(null);
+      setSaved(null);
+      setRestoring(true);
+      setPair(next);
+      // A narrative saved for this same pair, in this browser, is picked up again.
+      void loadNarrative(nextKey).then((found) => {
+        if (found) setBlocks(found);
+        setRestoring(false);
+      });
+      void askToPersist().then(setPersisted);
+      // Remembered so a reload can reopen it.
+      void saveOpenPair(next);
+      // Changes approved earlier for this pair are applied again.
+      void edits.replay(nextKey).then(setDroppedEdits);
+    },
+    [edits.replay],
+  );
 
   /** 'reopening' while the pair that was open before a reload is read back; '' when done. */
   const [reopening, setReopening] = useState<'checking' | 'reopening' | 'failed' | ''>(
@@ -162,6 +172,7 @@ export function App() {
     <div className={styles.shell}>
       {pair && trace ? (
         <TraceScreen
+          key={edits.version}
           projectName={pair.b.projectName}
           target={trace}
           backLabel={changes ? 'changes' : 'summary'}
@@ -173,6 +184,7 @@ export function App() {
         // the same rows, selection and scroll position.
         <div className={trace ? styles.setAside : styles.inPlace}>
           <ChangesScreen
+            key={edits.version}
             pair={pair}
             initialKind={changes.kind}
             check={changes.check}
@@ -205,6 +217,7 @@ export function App() {
       ) : null}
       {pair && health && !narrative && !changes && !trace ? (
         <HealthScreen
+          key={edits.version}
           pair={pair}
           onBack={() => setHealth(false)}
           onActivities={(check) => setChanges({ kind: null, check })}
@@ -212,7 +225,11 @@ export function App() {
       ) : null}
       {pair && !auditOpen && !health && !narrative && !changes && !trace ? (
         <SummaryScreen
+          key={edits.version}
           pair={pair}
+          appliedEdits={edits.count}
+          droppedEdits={droppedEdits}
+          onUndoEdits={() => void edits.undoAll()}
           onBack={() => {
             void clearOpenPair();
             setPair(null);
@@ -248,6 +265,7 @@ export function App() {
       {pair && !reopening ? (
         <AgentDock
           key={key}
+          edits={edits}
           onAudit={audit}
           onOpenActivity={(code) => {
             setTrace(null);
