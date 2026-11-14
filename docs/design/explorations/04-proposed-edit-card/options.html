@@ -1,0 +1,187 @@
+<!doctype html>
+<html lang="en-GB">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Proposed edit card: options</title>
+    <style>
+      /* A record of what was looked at. The product reads these values from packages/ui/src/tokens.css. */
+      :root {
+        --s0: #fbfaf7; --s1: #f4f2ec; --s2: #ebe8e0; --t1: #1c1b18; --t2: #55524a; --t3: #6c685d;
+        --b1: #e2ded3; --b2: #898477; --accent: #5b3fd6; --late4: #db6b2c; --late5: #b8321f; --early4: #4c8cda;
+      }
+      * { box-sizing: border-box; }
+      body { margin: 0; background: var(--s0); color: var(--t1); font: 13px/20px Inter, system-ui, -apple-system, 'Segoe UI', sans-serif; font-variant-numeric: tabular-nums; }
+      header, main { max-width: 1180px; margin: 0 auto; padding: 0 32px; }
+      header { padding-top: 24px; }
+      main { padding-bottom: 64px; }
+      h1 { font-size: 20px; line-height: 28px; margin: 0 0 4px; }
+      h2 { font-size: 16px; line-height: 24px; margin: 40px 0 8px; }
+      p { margin: 0 0 8px; color: var(--t2); max-width: 780px; }
+      .controls { position: sticky; top: 0; z-index: 2; background: var(--s0); border-bottom: 1px solid var(--b1); padding: 8px 0; margin: 16px 0 0; display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+      .controls button { font: inherit; padding: 2px 10px; border: 1px solid var(--b2); border-radius: 4px; background: var(--s0); color: var(--t1); cursor: pointer; }
+      .controls button[aria-pressed='true'] { background: var(--t1); color: var(--s0); border-color: var(--t1); }
+      .option { display: grid; grid-template-columns: 388px minmax(0, 1fr); gap: 32px; align-items: start; }
+      .notes { margin: 0; font-size: 12px; line-height: 16px; max-width: 520px; }
+      .notes dt { font-weight: 600; margin-top: 8px; }
+      .notes dt:first-child { margin-top: 0; }
+      .notes dd { margin: 0; color: var(--t2); }
+
+      .card { width: 388px; border: 1px solid var(--b2); border-radius: 6px; background: var(--s0); padding: 12px; display: grid; gap: 8px; }
+      .kicker { font-size: 11px; line-height: 16px; color: var(--t3); display: flex; justify-content: space-between; }
+      .state { font-weight: 600; color: var(--t1); border: 1px solid var(--t1); border-radius: 4px; padding: 0 5px; }
+      .title { font-weight: 600; }
+      .code { font: 11px "JetBrains Mono", ui-monospace, monospace; color: var(--t3); white-space: nowrap; }
+      .change { display: grid; grid-template-columns: 1fr auto 1fr; gap: 6px; align-items: center; padding: 6px 8px; background: var(--s1); border-radius: 4px; }
+      .change .was { color: var(--t2); text-decoration: line-through; text-decoration-color: var(--b2); }
+      .change .now { font-weight: 600; text-align: right; }
+      .why { color: var(--t2); font-size: 12px; line-height: 16px; }
+      .why b { color: var(--t1); font-weight: 500; }
+      .effect { font-size: 12px; line-height: 16px; display: grid; gap: 3px; }
+      .effect .row { display: grid; grid-template-columns: minmax(0, 1fr) 72px 92px; gap: 8px; align-items: center; }
+      .effect .row span:last-child { text-align: right; font-weight: 600; }
+      .effect .head { color: var(--t3); font-weight: 500; }
+      .effect .head span:last-child { font-weight: 500; }
+      .track { height: 8px; position: relative; background: linear-gradient(var(--b2), var(--b2)) center / 1px 100% no-repeat; }
+      .track i { position: absolute; top: 1px; height: 6px; }
+      .sum { font-weight: 600; }
+      .actions { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+      .btn { font: inherit; font-weight: 500; padding: 3px 12px; border: 1px solid var(--b2); border-radius: 4px; background: var(--s0); }
+      .btn.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+      .btn.quiet { border-color: transparent; text-decoration: underline; color: var(--t2); padding: 3px 4px; }
+      .after { font-size: 12px; line-height: 16px; color: var(--t2); }
+      .warn { border-left: 3px solid var(--t1); padding: 4px 8px; background: var(--s1); font-size: 12px; line-height: 16px; }
+      .fields { display: grid; grid-template-columns: 110px 1fr; gap: 4px 8px; font-size: 12px; line-height: 16px; }
+      .fields input { font: inherit; width: 90px; padding: 1px 4px; border: 1px solid var(--b2); border-radius: 4px; }
+      @media (max-width: 900px) { .option { grid-template-columns: 1fr; } }
+    </style>
+  </head>
+  <body>
+    <header>
+      <h1>Exploration 04: the proposed edit card</h1>
+      <p>The assistant can propose a change to an activity: a new duration, or a constraint. It never makes the change. A planner approves or rejects it; approving reruns the schedule; both are logged. The card has to give enough before and after to approve with confidence, including what the change does to the key milestones, which the engine works out before anything is changed. It must not become a form.</p>
+      <p>Each option shows the same proposals, drawn at the panel's width. Switch between a change that recovers time, one that makes things worse, one that moves nothing, and one already decided. The figures are made up but shaped like the engine's preview.</p>
+      <div class="controls" id="controls">
+        <span>Case:</span>
+        <button data-case="recovers" aria-pressed="true">Recovers time</button>
+        <button data-case="worse" aria-pressed="false">Makes it worse</button>
+        <button data-case="nothing" aria-pressed="false">Moves nothing</button>
+        <button data-case="approved" aria-pressed="false">Already approved</button>
+      </div>
+    </header>
+    <main id="main"></main>
+
+    <script>
+      const CASES = {
+        recovers: {
+          name: 'Install catenary, section 2', code: 'P03-A002-ENB-0110',
+          field: 'Original duration', was: '40d', now: '28d',
+          reason: 'Duration grew by 20 days this update; the second gang starts on 3 March.',
+          moved: 212, finishWas: '10 Aug 2027', finishNow: '23 Jul 2027',
+          milestones: [['Project completion', 'MS-COMPLETE', -12], ['Phase 3 complete', 'MS-P03', -12], ['Section 2 energised', 'MS-S2-EN', -9]],
+          state: 'proposed',
+        },
+        worse: {
+          name: 'Commission points machine, section 2', code: 'P03-A002-CIV-0220',
+          field: 'Constraint', was: 'None', now: 'Start on or after 2 Jun 2027',
+          reason: 'The supplier has confirmed delivery no earlier than June.',
+          moved: 96, finishWas: '10 Aug 2027', finishNow: '1 Oct 2027',
+          milestones: [['Project completion', 'MS-COMPLETE', 36], ['Phase 3 complete', 'MS-P03', 36]],
+          state: 'proposed',
+        },
+        nothing: {
+          name: 'Survey formation, section 4', code: 'P04-A001-CIV-0010',
+          field: 'Remaining duration', was: '15d', now: '10d',
+          reason: 'Half the survey is done.',
+          moved: 3, finishWas: '10 Aug 2027', finishNow: '10 Aug 2027',
+          milestones: [],
+          state: 'proposed',
+        },
+        approved: {
+          name: 'Install catenary, section 2', code: 'P03-A002-ENB-0110',
+          field: 'Original duration', was: '40d', now: '28d',
+          reason: 'Duration grew by 20 days this update; the second gang starts on 3 March.',
+          moved: 212, finishWas: '10 Aug 2027', finishNow: '23 Jul 2027',
+          milestones: [['Project completion', 'MS-COMPLETE', -12], ['Phase 3 complete', 'MS-P03', -12], ['Section 2 energised', 'MS-S2-EN', -9]],
+          state: 'approved',
+        },
+      };
+      const signed = (d) => `${d > 0 ? '+' : d < 0 ? '−' : ''}${Math.abs(d)}d`;
+      const bar = (d) => {
+        if (!d) return '';
+        const w = Math.sqrt(Math.min(Math.abs(d), 40) / 40) * 50;
+        return `<i style="${d > 0 ? 'left: 50%' : `left: ${50 - w}%`}; width: ${w}%; background: ${d > 0 ? (d >= 40 ? 'var(--late5)' : 'var(--late4)') : 'var(--early4)'}"></i>`;
+      };
+      const kicker = (c) => `<div class="kicker"><span>Proposed by the assistant</span>${c.state === 'approved' ? '<span class="state">Approved</span>' : ''}</div>`;
+      const change = (c) => `<div class="change"><span class="was">${c.was}</span><span>→</span><span class="now">${c.now}</span></div>`;
+      const subject = (c) => `<div><span class="title">${c.field}</span> of ${c.name} <span class="code">${c.code}</span></div>`;
+      const actions = (c, extra = '') =>
+        c.state === 'approved'
+          ? `<div class="after">Approved by you at 10:42. The schedule was recalculated; project completion is now ${c.finishNow}. <span class="btn quiet">Undo</span></div>`
+          : `<div class="actions"><span class="btn primary">Approve</span><span class="btn">Reject</span>${extra}</div>`;
+      const projectLine = (c) => {
+        const same = c.finishWas === c.finishNow;
+        return same ? `Project finish stays at ${c.finishNow}.` : `Project finish ${c.finishWas} → <b>${c.finishNow}</b>.`;
+      };
+
+      const OPTIONS = [
+        {
+          title: 'A. One sentence of effect',
+          render(c) {
+            const top = c.milestones[0];
+            const effect = top
+              ? `${top[0]} <span class="code">${top[1]}</span> moves <b>${signed(top[2])}</b>${c.milestones.length > 1 ? `, and ${c.milestones.length - 1} more ${c.milestones.length - 1 === 1 ? 'milestone' : 'milestones'}` : ''}. ${c.moved} activities change dates.`
+              : `No milestone moves. ${c.moved} activities change dates.`;
+            return `<div class="card">${kicker(c)}${subject(c)}${change(c)}<div class="why"><b>Why:</b> ${c.reason}</div><div class="why">${effect}</div>${actions(c)}</div>`;
+          },
+          notes: [
+            ['Shows', 'What changes, from and to, the assistant\'s reason, and one sentence on the effect: the milestone that moves most, and how many more.'],
+            ['Does well', 'Smallest; reads in two seconds. Approving is one click.'],
+            ['Costs', 'Only one milestone by name. A change that helps one milestone and hurts another reads as good news. Direction is in a sign inside prose, so a worsening change looks almost the same as a recovery.'],
+          ],
+        },
+        {
+          title: 'B. The milestones it moves, as a small table',
+          render(c) {
+            const rows = c.milestones.length
+              ? `<div class="effect"><div class="row head"><span>Milestone</span><span></span><span>Finish moves</span></div>${c.milestones
+                  .map(([name, code, d]) => `<div class="row"><span>${name} <span class="code">${code}</span></span><span class="track">${bar(d)}</span><span>${signed(d)}</span></div>`)
+                  .join('')}</div>`
+              : `<div class="why">No milestone moves.</div>`;
+            const worse = c.milestones.some(([, , d]) => d > 0);
+            return `<div class="card">${kicker(c)}${subject(c)}${change(c)}<div class="why"><b>Why:</b> ${c.reason}</div>${worse ? '<div class="warn">This makes the project finish later.</div>' : ''}${rows}<div class="why">${projectLine(c)} ${c.moved} activities change dates.</div>${actions(c, '<span class="btn quiet">See them in the grid</span>')}</div>`;
+          },
+          notes: [
+            ['Shows', 'The change, the reason, then every milestone it moves with the slip cell (number and bar, as in the grid), and the project finish before and after.'],
+            ['Does well', 'Mixed effects are visible: each milestone has its own row and direction is position as well as colour. A change that makes the finish later says so in words above the table. The activities that move are one click away.'],
+            ['Costs', 'Taller: a card per proposal can fill the panel. Still a card, not a form: nothing to type, two decisions.'],
+          ],
+        },
+        {
+          title: 'C. Editable before approving',
+          render(c) {
+            return `<div class="card">${kicker(c)}${subject(c)}<div class="fields"><span>${c.field}</span><span><span class="was">${c.was}</span> → <input value="${c.now.replace(/"/g, '')}" /></span><span>Reason</span><span>${c.reason}</span></div><div class="why"><b>Effect:</b> ${projectLine(c)} ${c.milestones.length ? `${c.milestones.length} milestones move.` : 'No milestone moves.'} <span class="btn quiet">Recalculate</span></div>${actions(c)}</div>`;
+          },
+          notes: [
+            ['Shows', 'The proposed value in a box the planner can change, the reason, and the effect, recalculated on request.'],
+            ['Does well', 'The planner can take the idea and adjust it ("28 days is too short, make it 32") without asking again.'],
+            ['Costs', 'It is a form, which the spec says it must not become. The planner, not the assistant, now owns the value, so the audit log has to say who chose what. The effect is stale until recalculated.'],
+          ],
+        },
+      ];
+
+      const main = document.getElementById('main');
+      function draw(which) {
+        const c = CASES[which];
+        main.innerHTML = OPTIONS.map((o) => `<h2>${o.title}</h2><div class="option"><div>${o.render(c)}</div><dl class="notes">${o.notes.map(([t, d]) => `<dt>${t}</dt><dd>${d}</dd>`).join('')}</dl></div>`).join('');
+      }
+      document.getElementById('controls').addEventListener('click', (event) => {
+        const button = event.target.closest('button');
+        if (!button) return;
+        for (const other of document.querySelectorAll('#controls button')) other.setAttribute('aria-pressed', String(other === button));
+        draw(button.dataset.case);
+      });
+      draw('recovers');
+    </script>
+  </body>
+</html>

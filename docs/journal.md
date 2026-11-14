@@ -2,6 +2,26 @@
 
 What was built, what Usman decided or designed, and what an agent generated. Newest first.
 
+## 14 November 2026: options for the proposed edit card
+
+**Done**
+
+- Exploration 04, the proposed edit card: three treatments at the panel's width, in four cases (recovers time, makes it worse, moves nothing, already approved).
+
+**Usman decided or designed**
+
+- To draw these next. Nothing on the page yet.
+
+**The agent (Claude) generated**
+
+- The page, the options, the write-up and the recommendation (B, the milestones it moves as a small table).
+- The figures, which are made up but shaped like the engine's preview of an edit.
+
+**Worth Usman's attention**
+
+- One choice is waiting before edits can be approved.
+- The page was checked with a headless browser; the browser pane was unavailable.
+
 ## 14 November 2026: the agent panel, scripted
 
 **Done**
