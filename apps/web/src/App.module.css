@@ -18,3 +18,10 @@
   visibility: hidden;
   pointer-events: none;
 }
+
+.reopening {
+  max-width: 1120px;
+  width: 100%;
+  margin: var(--space-0) auto;
+  padding: var(--space-6) var(--space-6) var(--space-0);
+}

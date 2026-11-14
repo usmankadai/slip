@@ -4,6 +4,8 @@ import type { Block } from '../features/narrative/model.ts';
 import { appendAudit, listAudit } from './auditLog.ts';
 import { openDb, pairKey } from './db.ts';
 import { loadNarrative, saveNarrative } from './narrativeStore.ts';
+import { clearOpenPair, loadOpenPair, saveOpenPair } from './session.ts';
+import type { SlotFacts } from '../features/import/types.ts';
 
 beforeAll(() => {
   // The audit log builds a key range; the fake factory needs its own.
@@ -130,5 +132,38 @@ describe('audit log', () => {
       await appendAudit({ pair: 'p1', actor: 'user', type: 'compared', summary: 'x' }, broken),
     ).toBe(false);
     expect(await listAudit('p1', broken)).toBeNull();
+  });
+});
+
+describe('open pair', () => {
+  const facts = (hash: string): SlotFacts => ({
+    fileName: 'a.xer',
+    projectName: 'Northern Rail',
+    projectId: 1,
+    dataDate: 0,
+    activities: 1000,
+    relationships: 1200,
+    sourceHash: hash.repeat(64),
+    projects: [],
+    incomplete: false,
+    incompleteAccepted: false,
+    report: { total: 0, kinds: 0, groups: [] },
+  });
+
+  it('remembers the open pair and forgets it', async () => {
+    const factory = new IDBFactory();
+    const pair = { a: facts('a'), b: facts('b') };
+    expect(await saveOpenPair(pair, factory)).toBe(true);
+    expect(await loadOpenPair(factory)).toEqual(pair);
+    await clearOpenPair(factory);
+    expect(await loadOpenPair(factory)).toBeNull();
+  });
+
+  it('ignores a saved pair that is not one', async () => {
+    const factory = new IDBFactory();
+    await saveOpenPair({ a: { ...facts('a'), sourceHash: '../x' }, b: facts('b') }, factory);
+    expect(await loadOpenPair(factory)).toBeNull();
+    await saveOpenPair({ a: facts('a'), b: { ...facts('b'), projectId: 1.5 } }, factory);
+    expect(await loadOpenPair(factory)).toBeNull();
   });
 });
