@@ -56,16 +56,27 @@ const SEARCH_DELAY_MS = 250;
 export function ChangesScreen({
   pair,
   initialKind,
+  check,
+  backLabel,
   onBack,
   onTrace,
 }: {
   pair: { a: SlotFacts; b: SlotFacts };
-  initialKind: ChangeKind;
+  /** The kind of change to open on, or null for every activity. */
+  initialKind: ChangeKind | null;
+  /** A health check whose activities to show, when the planner came from the health screen. */
+  check?: { id: number; name: string };
+  /** Where Back leads: "summary" or "health". */
+  backLabel: string;
   onBack: () => void;
   /** Opens the slip trace for the selected activity. */
   onTrace: (target: TraceTarget) => void;
 }) {
-  const [filter, setFilter] = useState<GridFilter>({ kind: initialKind, text: '' });
+  const [filter, setFilter] = useState<GridFilter>({
+    kind: initialKind,
+    text: '',
+    ...(check ? { healthCheck: check.id } : {}),
+  });
   const [typed, setTyped] = useState('');
   const [sort, setSort] = useState<SortSpec | null>(DEFAULT_SORT);
   const [density, setDensity] = useState<Density>('compact');
@@ -254,9 +265,26 @@ export function ChangesScreen({
           </p>
         </div>
         <Button variant="quiet" onClick={onBack}>
-          Back to summary
+          Back to {backLabel}
         </Button>
       </header>
+
+      {check && filter.healthCheck !== undefined ? (
+        <Notice
+          action={
+            <Button
+              variant="quiet"
+              onClick={() =>
+                setFilter((previous) => ({ kind: previous.kind, text: previous.text }))
+              }
+            >
+              Show all activities
+            </Button>
+          }
+        >
+          Showing the activities counted against {check.name} in update B.
+        </Notice>
+      ) : null}
 
       <div className={styles.toolbar}>
         <SegmentedControl
