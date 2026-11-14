@@ -11,7 +11,7 @@ To view: run the `design` preview (or `pnpm --filter @slip/web exec vite ../../d
 | Changes | [changes.html](changes.html): A grid and Gantt side by side, B grid first with a small timeline in each row, C change types down the left | Decided 11 November 2026 | A, grid and Gantt side by side |
 | Slip trace | Not drawn as a layout. [Exploration 03](../explorations/03-trace-view/README.md) has three treatments: A ranked causes, B the driving path, C a waterfall | Decided 12 November 2026 | A leading, B beneath as evidence |
 | Health | [health.html](health.html): A what changed first then the rest, B all 14 in DCMA order with the change marked, C checks on the left and the chosen check on the right | Waiting for Usman | |
-| Finish update | not drawn | | |
+| Finish update | [narrative.html](narrative.html): A one document with evidence in the margin, B paragraph blocks each with its own evidence, C choose the facts then the words | Waiting for Usman | |
 
 ## Decisions
 
@@ -19,6 +19,12 @@ Both were decided by Usman on 11 November 2026 by accepting Claude's recommendat
 
 - **Import: A, two slots side by side**, including the "do these two belong together" line. It is what the spec asks for (two slots), and it keeps each warning beside the file it is about. B is the stronger answer to "can I trust it" and stays the fallback if the import report turns out to need the full width; exploration 08 (import warnings) will show that.
 - **Update summary: B, milestones with a rail.** It is the one where the secondary facts are plainly secondary and still on screen. A's strip of three tiles is the dashboard the spec warns against. C's sentence is a good idea that belongs on the Finish update screen.
+
+## Finish update: waiting for a decision
+
+Three layouts drawn on 14 November 2026. Claude's recommendation, a suggestion only: **B, paragraph blocks**. It is the only one where "no claim without evidence" can be kept simply and visibly: each block carries its chips and says whether it is generated or edited, the planner can always get back to the generated text, and a block that contradicts the data is caught in words. A reads better but is much harder to build honestly; C's facts list is a good idea that could later become how blocks are added.
+
+Open whichever is chosen: where the narrative is kept between visits, and whether each edit goes in the audit log. Neither exists yet.
 
 ## Health: waiting for a decision
 

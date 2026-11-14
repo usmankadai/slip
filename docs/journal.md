@@ -2,6 +2,27 @@
 
 What was built, what Usman decided or designed, and what an agent generated. Newest first.
 
+## 14 November 2026: layouts for the Finish update narrative
+
+**Done**
+
+- Three low-fidelity layouts for the last screen in the flow: one document with evidence in the margin, paragraph blocks each with its own evidence, and a checklist of facts that the text is written from.
+
+**Usman decided or designed**
+
+- To draw these next. Nothing on the page yet.
+
+**The agent (Claude) generated**
+
+- The page, the three layouts and the recommendation (B, paragraph blocks).
+- The sample narrative text, which is made up but uses figures from the generated rail schedule.
+
+**Worth Usman's attention**
+
+- One choice is waiting. The screen is not built until it is made.
+- The page was not looked at in a browser: the browser pane was unavailable. Its structure was checked from the command line only.
+- How a planner's own statement, with no evidence, is allowed and marked is a judgement in every layout; the spec says only that a claim must not exist without evidence.
+
 ## 12 November 2026: layouts for the health screen
 
 **Done**
