@@ -19,6 +19,7 @@ export const SUGGESTED: SuggestedQuestion[] = [
   { id: 'changed', text: 'What changed between the two updates?' },
   { id: 'health', text: 'Which health checks got worse?' },
   { id: 'critical', text: 'Which critical activities slipped most?' },
+  { id: 'recover', text: 'What change would recover the largest slip?' },
 ];
 
 interface ToolCall {
@@ -197,6 +198,58 @@ const SCRIPTS: Record<string, Script> = {
         worse.length === 0
           ? `No DCMA check got worse. ${failing} fail in the current update.`
           : `${worse.length} DCMA ${worse.length === 1 ? 'check' : 'checks'} got worse: ${list(worse)}. ${failing} fail in the current update.`,
+    };
+  },
+
+  recover(results) {
+    if (results.length === 0) return { tools: [{ name: 'diff_summary', input: {} }] };
+    if (failure(results)) return { answer: COULD_NOT };
+    const top = rows(results[0]!.output!.milestones_moved).find(
+      (row) => (num(row.slip_working_days) ?? 0) > 0,
+    );
+    if (!top)
+      return {
+        answer:
+          'No milestone finishes later than it did in the last update, so there is no slip to recover.',
+      };
+    if (results.length === 1)
+      return { tools: [{ name: 'trace_slip', input: { task_code: str(top.code) } }] };
+    // The largest cause that is a duration that grew: setting it back is a change Slip can propose.
+    const cause = rows(results[1]!.output!.contributors).find(
+      (row) => str(row.cause) === 'duration' && (num(row.working_days) ?? 0) > 0,
+    );
+    if (!cause) {
+      return {
+        answer: `None of the causes of the slip to ${str(top.name)} #${str(top.code)} is a duration that grew, so there is no single duration to set back. Ask why it moved to see what did cause it.`,
+      };
+    }
+    if (results.length === 2)
+      return { tools: [{ name: 'get_activity', input: { task_code: str(cause.code) } }] };
+    const current = (results[2]!.output!.current ?? {}) as Row;
+    const original = num(current.original_duration_days);
+    const grew = num(cause.working_days)!;
+    if (original === null) return { answer: COULD_NOT };
+    const back = Math.max(0, Math.round((original - grew) * 10) / 10);
+    if (results.length === 3) {
+      return {
+        tools: [
+          {
+            name: 'propose_edit',
+            input: {
+              task_code: str(cause.code),
+              change: 'set_original_duration',
+              working_days: back,
+              reason: `Its duration grew by ${days(grew)} this update and that growth drives ${str(top.name)}. Setting it back to ${days(back)} tests what that recovers.`,
+            },
+          },
+        ],
+      };
+    }
+    const proposal = results[3]!.output!;
+    return {
+      answer: `The largest cause of the slip to ${str(top.name)} #${str(top.code)} is ${str(cause.name)} #${str(cause.code)}, whose duration grew by ${days(grew)}. Setting it back to ${days(back)} is proposed below${
+        proposal.proposed ? '' : ' but could not be worked out'
+      }, with what it would do to the milestones. Nothing changes unless you approve it.`,
     };
   },
 

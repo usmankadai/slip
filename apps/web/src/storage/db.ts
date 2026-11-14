@@ -6,11 +6,13 @@
  */
 
 const NAME = 'slip';
-const VERSION = 2;
+const VERSION = 3;
 export const NARRATIVES = 'narratives';
 export const AUDIT = 'audit';
 /** Which pair of updates was open, so a reload can reopen it. Version 2. */
 export const SESSION = 'session';
+/** Changes the planner approved, per pair, replayed when the pair is opened. Version 3. */
+export const EDITS = 'edits';
 
 /** The factory is a parameter so tests can pass an in-memory one. */
 export function openDb(
@@ -29,6 +31,7 @@ export function openDb(
       const db = request.result;
       if (!db.objectStoreNames.contains(NARRATIVES)) db.createObjectStore(NARRATIVES);
       if (!db.objectStoreNames.contains(SESSION)) db.createObjectStore(SESSION);
+      if (!db.objectStoreNames.contains(EDITS)) db.createObjectStore(EDITS);
       if (!db.objectStoreNames.contains(AUDIT)) {
         const audit = db.createObjectStore(AUDIT, { keyPath: 'id', autoIncrement: true });
         audit.createIndex('pair', 'pair');

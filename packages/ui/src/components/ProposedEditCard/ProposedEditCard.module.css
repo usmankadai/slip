@@ -1,0 +1,110 @@
+.card {
+  display: grid;
+  gap: var(--space-2);
+  width: 100%;
+  padding: var(--space-3);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-card);
+  background: var(--surface-0);
+}
+
+.kicker {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--space-2);
+  font-size: var(--text-xs);
+  line-height: var(--leading-xs);
+  color: var(--text-muted);
+}
+
+.state {
+  padding: var(--space-0) var(--space-1);
+  border: 1px solid var(--text-primary);
+  border-radius: var(--radius-control);
+  font-weight: var(--weight-semibold);
+  color: var(--text-primary);
+}
+
+.subject {
+  margin: var(--space-0);
+}
+
+.field {
+  font-weight: var(--weight-semibold);
+}
+
+.code {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+
+.change {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  gap: var(--space-2);
+  align-items: center;
+  padding: var(--space-1) var(--space-2);
+  border-radius: var(--radius-control);
+  background: var(--surface-1);
+  font-variant-numeric: tabular-nums;
+}
+
+.from {
+  color: var(--text-secondary);
+  text-decoration: line-through;
+  text-decoration-color: var(--border-strong);
+}
+
+.to {
+  text-align: right;
+  font-weight: var(--weight-semibold);
+}
+
+.small {
+  margin: var(--space-0);
+  font-size: var(--text-sm);
+  line-height: var(--leading-sm);
+  color: var(--text-secondary);
+}
+
+.later {
+  padding: var(--space-1) var(--space-2);
+  border-left: var(--space-1) solid var(--text-primary);
+  background: var(--surface-1);
+  font-size: var(--text-sm);
+  line-height: var(--leading-sm);
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--text-sm);
+  line-height: var(--leading-sm);
+  font-variant-numeric: tabular-nums;
+}
+
+.table th,
+.table td {
+  padding: var(--space-1) var(--space-0);
+  text-align: left;
+  font-weight: var(--weight-regular);
+  vertical-align: middle;
+}
+
+.table thead th {
+  color: var(--text-muted);
+  font-weight: var(--weight-medium);
+}
+
+.table .moves {
+  text-align: right;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+}

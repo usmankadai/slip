@@ -27,3 +27,8 @@ export {
   type AgentTextProps,
 } from './components/AgentText/AgentText.tsx';
 export { ScriptedBadge } from './components/ScriptedBadge/ScriptedBadge.tsx';
+export {
+  ProposedEditCard,
+  type MilestoneEffect,
+  type ProposedEditCardProps,
+} from './components/ProposedEditCard/ProposedEditCard.tsx';

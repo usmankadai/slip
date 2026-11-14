@@ -5,6 +5,7 @@ import { appendAudit, listAudit } from './auditLog.ts';
 import { openDb, pairKey } from './db.ts';
 import { loadNarrative, saveNarrative } from './narrativeStore.ts';
 import { clearOpenPair, loadOpenPair, saveOpenPair } from './session.ts';
+import { loadEdits, saveEdits } from './editStore.ts';
 import type { SlotFacts } from '../features/import/types.ts';
 
 beforeAll(() => {
@@ -165,5 +166,39 @@ describe('open pair', () => {
     expect(await loadOpenPair(factory)).toBeNull();
     await saveOpenPair({ a: facts('a'), b: { ...facts('b'), projectId: 1.5 } }, factory);
     expect(await loadOpenPair(factory)).toBeNull();
+  });
+});
+
+describe('edit store', () => {
+  const edit = {
+    id: 'edit-1',
+    taskCode: 'ENB-0110',
+    field: 'originalDuration' as const,
+    to: 9600,
+    reason: 'It grew.',
+  };
+
+  it('saves the approved edits for a pair, in order', async () => {
+    const factory = new IDBFactory();
+    const constraint = {
+      ...edit,
+      id: 'edit-2',
+      field: 'constraintType' as const,
+      to: 2,
+      and: { field: 'constraintDate' as const, to: 1000 },
+    };
+    expect(await saveEdits('p1', [edit, constraint], factory)).toBe(true);
+    expect(await loadEdits('p1', factory)).toEqual([edit, constraint]);
+    expect(await loadEdits('p2', factory)).toEqual([]);
+  });
+
+  it('leaves out anything saved that is not an edit', async () => {
+    const factory = new IDBFactory();
+    await saveEdits(
+      'p1',
+      [edit, { ...edit, field: 'name' } as never, { ...edit, to: 1.5 }],
+      factory,
+    );
+    expect(await loadEdits('p1', factory)).toEqual([edit]);
   });
 });

@@ -9,6 +9,7 @@ import {
   EntityChip,
   Notice,
   ProgressBar,
+  ProposedEditCard,
   SegmentedControl,
   Skeleton,
   barLength,
@@ -201,5 +202,56 @@ describe('AgentText', () => {
 describe('ScriptedBadge', () => {
   it('says the answer is scripted', () => {
     expect(renderToStaticMarkup(<ScriptedBadge />)).toContain('Scripted answer, not AI');
+  });
+});
+
+describe('ProposedEditCard', () => {
+  const props = {
+    field: 'Original duration',
+    activityName: 'Install catenary',
+    activityCode: 'ENB-0110',
+    from: '40 working days',
+    to: '20 working days',
+    reason: 'It grew.',
+    effect: {
+      milestones: [{ code: 'MS-COMPLETE', days: 36 }],
+      milestonesMoved: 3,
+      projectFinishBefore: '10 August 2027',
+      projectFinishAfter: '1 October 2027',
+      activitiesMoved: 1,
+      later: true,
+    },
+    state: 'proposed' as const,
+    onApprove: () => {},
+    onReject: () => {},
+    onUndo: () => {},
+  };
+
+  it('says in words when a change makes the finish later, and lists the milestones', () => {
+    const html = renderToStaticMarkup(<ProposedEditCard {...props} />);
+    expect(html).toContain('This makes the project finish later.');
+    expect(html).toContain('MS-COMPLETE');
+    expect(html).toContain('+36d');
+    expect(html).toContain('2 more milestones move.');
+    expect(html).toContain('1 activity changes dates.');
+  });
+
+  it('cannot be approved before the effect is known', () => {
+    const html = renderToStaticMarkup(<ProposedEditCard {...props} effect={null} />);
+    expect(html).toContain('Working out what this would move');
+    expect(html).toMatch(/<button[^>]*disabled=""[^>]*>Approve<\/button>/);
+  });
+
+  it('stays after a decision, saying what happened, and offers Undo only when approved', () => {
+    const approved = renderToStaticMarkup(
+      <ProposedEditCard {...props} state="approved" outcome="Approved by you." />,
+    );
+    expect(approved).toContain('>Approved<');
+    expect(approved).toContain('>Undo<');
+    expect(approved).not.toContain('>Approve<');
+    const rejected = renderToStaticMarkup(
+      <ProposedEditCard {...props} state="rejected" outcome="Rejected." />,
+    );
+    expect(rejected).not.toContain('>Undo<');
   });
 });

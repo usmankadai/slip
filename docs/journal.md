@@ -2,6 +2,33 @@
 
 What was built, what Usman decided or designed, and what an agent generated. Newest first.
 
+## 14 November 2026: approving the assistant's changes
+
+**Done**
+
+- The proposed edit card (exploration 04, option B): the change, the assistant's reason, every milestone it moves with the slip cell, the project finish before and after, and how many activities move, all from the engine's preview. Approve stays disabled until the effect is known.
+- Approve applies the change in the engine, saves it for the pair, and logs it. Reject logs it. An approved change can be undone from its card, or all at once from a notice on the summary. Every screen reads the schedule again after a change.
+- Approved changes are replayed when the pair is opened again, so they survive a reload.
+- A fifth scripted question, "What change would recover the largest slip?", proposes setting back the duration that grew most, so the card can be tried on the public site.
+- An engine fix: previewing an edit used to switch update B to recalculated dates as a side effect. A preview now keeps nothing.
+- Checked headlessly on the 1,000 activity fixture: the proposal takes the largest slip from +67 to +47 working days, that survives a reload, and Undo brings it back to +67; the activity log shows the proposal, the approval and the undo.
+
+**Usman decided or designed**
+
+- Option B for the card ("B, milestone table"), on the agent's recommendation. No reasons of his own.
+
+**The agent (Claude) generated**
+
+- All the code, tests, stories and copy, and the fifth question.
+- Choices made while building: Undo on the card and "Undo all" on the summary; that after any approved change every screen uses recalculated dates, and the summary says so; that a saved change which no longer applies is dropped with a notice.
+- The engine change to previews, found while building: the old behaviour would have changed the summary's dates just by showing a proposal.
+
+**Worth Usman's attention**
+
+- After an approved change, screens are read again from scratch, so the grid loses its filter and scroll position.
+- The narrative does not rewrite itself after a change; its generated text describes the schedule as it was when it was written.
+- After a reload the cards are gone (the conversation is not saved), so the only Undo is "Undo all" on the summary.
+
 ## 14 November 2026: options for the proposed edit card
 
 **Done**

@@ -73,6 +73,29 @@ describe('scripted answers on the 1,000 activity fixture', () => {
     expect(answer.text).not.toMatch(/\((\d+\.\d)% to \1%\)/);
   });
 
+  it('proposes setting back the duration that grew most, and changes nothing', async () => {
+    const engine = loaded();
+    const answer = await run(
+      'What change would recover the largest slip?',
+      scriptedTransport(),
+      engine,
+    );
+    expect(answer.steps.map((step) => step.tool)).toEqual([
+      'diff_summary',
+      'trace_slip',
+      'get_activity',
+      'propose_edit',
+    ]);
+    expect(answer.proposals).toHaveLength(1);
+    expect(answer.proposals[0]).toMatchObject({
+      taskCode: 'P03-A002-ENB-0110',
+      field: 'originalDuration',
+    });
+    expect(answer.proposals[0]!.to).toBeLessThan(answer.proposals[0]!.from);
+    expect(unverified(answer)).toEqual([]);
+    expect(await engine.request({ type: 'edits' })).toEqual({ type: 'edits', edits: [] });
+  });
+
   it('says plainly that it answers only the suggested questions', async () => {
     const answer = await run('Is the delay the subcontractor’s fault?');
     expect(answer.status).toBe('done');

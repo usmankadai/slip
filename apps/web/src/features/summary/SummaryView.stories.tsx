@@ -168,3 +168,7 @@ export const CarriedFromImport: Story = {
     },
   },
 };
+
+export const WithApprovedChanges: Story = {
+  args: { edits: { count: 1, onUndoAll: noop } },
+};
