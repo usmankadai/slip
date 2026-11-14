@@ -14,6 +14,7 @@ Part of the Slip spec. Start at [CLAUDE.md](../../CLAUDE.md).
 4. **Slip trace**: pick a milestone that moved and walk back along the driving path to the activities that caused the slip. Show it as a ranked list (largest contributors first) and a small focused network view.
 5. **Health comparison**: DCMA 14-point checks run on both updates, shown as a delta ("12 new hard constraints this update"). Every failed check clicks through to the activities causing it.
 6. **Finish update**: generates a written change narrative for the monthly report. Every claim links to activity IDs. The planner can edit it before export (Markdown and PDF).
+   *Built (14 November 2026):* template-generated paragraphs with evidence chips, editing, the planner's own paragraphs, and Markdown export. Not yet: PDF, saving across reloads, the audit log, agent polishing.
 
 ## Agent panel
 A side panel in the style of a copilot:

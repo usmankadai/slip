@@ -31,6 +31,8 @@ export interface SummaryViewProps {
   onTrace: (target: TraceTarget) => void;
   /** Opens the health comparison. */
   onHealth: () => void;
+  /** Opens Finish update, the narrative for the report. */
+  onNarrative: () => void;
 }
 
 function Milestones({
@@ -212,6 +214,7 @@ export function SummaryView({
   onChanges,
   onTrace,
   onHealth,
+  onNarrative,
 }: SummaryViewProps) {
   const all = state.recalculation ? [...notices, state.recalculation] : notices;
   const empty = state.changes.status === 'ready' && nothingChanged(state.changes.value);
@@ -226,6 +229,9 @@ export function SummaryView({
         </div>
         <div className={styles.headerActions}>
           <Button onClick={() => onChanges('all')}>See all changes</Button>
+          <Button variant="primary" onClick={onNarrative}>
+            Finish update
+          </Button>
           <Button variant="quiet" onClick={onBack}>
             Back to import
           </Button>

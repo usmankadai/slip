@@ -3,6 +3,7 @@ import { describe, expect, it } from 'vitest';
 import {
   Button,
   DeltaCell,
+  EntityChip,
   Notice,
   ProgressBar,
   SegmentedControl,
@@ -121,5 +122,27 @@ describe('SegmentedControl', () => {
     expect(html).toContain('aria-label="Density"');
     expect(html.match(/aria-pressed="true"/g)).toHaveLength(1);
     expect(html).toMatch(/aria-pressed="true"[^>]*>Comfortable/);
+  });
+});
+
+describe('EntityChip', () => {
+  it('is a button that names its evidence, with a description when given', () => {
+    const html = renderToStaticMarkup(
+      <EntityChip
+        kind="activity"
+        label="MS-COMPLETE"
+        description="Open activity MS-COMPLETE"
+        onOpen={() => {}}
+      />,
+    );
+    expect(html).toMatch(/^<button type="button"/);
+    expect(html).toContain('aria-label="Open activity MS-COMPLETE"');
+    expect(html).toContain('>MS-COMPLETE</button>');
+  });
+
+  it('renders a label as text, never as markup', () => {
+    expect(renderToStaticMarkup(<EntityChip label="<b>x</b>" onOpen={() => {}} />)).toContain(
+      '&lt;b&gt;',
+    );
   });
 });

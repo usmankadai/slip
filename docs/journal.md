@@ -2,6 +2,34 @@
 
 What was built, what Usman decided or designed, and what an agent generated. Newest first.
 
+## 14 November 2026: the Finish update screen
+
+**Done**
+
+- The last screen in the planner's flow. Four paragraphs written by template from the summary, trace and health results: key dates, why the largest move happened, what changed, schedule health. Each carries evidence chips; each chip opens the changes grid on that activity, kind of change or health check, and Back returns to the narrative.
+- Every paragraph is editable. Each is marked generated, edited by you, or your own statement. An edited paragraph keeps its evidence and offers its generated text back; a paragraph the planner adds has no evidence and says so.
+- Export as Markdown, downloaded as a file, with each paragraph's evidence and mark in words. Schedule and planner text is escaped so nothing in it becomes a link or HTML.
+- Reached from a "Finish update" button on the summary. Edits survive moving between screens; loading a new pair starts a new narrative.
+- `EntityChip` added to `packages/ui` with a contract, stories and tests.
+- Checked headlessly with Playwright on the 1,000 activity fixture, in the development build and the production build: generate, edit, add, export, follow a chip into the grid and back, with no console errors.
+
+**Usman decided or designed**
+
+- Layout B, paragraph blocks ("B, paragraph blocks"), on the agent's recommendation. No reasons of his own.
+
+**The agent (Claude) generated**
+
+- All the code, tests, stories, and every template sentence.
+- Rules settled without asking, recorded in `docs/design/flows/README.md`: the four paragraphs and their order; the three marks; what an evidence chip opens; Markdown only.
+- A departure from the drawing: layout B showed a paragraph flagged for contradicting the data. That is not built. Telling whether free text agrees with a number is not something a template can do reliably; an edited paragraph says instead that its evidence is for the generated text.
+
+**Worth Usman's attention**
+
+- Edits are lost on reload. IndexedDB, where the persistence spec keeps them, does not exist yet, and edits are not written to an audit log.
+- No PDF export.
+- When two milestones tie for the largest move, the one listed first in the file leads. On the 1,000 activity fixture that is Phase 3 complete, not Project completion, though both moved 67 days.
+- The browser pane was unavailable, so the screen was checked with a headless browser and a screenshot, not by hand.
+
 ## 14 November 2026: layouts for the Finish update narrative
 
 **Done**

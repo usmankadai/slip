@@ -15,3 +15,4 @@ export {
   type SegmentedOption,
 } from './components/SegmentedControl/SegmentedControl.tsx';
 export { ROW_HEIGHT, type Density } from './density.ts';
+export { EntityChip, type EntityChipProps } from './components/EntityChip/EntityChip.tsx';
