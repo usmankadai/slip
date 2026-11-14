@@ -14,6 +14,10 @@ import type { TraceTarget } from './features/trace/TraceView.tsx';
 import { count } from './shared/format.ts';
 import { appendAudit, type AuditType } from './storage/auditLog.ts';
 import { askToPersist, pairKey } from './storage/db.ts';
+import { reopenSchedule } from './storage/reopen.ts';
+import { clearOpenPair, loadOpenPair, saveOpenPair } from './storage/session.ts';
+import { engine } from './app/engine.ts';
+import { Notice } from '@slip/ui';
 import { loadNarrative, saveNarrative } from './storage/narrativeStore.ts';
 import styles from './App.module.css';
 
@@ -74,7 +78,8 @@ export function App() {
     return () => clearTimeout(timer);
   }, [key, blocks, restoring]);
 
-  const compare = (next: ComparedPair) => {
+  /** Shows a pair whose schedules are already in the engine, and picks up its saved work. */
+  const open = useCallback((next: ComparedPair) => {
     const nextKey = pairKey(next.a, next.b);
     setBlocks(null);
     setSaved(null);
@@ -86,6 +91,50 @@ export function App() {
       setRestoring(false);
     });
     void askToPersist().then(setPersisted);
+    // Remembered so a reload can reopen it.
+    void saveOpenPair(next);
+  }, []);
+
+  /** 'reopening' while the pair that was open before a reload is read back; '' when done. */
+  const [reopening, setReopening] = useState<'checking' | 'reopening' | 'failed' | ''>(
+    SHOW_HARNESS ? '' : 'checking',
+  );
+  const [reopeningName, setReopeningName] = useState('');
+  useEffect(() => {
+    if (SHOW_HARNESS) return;
+    let current = true;
+    void (async () => {
+      const saved = await loadOpenPair();
+      if (!current) return;
+      if (!saved) {
+        setReopening('');
+        return;
+      }
+      setReopeningName(saved.b.projectName);
+      setReopening('reopening');
+      const [a, b] = await Promise.all([reopenSchedule(saved.a), reopenSchedule(saved.b)]);
+      if (!current) return;
+      try {
+        if (!a || !b) throw new Error('not cached');
+        await engine().load('a', a);
+        await engine().load('b', b);
+        if (!current) return;
+        open(saved);
+        setReopening('');
+      } catch {
+        void clearOpenPair();
+        if (current) setReopening('failed');
+      }
+    })();
+    return () => {
+      current = false;
+    };
+  }, [open]);
+
+  const compare = (next: ComparedPair) => {
+    const nextKey = pairKey(next.a, next.b);
+    setReopening('');
+    open(next);
     const log = (type: AuditType, summary: string) =>
       void appendAudit({ pair: nextKey, actor: 'user', type, summary });
     log(
@@ -163,7 +212,10 @@ export function App() {
       {pair && !auditOpen && !health && !narrative && !changes && !trace ? (
         <SummaryScreen
           pair={pair}
-          onBack={() => setPair(null)}
+          onBack={() => {
+            void clearOpenPair();
+            setPair(null);
+          }}
           onChanges={(kind) => setChanges({ kind })}
           onHealth={() => setHealth(true)}
           onNarrative={() => setNarrative(true)}
@@ -171,7 +223,27 @@ export function App() {
           onTrace={setTrace}
         />
       ) : null}
-      {pair ? null : <ImportScreen onCompare={compare} />}
+      {reopening === 'checking' ? <main /> : null}
+      {reopening === 'reopening' ? (
+        <main className={styles.reopening} aria-busy="true">
+          <Notice title={`Reopening ${reopeningName || 'the updates you had open'}`}>
+            Reading both updates back from this browser&apos;s copy.
+          </Notice>
+        </main>
+      ) : null}
+      {pair || reopening === 'checking' || reopening === 'reopening' ? null : (
+        <>
+          {reopening === 'failed' ? (
+            <div className={styles.reopening}>
+              <Notice title="Slip could not reopen the updates you had open">
+                This browser no longer has its copy of them. Drop the two files again; your
+                narrative and activity log are kept and will come back.
+              </Notice>
+            </div>
+          ) : null}
+          <ImportScreen onCompare={compare} />
+        </>
+      )}
       <Footer />
     </div>
   );
