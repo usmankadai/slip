@@ -2,6 +2,36 @@
 
 What was built, what Usman decided or designed, and what an agent generated. Newest first.
 
+## 14 November 2026: the agent panel, scripted
+
+**Done**
+
+- An "Ask about this schedule" button on every screen once a pair is open, which opens the assistant in a panel on the right.
+- Four suggested questions, answered by the real tools against the loaded schedule: why the milestone that slipped most moved, what changed, which health checks got worse, which critical activities slipped most. The wording is canned; every figure and every activity named comes from the tool results. Each answer says "Scripted answer, not AI".
+- The working is folded into one line ("Worked for 1s, 2 steps") that opens to each tool call. Cited activities that were in the tool results are chips that open the grid; any other code is marked unverified where it stands.
+- A free question gets a plain answer that the scripted assistant reads only the suggested questions.
+- The browser-side loop that asks a question, runs the tools and sends results back, shared by a scripted transport and a live one. The live one is tested but not used: the agent server is not deployed.
+- Each answer is logged in the activity log as the assistant's, with the tools it used.
+- `AgentSteps`, `AgentText` and `ScriptedBadge` in `packages/ui`.
+- Checked: 14 unit tests, including every suggested question run on the 1,000 activity fixture with no unverified citations and the causes matching `expected.json`; and headlessly in the browser.
+
+**Usman decided or designed**
+
+- Option A for the agent's steps ("A, steps folded"), on the agent's recommendation. No reasons of his own.
+
+**The agent (Claude) generated**
+
+- All the code, tests, stories, the four questions and their templates.
+- D22: scripted answers come from an in-browser transport, not MSW as the spec said. Same events, same loop, same real tools, no service worker.
+- Where the panel lives (a drawer from the right, over the screen) and how it opens (a floating button), neither drawn first. The UI spec puts a switchable panel on the right of a three-part layout that does not exist yet.
+
+**Worth Usman's attention**
+
+- Live mode is not reachable: the server is not deployed, and needs the Anthropic key on Vercel and a decision to turn it on.
+- Proposed edits cannot be approved; that waits for exploration 04, the proposed edit card. A proposal in a live answer is shown as a note and logged as not applied.
+- The conversation is lost on reload and when the pair changes.
+- Opening a cited activity closes the panel, because the panel covers the grid.
+
 ## 14 November 2026: options for the agent's steps
 
 **Done**

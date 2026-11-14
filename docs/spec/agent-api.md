@@ -83,3 +83,11 @@ The client keeps the set of task codes that appeared in tool results for the cur
 - **First full run:** 28 of 28 passed on `claude-opus-5-5` at `medium` effort. Results and how to read them are in [docs/evals.md](../evals.md). All 28 graded answers are saved under `tools/evals/recorded/` and regraded by `pnpm evals:replay`.
 - Not yet: harder cases (the set is saturated), repeated runs, a second fixture, wiring the agent into the browser (the panel, the audit entries), scripted mode, and deployment to Vercel.
 
+## What the panel does today (14 November 2026)
+
+- **Scripted mode only.** The live transport exists and is tested, but the agent server is not deployed, so the panel uses scripted answers. Scripted answers come from an in-browser transport, not MSW ([D22](../decisions/D22-scripted-agent-without-msw.md)).
+- **Four suggested questions**, each answered by asking for the real tools, reading their results for the loaded pair, and filling a template: why the milestone that slipped most moved, what changed, which health checks got worse, which critical activities slipped most. A free question gets a plain answer that only the suggested questions are read. Every scripted answer carries "Scripted answer, not AI".
+- **Steps folded** into one line that opens to each tool call and what it returned (exploration 05, option A). Cited codes found in the tool results are chips that open the grid; others are marked unverified where they stand.
+- **Audit log.** Each answer is logged as the assistant's, with the tools it used. A proposed edit (live mode only) is logged as not applied and shown as a note; approving proposals waits for exploration 04.
+- **Not built:** the live connection, conversations kept across reloads, the `#` mention picker, tables and charts in answers, the data flow panel and first-use notice, and "Show a scripted answer instead" after a live failure.
+

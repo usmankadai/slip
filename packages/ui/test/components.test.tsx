@@ -1,7 +1,10 @@
 import { renderToStaticMarkup } from 'react-dom/server';
 import { describe, expect, it } from 'vitest';
 import {
+  AgentSteps,
+  AgentText,
   Button,
+  ScriptedBadge,
   DeltaCell,
   EntityChip,
   Notice,
@@ -144,5 +147,59 @@ describe('EntityChip', () => {
     expect(renderToStaticMarkup(<EntityChip label="<b>x</b>" onOpen={() => {}} />)).toContain(
       '&lt;b&gt;',
     );
+  });
+});
+
+describe('AgentSteps', () => {
+  const steps = [
+    { tool: 'diff_summary', input: '', result: '544 changed', isError: false },
+    { tool: 'trace_slip', input: 'MS-COMPLETE', result: '4 causes', isError: false },
+  ];
+
+  it('folds the working into one line', () => {
+    const html = renderToStaticMarkup(<AgentSteps steps={steps} seconds={2.6} />);
+    expect(html).toContain('Worked for 3s, 2 steps');
+    expect(html).toContain('aria-expanded="false"');
+    expect(html).not.toContain('trace_slip');
+  });
+
+  it('says it is working, and shows nothing for an answer with no steps', () => {
+    expect(renderToStaticMarkup(<AgentSteps steps={steps.slice(0, 1)} working />)).toContain(
+      'Working, 1 step so far',
+    );
+    expect(renderToStaticMarkup(<AgentSteps steps={[]} seconds={1} />)).toBe('');
+  });
+});
+
+describe('AgentText', () => {
+  it('makes verified codes chips and marks unverified ones in words', () => {
+    const html = renderToStaticMarkup(
+      <AgentText
+        onOpen={() => {}}
+        parts={[
+          { kind: 'text', text: 'See ' },
+          { kind: 'verified', text: 'MS-COMPLETE' },
+          { kind: 'text', text: ' and ' },
+          { kind: 'unverified', text: 'X-1' },
+        ]}
+      />,
+    );
+    expect(html).toContain('aria-label="Open activity MS-COMPLETE"');
+    expect(html).toContain('X-1</span><span');
+    expect(html).toContain('>unverified</span>');
+    expect(html).not.toContain('Open activity X-1');
+  });
+
+  it('renders answer text as text, never as markup', () => {
+    const html = renderToStaticMarkup(
+      <AgentText onOpen={() => {}} parts={[{ kind: 'text', text: '<script>x</script>' }]} />,
+    );
+    expect(html).toContain('&lt;script&gt;');
+  });
+});
+
+describe('ScriptedBadge', () => {
+  it('says the answer is scripted', () => {
+    expect(renderToStaticMarkup(<ScriptedBadge />)).toContain('Scripted answer, not AI');
   });
 });
