@@ -15,11 +15,13 @@ export function SummaryScreen({
   onBack,
   onChanges,
   onTrace,
+  onHealth,
 }: {
   pair: ComparedPair;
   onBack: () => void;
   onChanges: (kind: ChangeKind) => void;
   onTrace: (target: TraceTarget) => void;
+  onHealth: () => void;
 }) {
   const { state, retry } = useSummary();
   return (
@@ -33,6 +35,7 @@ export function SummaryScreen({
       onBack={onBack}
       onChanges={onChanges}
       onTrace={onTrace}
+      onHealth={onHealth}
     />
   );
 }

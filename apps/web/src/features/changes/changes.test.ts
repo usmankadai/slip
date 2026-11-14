@@ -143,6 +143,12 @@ describe('filter and sort', () => {
     );
   });
 
+  it('can show only the activities counted against a health check', () => {
+    expect(engineFilter({ kind: null, text: '', healthCheck: 7 })).toEqual({ healthCheck: 7 });
+    expect(engineFilter({ kind: 'dates', text: '', healthCheck: 7 }).healthCheck).toBe(7);
+    expect(engineFilter({ kind: null, text: '', healthCheck: 1.5 })).toEqual({});
+  });
+
   it('cuts a very long search', () => {
     expect(engineFilter({ kind: null, text: 'x'.repeat(5000) }).text).toHaveLength(200);
   });

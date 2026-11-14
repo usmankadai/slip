@@ -7,6 +7,7 @@
 import type { HealthSummary } from '@slip/engine';
 import { count, plural } from '../../shared/format.ts';
 import type { ChangeKind } from '../changes/model.ts';
+import { movementOf } from '../health/model.ts';
 import type { SlotFacts } from '../import/types.ts';
 
 /** How many milestone rows the summary shows. The full list belongs in the changes view. */
@@ -133,8 +134,10 @@ export function healthDelta(a: readonly HealthSummary[], b: readonly HealthSumma
     if (!was || was.pass === null || now.pass === null) continue;
     delta.assessed++;
     const by = now.count - was.count;
-    const worse = (was.pass && !now.pass) || (!was.pass && !now.pass && by > 0);
-    const better = (!was.pass && now.pass) || (!was.pass && !now.pass && by < 0);
+    // The same rule as the health screen, so the two never disagree.
+    const movement = movementOf(was, now);
+    const worse = movement === 'worse';
+    const better = movement === 'better';
     if (worse) {
       delta.worse++;
       if (by > worstBy || delta.worst === '') {

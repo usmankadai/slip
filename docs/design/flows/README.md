@@ -10,7 +10,7 @@ To view: run the `design` preview (or `pnpm --filter @slip/web exec vite ../../d
 | Update summary | [summary.html](summary.html): A milestones full width with a strip below, B milestones with a rail, C one sentence then the evidence | Decided 11 November 2026 | B, milestones with a rail |
 | Changes | [changes.html](changes.html): A grid and Gantt side by side, B grid first with a small timeline in each row, C change types down the left | Decided 11 November 2026 | A, grid and Gantt side by side |
 | Slip trace | Not drawn as a layout. [Exploration 03](../explorations/03-trace-view/README.md) has three treatments: A ranked causes, B the driving path, C a waterfall | Decided 12 November 2026 | A leading, B beneath as evidence |
-| Health | [health.html](health.html): A what changed first then the rest, B all 14 in DCMA order with the change marked, C checks on the left and the chosen check on the right | Waiting for Usman | |
+| Health | [health.html](health.html): A what changed first then the rest, B all 14 in DCMA order with the change marked, C checks on the left and the chosen check on the right | Decided 12 November 2026 | A, what changed first |
 | Finish update | [narrative.html](narrative.html): A one document with evidence in the margin, B paragraph blocks each with its own evidence, C choose the facts then the words | Waiting for Usman | |
 
 ## Decisions
@@ -26,11 +26,17 @@ Three layouts drawn on 14 November 2026. Claude's recommendation, a suggestion o
 
 Open whichever is chosen: where the narrative is kept between visits, and whether each edit goes in the audit log. Neither exists yet.
 
-## Health: waiting for a decision
+## Health: decision
 
-Three layouts drawn on 12 November 2026. Claude's recommendation, a suggestion only: **A**, what changed first, then the rest. It is the hierarchy the design spec asks for (the checks that changed or got worse lead), it keeps all 14 on the page, and each row is a way in to the changes grid filtered to that check. When nothing changed it falls back to B's table. C's definition of each check is worth keeping as a line under the check's name.
+**Layout A, what changed first, then the rest.** Chosen by Usman on 12 November 2026 ("A, changed first"), on Claude's recommendation and without reasons of his own. The reasoning is Claude's: it is the hierarchy the design spec asks for, it keeps all 14 checks on the page, and each row leads into the changes grid filtered to that check. A line under each check's name says what it counts, taken from layout C.
 
-Open whichever is chosen: what "worse" means for a check that fails in both updates, and for the two ratio checks, which have no count of activities.
+Settled while building, by Claude, and open to change:
+
+- **Worse and better.** A check is worse if it passed and now fails, or fails in both updates and its figure (the share, the count or the index, whichever the threshold applies to) is further from its threshold. Better is the reverse. A check that passes in both is unchanged whatever its figures did. The first version judged on the count of activities; it was changed after it called Missing logic better while a larger share failed.
+- **Not compared.** A check that is reported only, or cannot be assessed in either update, is listed with the rest and never called worse or better.
+- When nothing changed, the lead box says so in a sentence and the 14 checks follow in DCMA order.
+
+The states of this screen were not drawn as a low-fidelity page before building; they exist as stories (`Screens/Health`).
 
 ## Changes: decisions
 

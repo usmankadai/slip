@@ -1,0 +1,209 @@
+.screen {
+  max-width: 1120px;
+  width: 100%;
+  margin: var(--space-0) auto;
+  padding: var(--space-6);
+  display: grid;
+  gap: var(--space-4);
+  align-content: start;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: start;
+  gap: var(--space-4);
+}
+
+.title {
+  margin: var(--space-0);
+  font-size: var(--text-xl);
+  line-height: var(--leading-xl);
+  font-weight: var(--weight-semibold);
+  overflow-wrap: anywhere;
+}
+
+.period {
+  margin: var(--space-0);
+  color: var(--text-secondary);
+  font-variant-numeric: tabular-nums;
+}
+
+.box {
+  display: grid;
+  gap: var(--space-3);
+  align-content: start;
+  padding: var(--space-4);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-card);
+  background: var(--surface-0);
+  min-width: 0;
+  overflow-x: auto;
+}
+
+.lead {
+  border-color: var(--border-strong);
+}
+
+.answer {
+  margin: var(--space-0);
+  font-size: var(--text-lg);
+  line-height: var(--leading-lg);
+  font-weight: var(--weight-semibold);
+}
+
+.say {
+  margin: var(--space-0);
+}
+
+.footnote {
+  margin: var(--space-0);
+  max-width: 80ch;
+  font-size: var(--text-sm);
+  line-height: var(--leading-sm);
+  color: var(--text-secondary);
+}
+
+.skeletons {
+  display: grid;
+  gap: var(--space-3);
+  padding: var(--space-2) var(--space-0);
+}
+
+.table {
+  width: 100%;
+  min-width: 880px;
+  /* Fixed, so the tables on this page line up with each other. */
+  table-layout: fixed;
+  border-collapse: collapse;
+  font-size: var(--text-sm);
+  line-height: var(--leading-base);
+  font-variant-numeric: tabular-nums;
+}
+
+.caption {
+  padding-bottom: var(--space-1);
+  text-align: left;
+  font-size: var(--text-xs);
+  line-height: var(--leading-xs);
+  font-weight: var(--weight-semibold);
+  color: var(--text-secondary);
+}
+
+.table th,
+.table td {
+  padding: var(--space-1) var(--space-2);
+  border-bottom: 1px solid var(--border-subtle);
+  text-align: left;
+  vertical-align: top;
+  font-weight: var(--weight-regular);
+}
+
+.table tbody tr:last-child th,
+.table tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+.table thead th {
+  background: var(--surface-2);
+  color: var(--text-secondary);
+  font-weight: var(--weight-medium);
+  white-space: nowrap;
+}
+
+.table .number {
+  width: 40px;
+  text-align: right;
+  color: var(--text-muted);
+}
+
+.name {
+  display: block;
+  font-weight: var(--weight-medium);
+}
+
+.detail,
+.note {
+  display: block;
+  font-size: var(--text-xs);
+  line-height: var(--leading-xs);
+  color: var(--text-secondary);
+}
+
+.note {
+  color: var(--text-muted);
+}
+
+.status {
+  white-space: nowrap;
+}
+
+.table .statusHead {
+  width: 112px;
+}
+
+.table .changeHead {
+  width: 250px;
+}
+
+.table .wayHead {
+  width: 96px;
+}
+
+/* Pass and fail are told apart by shape and by the word beside it, never by colour. */
+.mark {
+  display: inline-block;
+  width: var(--space-2);
+  height: var(--space-2);
+  margin-right: var(--space-2);
+  border: 2px solid var(--text-primary);
+}
+
+.fails {
+  background: var(--text-primary);
+}
+
+.passes {
+  background: var(--surface-0);
+  border-color: var(--border-strong);
+}
+
+.unjudged {
+  border-style: dotted;
+  border-color: var(--border-strong);
+  border-radius: 50%;
+}
+
+.table .figure {
+  width: 104px;
+  text-align: right;
+  white-space: nowrap;
+  color: var(--text-secondary);
+}
+
+.table .now {
+  color: var(--text-primary);
+  font-weight: var(--weight-semibold);
+}
+
+.change {
+  white-space: nowrap;
+}
+
+.moved {
+  margin-right: var(--space-2);
+  font-weight: var(--weight-semibold);
+}
+
+.way {
+  text-align: right;
+  white-space: nowrap;
+}
+
+.hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+}
