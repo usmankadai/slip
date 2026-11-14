@@ -2,6 +2,24 @@
 
 What was built, what Usman decided or designed, and what an agent generated. Newest first.
 
+## 14 November 2026: options for the agent's steps
+
+**Done**
+
+- Exploration 05, agent steps: three treatments at the panel's real width, with a switch between a grounded answer, an answer citing a code that is not in the results, and a question the data cannot answer.
+
+**Usman decided or designed**
+
+- To start the agent panel. Nothing on the page yet.
+
+**The agent (Claude) generated**
+
+- The page, the options, the write-up and the recommendation (A, steps folded into one line, unverified codes marked in place).
+
+**Worth Usman's attention**
+
+- One choice is waiting before the panel is built. Exploration 04, the proposed edit card, comes next and is needed before edits can be approved.
+- The page was checked with a headless browser and screenshots; the browser pane was unavailable.
 ## 14 November 2026: a reload reopens the open pair
 
 **Done**
