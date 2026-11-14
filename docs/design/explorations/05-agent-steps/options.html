@@ -1,0 +1,150 @@
+<!doctype html>
+<html lang="en-GB">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Agent steps: options</title>
+    <style>
+      /* A record of what was looked at. The product reads these values from packages/ui/src/tokens.css. */
+      :root {
+        --s0: #fbfaf7; --s1: #f4f2ec; --s2: #ebe8e0; --t1: #1c1b18; --t2: #55524a; --t3: #6c685d;
+        --b1: #e2ded3; --b2: #898477; --accent: #5b3fd6;
+      }
+      * { box-sizing: border-box; }
+      body { margin: 0; background: var(--s0); color: var(--t1); font: 13px/20px Inter, system-ui, -apple-system, 'Segoe UI', sans-serif; font-variant-numeric: tabular-nums; }
+      header, main { max-width: 1180px; margin: 0 auto; padding: 0 32px; }
+      header { padding-top: 24px; }
+      main { padding-bottom: 64px; }
+      h1 { font-size: 20px; line-height: 28px; margin: 0 0 4px; }
+      h2 { font-size: 16px; line-height: 24px; margin: 40px 0 8px; }
+      p { margin: 0 0 8px; color: var(--t2); max-width: 760px; }
+      .controls { position: sticky; top: 0; z-index: 2; background: var(--s0); border-bottom: 1px solid var(--b1); padding: 8px 0; margin: 16px 0 0; display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+      .controls button { font: inherit; padding: 2px 10px; border: 1px solid var(--b2); border-radius: 4px; background: var(--s0); color: var(--t1); cursor: pointer; }
+      .controls button[aria-pressed='true'] { background: var(--t1); color: var(--s0); border-color: var(--t1); }
+      .option { display: grid; grid-template-columns: 380px minmax(0, 1fr); gap: 32px; align-items: start; }
+      .notes { margin: 0; font-size: 12px; line-height: 16px; max-width: 520px; }
+      .notes dt { font-weight: 600; margin-top: 8px; }
+      .notes dt:first-child { margin-top: 0; }
+      .notes dd { margin: 0; color: var(--t2); }
+
+      .panel { width: 380px; border: 1px solid var(--b1); border-radius: 6px; background: var(--s0); display: grid; }
+      .phead { display: flex; justify-content: space-between; padding: 8px 12px; border-bottom: 1px solid var(--b1); font-weight: 600; }
+      .badge { font-size: 11px; font-weight: 500; color: var(--t2); border: 1px dashed var(--b2); border-radius: 4px; padding: 0 6px; }
+      .thread { padding: 12px; display: grid; gap: 12px; }
+      .q { justify-self: end; max-width: 85%; background: var(--s2); border-radius: 6px; padding: 6px 10px; }
+      .a { display: grid; gap: 8px; }
+      .steps { font-size: 12px; line-height: 16px; color: var(--t2); display: flex; gap: 6px; align-items: center; }
+      .caret { color: var(--t3); }
+      .steplist { margin: 0; padding: 0 0 0 16px; font-size: 12px; line-height: 18px; color: var(--t2); border-left: 2px solid var(--b1); list-style: none; }
+      .steplist li span { font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 11px; color: var(--t1); }
+      .chip { display: inline-block; font: 11px/16px 'JetBrains Mono', ui-monospace, monospace; border: 1px solid var(--b2); border-radius: 4px; padding: 0 5px; margin: 0 1px; white-space: nowrap; }
+      .unverified { font: 11px/16px 'JetBrains Mono', ui-monospace, monospace; text-decoration: underline wavy var(--t3); text-underline-offset: 3px; }
+      .flag { font-size: 11px; font-weight: 600; border: 1px solid var(--t1); border-radius: 4px; padding: 0 5px; margin-left: 2px; }
+      .fig { border-bottom: 1px dotted var(--t2); }
+      .src { display: block; font-size: 11px; line-height: 16px; color: var(--t3); }
+      .sentence { display: block; padding-left: 8px; border-left: 2px solid var(--b2); margin-bottom: 4px; }
+      .sentence.free { border-left: 2px dashed var(--b1); }
+      .ev { font-size: 12px; line-height: 16px; border-top: 1px solid var(--b1); padding-top: 8px; display: grid; gap: 2px; }
+      .ev div { display: grid; grid-template-columns: 1fr auto; gap: 8px; }
+      .ev .bad { font-weight: 600; }
+      .none { border: 1px solid var(--b2); border-radius: 6px; padding: 8px 10px; background: var(--s1); }
+      @media (max-width: 900px) { .option { grid-template-columns: 1fr; } }
+    </style>
+  </head>
+  <body>
+    <header>
+      <h1>Exploration 05: agent steps</h1>
+      <p>The assistant answers by calling tools against the loaded schedule, then writing. A planner has to be able to trust the answer, or see where not to, without reading the working. Two questions: how much of the working to show by default, and how a grounded statement looks different from one that is not.</p>
+      <p>The rules that are not choices: the assistant never states a date, duration or float that did not come from a tool result; an activity code it cites is checked against those results and shown as unverified when it is not there; "the data does not show this" is a designed answer, not an error. Each option shows the same three cases, drawn at the panel's real width. Figures are from the generated 1,000 activity rail schedule.</p>
+      <div class="controls" id="controls">
+        <span>Case:</span>
+        <button data-case="grounded" aria-pressed="true">Grounded answer</button>
+        <button data-case="unverified" aria-pressed="false">One code not in the results</button>
+        <button data-case="cannot" aria-pressed="false">The data cannot answer</button>
+      </div>
+    </header>
+    <main id="main"></main>
+
+    <script>
+      const QUESTIONS = {
+        grounded: 'Why did project completion slip?',
+        unverified: 'Why did project completion slip?',
+        cannot: 'Is the delay the subcontractor’s fault?',
+      };
+      const STEPS = {
+        grounded: [['trace_slip', 'MS-COMPLETE', '4 causes, 48 on the path'], ['get_activity', 'P03-A002-ENB-0110', 'duration 20 to 40 days']],
+        unverified: [['trace_slip', 'MS-COMPLETE', '4 causes, 48 on the path']],
+        cannot: [['trace_slip', 'MS-COMPLETE', '4 causes, 48 on the path'], ['search_activities', 'subcontractor', 'no activities']],
+      };
+      const chip = (code) => `<span class="chip">${code}</span>`;
+      const bad = (code) => `<span class="unverified">${code}</span><span class="flag">unverified</span>`;
+
+      const header = (scripted) => `<div class="phead"><span>Ask</span>${scripted ? '<span class="badge">Scripted answer, not AI</span>' : ''}</div>`;
+      const stepsLine = (which) => `${STEPS[which].length} ${STEPS[which].length === 1 ? 'step' : 'steps'}`;
+      const stepList = (which) => `<ol class="steplist">${STEPS[which].map(([tool, input, result]) => `<li><span>${tool}</span>(${input}) · ${result}</li>`).join('')}</ol>`;
+
+      const OPTIONS = [
+        {
+          title: 'A. Steps folded into one line; unverified codes marked in place',
+          render(which) {
+            const body = which === 'cannot'
+              ? `<div class="none">The data does not show who is responsible. It shows that project completion moved 67 working days later ${chip('MS-COMPLETE')}, driven by four activities in section 2 whose durations grew. Nothing in the schedule records a subcontractor.</div>`
+              : `<div>Project completion moved 67 working days later ${chip('MS-COMPLETE')}. Four activities in section 2 added time of their own; the largest was catenary installation, +20 days ${chip('P03-A002-ENB-0110')}, then track tamping, +18 days ${which === 'unverified' ? bad('P03-A002-TRK-0710') : chip('P03-A002-TRK-0170')}.</div>`;
+            return `<div class="panel">${header(false)}<div class="thread"><div class="q">${QUESTIONS[which]}</div><div class="a"><div class="steps"><span class="caret">▸</span>Worked for 3s, ${stepsLine(which)}</div>${body}</div></div></div>`;
+          },
+          notes: [
+            ['Shows by default', 'One line saying how much work was done, then the answer. The steps open on request.'],
+            ['Grounded or not', 'Each cited activity is a chip. A code the assistant wrote that is not in its tool results is plain text, underlined, with the word "unverified" beside it.'],
+            ['Does well', 'Quiet, and the answer leads, which is what the spec asks. The check that matters (is this activity real) is shown exactly where the code is, in words.'],
+            ['Costs', 'Only codes are checked visibly. A figure such as "+18 days" is grounded by the rules, but nothing on screen says which result it came from.'],
+          ],
+        },
+        {
+          title: 'B. Steps shown while working, then folded; each sentence marked',
+          render(which) {
+            const body = which === 'cannot'
+              ? `<span class="sentence">Project completion moved 67 working days later ${chip('MS-COMPLETE')}<span class="src">from trace_slip</span></span><span class="sentence free">Nothing in the schedule records who is responsible, so the data cannot say whether it is the subcontractor's fault.<span class="src">no tool result: the assistant's own statement</span></span>`
+              : `<span class="sentence">Project completion moved 67 working days later ${chip('MS-COMPLETE')}.<span class="src">from trace_slip</span></span><span class="sentence">The largest cause was catenary installation, +20 days ${chip('P03-A002-ENB-0110')}.<span class="src">from trace_slip, get_activity</span></span><span class="sentence ${which === 'unverified' ? 'free' : ''}">Then track tamping, +18 days ${which === 'unverified' ? bad('P03-A002-TRK-0710') : chip('P03-A002-TRK-0170')}.<span class="src">${which === 'unverified' ? 'code not found in the results' : 'from trace_slip'}</span></span>`;
+            return `<div class="panel">${header(false)}<div class="thread"><div class="q">${QUESTIONS[which]}</div><div class="a"><div class="steps"><span class="caret">▾</span>Worked for 3s, ${stepsLine(which)}</div>${stepList(which)}<div>${body}</div></div></div></div>`;
+          },
+          notes: [
+            ['Shows by default', 'The steps as they happen, so the planner sees the assistant working; they fold away when the answer is done. Drawn here open.'],
+            ['Grounded or not', 'Every sentence carries the tool it came from. A sentence with no tool behind it, or with an unverified code, has a dashed edge and says so.'],
+            ['Does well', 'The most transparent: every claim is traceable, and the line between data and the assistant\'s own reasoning is visible.'],
+            ['Costs', 'Noisy in a narrow panel: every sentence has a caption. Matching sentences to tool results reliably is hard; the model would have to mark them, and that marking could itself be wrong. Looks more certain than it is when the matching is loose.'],
+          ],
+        },
+        {
+          title: 'C. Answer first, an evidence list beneath',
+          render(which) {
+            const body = which === 'cannot'
+              ? `<div class="none">The data does not show who is responsible. Nothing in the schedule records a subcontractor.</div>`
+              : `<div>Project completion moved <span class="fig">67 working days</span> later. Four activities in section 2 added time of their own; the largest was catenary installation, <span class="fig">+20 days</span>, then track tamping, <span class="fig">+18 days</span>.</div>`;
+            const evidence = which === 'cannot'
+              ? `<div><span>${chip('MS-COMPLETE')} slip</span><span>+67d</span></div><div><span>Activities matching "subcontractor"</span><span>none</span></div>`
+              : `<div><span>${chip('MS-COMPLETE')} slip</span><span>+67d</span></div><div><span>${chip('P03-A002-ENB-0110')} added</span><span>+20d</span></div>${which === 'unverified' ? `<div class="bad"><span><span class="unverified">P03-A002-TRK-0710</span> named in the answer</span><span>not in the data</span></div>` : `<div><span>${chip('P03-A002-TRK-0170')} added</span><span>+18d</span></div>`}`;
+            return `<div class="panel">${header(false)}<div class="thread"><div class="q">${QUESTIONS[which]}</div><div class="a">${body}<div class="ev"><div><b>Evidence</b><span class="steps"><span class="caret">▸</span>${stepsLine(which)}, 3s</span></div>${evidence}</div></div></div></div>`;
+          },
+          notes: [
+            ['Shows by default', 'The answer as clean prose, then a short list of the facts it rests on, each with its chip and value. Steps are a line in the list\'s heading.'],
+            ['Grounded or not', 'Figures in the answer are underlined; each appears in the evidence list with its source. An unverified code appears in the list as "not in the data".'],
+            ['Does well', 'Reads cleanly, and the evidence is complete at a glance: chips, values, and what was not found. The same shape as the Finish update paragraphs, so the two feel like one product.'],
+            ['Costs', 'The unverified code is in the list, not where it was written, so a reader of the prose can miss it. Building the list means pulling figures out of free text, which is the hard part again.'],
+          ],
+        },
+      ];
+
+      const main = document.getElementById('main');
+      function draw(which) {
+        main.innerHTML = OPTIONS.map((o) => `<h2>${o.title}</h2><div class="option"><div>${o.render(which)}</div><dl class="notes">${o.notes.map(([t, d]) => `<dt>${t}</dt><dd>${d}</dd>`).join('')}</dl></div>`).join('');
+      }
+      document.getElementById('controls').addEventListener('click', (event) => {
+        const button = event.target.closest('button');
+        if (!button) return;
+        for (const other of document.querySelectorAll('#controls button')) other.setAttribute('aria-pressed', String(other === button));
+        draw(button.dataset.case);
+      });
+      draw('grounded');
+    </script>
+  </body>
+</html>
