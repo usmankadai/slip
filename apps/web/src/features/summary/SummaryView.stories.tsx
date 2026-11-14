@@ -67,6 +67,7 @@ const meta: Meta<typeof SummaryView> = {
     onBack: noop,
     onChanges: noop,
     onTrace: noop,
+    onHealth: noop,
   },
 };
 export default meta;

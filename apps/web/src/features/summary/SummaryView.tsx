@@ -29,6 +29,8 @@ export interface SummaryViewProps {
   onChanges: (kind: ChangeKind) => void;
   /** Opens the slip trace for a milestone. */
   onTrace: (target: TraceTarget) => void;
+  /** Opens the health comparison. */
+  onHealth: () => void;
 }
 
 function Milestones({
@@ -209,6 +211,7 @@ export function SummaryView({
   onBack,
   onChanges,
   onTrace,
+  onHealth,
 }: SummaryViewProps) {
   const all = state.recalculation ? [...notices, state.recalculation] : notices;
   const empty = state.changes.status === 'ready' && nothingChanged(state.changes.value);
@@ -278,7 +281,14 @@ export function SummaryView({
               )}
             </RailBox>
             <RailBox title="Health" busy="Running 14 checks on each update" part={state.health}>
-              {(value) => <p className={styles.say}>{healthSentence(value)}</p>}
+              {(value) => (
+                <>
+                  <p className={styles.say}>{healthSentence(value)}</p>
+                  <div>
+                    <Button onClick={onHealth}>See all 14 checks</Button>
+                  </div>
+                </>
+              )}
             </RailBox>
           </div>
         )}

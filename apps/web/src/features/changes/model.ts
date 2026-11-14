@@ -26,6 +26,8 @@ export interface GridFilter {
   /** null shows every activity, changed or not. */
   kind: ChangeKind | null;
   text: string;
+  /** Only the activities counted against this DCMA check (1 to 14), when set. */
+  healthCheck?: number;
 }
 
 export const DEFAULT_FILTER: GridFilter = { kind: 'all', text: '' };
@@ -35,6 +37,9 @@ export function engineFilter(filter: GridFilter): FilterSpec {
   const spec: FilterSpec = {};
   if (filter.kind === 'all') spec.changedOnly = true;
   else if (filter.kind) spec.flagsAny = KINDS.find((kind) => kind.id === filter.kind)?.flags ?? 0;
+  if (filter.healthCheck !== undefined && Number.isInteger(filter.healthCheck)) {
+    spec.healthCheck = filter.healthCheck;
+  }
   const text = filter.text.trim();
   if (text) spec.text = text.slice(0, 200);
   return spec;

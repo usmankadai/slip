@@ -2,6 +2,32 @@
 
 What was built, what Usman decided or designed, and what an agent generated. Newest first.
 
+## 12 November 2026: the health screen
+
+**Done**
+
+- The fifth product screen. A sentence answers the question ("5 checks got worse, 1 got better"), then the checks that moved, grouped as worse and better, then the rest in DCMA order. Each check shows what it counts, the rule it is judged by, its figure in each update, and the change.
+- "See them" on a check opens the changes grid on the activities counted against it in update B. Back returns to health.
+- Reached from the summary's health box. The summary's sentence and this screen use one rule, so they cannot disagree.
+- States: loading, error, and nothing changed, where the lead says so and all 14 follow.
+
+**Usman decided or designed**
+
+- Layout A ("A, changed first"), on the agent's recommendation. No reasons of his own.
+
+**The agent (Claude) generated**
+
+- All the code, tests, stories and copy, including a one-line description of what each of the 14 checks counts.
+- The rule for worse and better, which was open. First built on the count of activities; changed after seeing it in the browser, where "Missing logic" read as better with a larger share failing. A failing check is now judged on the figure its threshold applies to. This changed the summary's sentence too: on the 10,000 activity sample it went from "3 worse, 3 better" to "5 worse, 1 better".
+- Pass and fail marks: a filled square, an empty square, and a dotted circle for a check with no judgement. No colour.
+
+**Worth Usman's attention**
+
+- The worse-or-better rule is a judgement about planning. A check that passes in both updates is never called worse, however much its figure moved towards the threshold.
+- Three checks are not the full DCMA test: resources (not assessed), the critical path test (reported only) and the critical path length index (uses the lowest float in the schedule). The first two say so on the screen through the engine's notes; the third does not.
+- "See them" shows update B only. There is no way to see which activities were counted in update A, or which are newly counted.
+- The states of this screen were not drawn first; they exist as stories.
+
 ## 12 November 2026: layouts for the health screen
 
 **Done**
