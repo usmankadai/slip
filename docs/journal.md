@@ -20,6 +20,24 @@ What was built, what Usman decided or designed, and what an agent generated. New
 
 - One choice is waiting before the panel is built. Exploration 04, the proposed edit card, comes next and is needed before edits can be approved.
 - The page was checked with a headless browser and screenshots; the browser pane was unavailable.
+## 14 November 2026: a reload reopens the open pair
+
+**Done**
+
+- A reload no longer goes back to the import screen. The open pair is remembered in the browser; on reload both schedules are read back from the cache, handed to the engine, and the summary opens with the saved narrative. Going back to import forgets the pair, so a reload then stays on import. If the cached copy is gone, the import screen says so.
+- Checked headlessly: reload with a pair open (the summary, the narrative and the grid all work), reload after going back to import, and reload with the cache cleared. Reopening took 132ms at 1,000 activities and 845ms at 350,000.
+
+**Usman decided or designed**
+
+- Asked why a reload went back to import, which it should not have.
+
+**The agent (Claude) generated**
+
+- The fix and its tests. The previous step had left this undone without saying so clearly enough: the persistence spec says a reload never loses work.
+
+**Worth Usman's attention**
+
+- Only the pair is reopened. The screen you were on, and the grid's filter and scroll position, are not; that is URL state, still to build.
 
 ## 14 November 2026: saving the narrative, and the audit log
 
