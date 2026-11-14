@@ -21,6 +21,8 @@ export interface NarrativeViewProps {
   onEvidence: (evidence: Evidence) => void;
   onRetry: () => void;
   onBack: () => void;
+  /** Whether the paragraphs are kept in this browser: null while not known yet. */
+  saved: boolean | null;
 }
 
 const MARK_WORDS = {
@@ -105,7 +107,8 @@ function BlockEditor({
 
 /** Finish update, layout B: paragraph blocks, each with its own evidence. Presentational. */
 export function NarrativeView(props: NarrativeViewProps) {
-  const { projectName, dataDateA, dataDateB, state, onAdd, onExport, onRetry, onBack } = props;
+  const { projectName, dataDateA, dataDateB, state, onAdd, onExport, onRetry, onBack, saved } =
+    props;
   const blocks = state.status === 'ready' ? state.blocks : [];
   const marks = blocks.map(markOf);
   const tally = (mark: string) => marks.filter((m) => m === mark).length;
@@ -154,7 +157,10 @@ export function NarrativeView(props: NarrativeViewProps) {
           <Notice>
             {plural(blocks.length, 'paragraph')}: {tally('generated')} generated, {tally('edited')}{' '}
             edited by you, {tally('own')} your own. Generated text is written from the dates stored
-            in the files. Edits are kept while Slip is open, not after a reload.
+            in the files.{' '}
+            {saved === false
+              ? "This browser is not keeping Slip's data, so edits will be lost on reload."
+              : 'Edits are saved in this browser as you type.'}
           </Notice>
           {blocks.map((block) => (
             <BlockEditor key={block.id} block={block} {...props} />

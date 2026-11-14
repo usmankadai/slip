@@ -132,6 +132,7 @@ const meta: Meta<typeof NarrativeView> = {
     onEvidence: noop,
     onRetry: noop,
     onBack: noop,
+    saved: true,
   },
 };
 export default meta;
@@ -165,6 +166,7 @@ export const EmptyNothingMoved: Story = {
     },
   },
 };
+export const NotSaved: Story = { args: { saved: false } };
 export const Loading: Story = { args: { state: { status: 'loading' } } };
 export const Error: Story = {
   args: {

@@ -19,5 +19,14 @@ Nothing here needs a server. The aim: a reload never loses work, and reopening a
 - The cache format (`encode` and `decode` in `packages/xer`), the OPFS store (`apps/web/src/storage/scheduleCache.ts`) and the import worker that uses them.
 - **The file is read twice on a miss:** once to hash it and look for a cached copy, then again to parse it. Hashing "while streaming" in one pass cannot skip the parse, because the hash is only known at the end. The extra pass costs about 1.1s at 1M activities.
 - Old-format entries are deleted at start-up. Private windows and full disks fall back to no cache.
-- Not yet: IndexedDB for edits, the audit log and conversations; `navigator.storage.persist()`; the storage panel (the developer harness has a count and a clear button only).
+- Not yet: IndexedDB for schedule edits and conversations (there are no schedule edits or agent conversations in the app yet); the storage panel (the developer harness has a count and a clear button only).
+
+## What is built (14 November 2026)
+
+- **One IndexedDB database, `slip`,** with two stores (`apps/web/src/storage`). Everything fails soft: with no IndexedDB, in a private window or on a full disk the app works and says its work is not being kept.
+- **The key for a pair** is the hash of each file plus the project read from it (`<hashA>-p<projectA>:<hashB>-p<projectB>`), because one file can hold several projects.
+- **The narrative** is saved for its pair 400ms after each change and read back when the same pair is compared again. What is read back is checked before it is used; anything that is not a narrative is ignored.
+- **The audit log** is append-only: entries are added and never changed or removed. Each has a time, an actor (you, or later the assistant), a kind and a sentence. Logged today: comparing a pair, using an incomplete file as it is, and editing, restoring, adding, removing and exporting the narrative. A narrative edit is logged once, when a generated paragraph first stops matching its generated text, not on every key.
+- **`navigator.storage.persist()`** is asked after each comparison; the answer is shown on the activity log.
+- **A reload** returns to the import screen, since which pair was open is not saved. Comparing the same files again restores the narrative and keeps adding to the same log; the parsed schedules come back from the OPFS cache.
 

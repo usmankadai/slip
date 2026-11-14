@@ -69,6 +69,7 @@ const meta: Meta<typeof SummaryView> = {
     onTrace: noop,
     onHealth: noop,
     onNarrative: noop,
+    onAudit: noop,
   },
 };
 export default meta;
