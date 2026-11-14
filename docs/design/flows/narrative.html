@@ -1,0 +1,149 @@
+<!doctype html>
+<html lang="en-GB">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Flow: Finish update, three layouts</title>
+    <link rel="stylesheet" href="wire.css" />
+    <style>
+      .frame { min-height: 0; }
+      .say { color: #222; line-height: 1.6; }
+      .chip { display: inline-block; border: 1px solid #222; border-radius: 3px; padding: 0 4px; font: 10px ui-monospace, monospace; margin: 0 1px; white-space: nowrap; }
+      .chip.off { border-style: dashed; color: #999; border-color: #999; }
+      .hl { background: #ececec; outline: 1.5px solid #222; }
+      .warn { border-left: 3px solid #222; padding-left: 8px; }
+      .edited { font-size: 10px; font-weight: 600; border: 1px solid #777; border-radius: 9px; padding: 0 6px; }
+      .gen { font-size: 10px; color: #777; border: 1px dashed #aaa; border-radius: 9px; padding: 0 6px; }
+      .tick { display: inline-block; width: 10px; height: 10px; border: 1.5px solid #222; margin-right: 6px; vertical-align: -1px; }
+      .tick.on { background: #222; }
+      .ev div { padding: 3px 0; border-bottom: 1px solid #e5e5e5; display: flex; justify-content: space-between; gap: 8px; }
+    </style>
+  </head>
+  <body>
+    <header>
+      <h1>Finish update: three low-fidelity layouts</h1>
+      <p>Hierarchy only: boxes and labels, no identity. The numbered tags show the order the eye should take. A heavy border marks what leads. Boxed codes are activity chips: each one opens the activity.</p>
+      <p class="question">
+        The planner's question: "What do I tell the client?"<br />
+        Most prominent: an editable narrative where each claim carries its activity chips.<br />
+        Then: export; what was edited by hand versus generated.<br />
+        Must not: let a claim exist without evidence.
+      </p>
+      <p>Layouts drawn by Claude for Usman to choose between. The text is generated from the summary, trace and health results by templates (the phase plan says template-based first; the agent may polish it later). The planner then edits it.</p>
+    </header>
+
+    <main>
+      <h2>A. One document, evidence in the margin</h2>
+      <div class="option">
+        <div class="frame">
+          <div class="bar"><b>Slip</b><span>Project · update A to B</span><span>Summary</span><span>Changes</span><span>Health</span><b>Finish update</b><span class="right">Export</span></div>
+          <div class="body">
+            <div class="cols" style="grid-template-columns: minmax(0, 2fr) minmax(0, 1fr)">
+              <div class="box lead">
+                <div class="t"><span class="tag">1</span>Update narrative, June 2026 <span class="gen">generated</span></div>
+                <div class="say"><b>Key dates.</b> <span class="hl">Project completion moved 67 working days later, to 10 August 2027 <span class="chip">MS-COMPLETE</span>.</span> Four activities in section 2 caused it, the largest being catenary installation, which grew by 20 days <span class="chip">P03-A002-ENB-0110</span> <span class="chip">P03-A002-TRK-0170</span>.</div>
+                <div class="say"><b>Schedule health.</b> Negative float rose from 286 to 622 activities <span class="chip">7 · 622</span>. <span class="edited">edited</span> We expect this to recover when the revised possession plan is loaded next month.</div>
+                <div class="say warn">This sentence has no evidence: its figures no longer match the data, or its chips were removed. <span class="chip off">MS-S3-HO</span></div>
+                <div class="quiet">Type anywhere. Generated text stays linked to its evidence until you change its figures.</div>
+              </div>
+              <div class="box ev">
+                <div class="t"><span class="tag">2</span>Evidence for the selected sentence</div>
+                <div><span>MS-COMPLETE · Project completion</span><b>+67d</b></div>
+                <div><span>Was 7 May 2027</span><span>Now 10 Aug 2027</span></div>
+                <div class="quiet">Open in the trace</div>
+                <div class="t" style="margin-top: 10px"><span class="tag">3</span>This document</div>
+                <div><span>Generated sentences</span><b>9</b></div>
+                <div><span>Edited by you</span><b>2</b></div>
+                <div><span>Without evidence</span><b>1</b></div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <dl class="notes">
+          <dt>Leads with</dt><dd>The narrative as one piece of writing, the way it will be read in the report.</dd>
+          <dt>Does well</dt><dd>Feels like writing, not filling in a form. The margin shows the evidence for whatever sentence the cursor is in, and keeps the counts of generated, edited and unsupported sentences in view.</dd>
+          <dt>Costs</dt><dd>Tracking which sentence is generated, edited or unsupported inside free text is the hardest thing on this page to build well. A planner who rewrites a paragraph freely can break the link between a sentence and its chips without noticing.</dd>
+        </dl>
+      </div>
+
+      <h2>B. Paragraph blocks, each with its own evidence</h2>
+      <div class="option">
+        <div class="frame">
+          <div class="bar"><b>Slip</b><span>Project · update A to B</span><span>Summary</span><span>Changes</span><span>Health</span><b>Finish update</b><span class="right">Export</span></div>
+          <div class="body">
+            <div class="box lead">
+              <div class="t"><span class="tag">1</span>Key dates <span class="gen">generated</span></div>
+              <div class="say">Project completion moved 67 working days later, to 10 August 2027. Four activities in section 2 caused it, the largest being catenary installation, which grew by 20 days.</div>
+              <div><span class="chip">MS-COMPLETE</span> <span class="chip">P03-A002-ENB-0110</span> <span class="chip">P03-A002-TRK-0170</span> <span class="quiet">+2 more</span></div>
+            </div>
+            <div class="box lead">
+              <div class="t"><span class="tag">1</span>Schedule health <span class="edited">edited</span></div>
+              <div class="say">Negative float rose from 286 to 622 activities. We expect this to recover when the revised possession plan is loaded next month.</div>
+              <div><span class="chip">Negative float · 622</span> <span class="quiet">· Show the generated text</span></div>
+            </div>
+            <div class="box warn">
+              <div class="t"><span class="tag">2</span>Section 3 handover <span class="edited">edited</span></div>
+              <div class="say">Section 3 handover is on programme.</div>
+              <div class="say">"This paragraph has no evidence. The data shows section 3 handover 27 days later. Restore the generated text, add evidence, or keep it as your own statement."</div>
+            </div>
+            <div class="cols c2">
+              <div class="quiet">Add a paragraph · Reorder</div>
+              <div class="btn" style="justify-self: end"><span class="tag">3</span>Export</div>
+            </div>
+          </div>
+        </div>
+        <dl class="notes">
+          <dt>Leads with</dt><dd>One block per topic, in report order. Each block has its text, its chips beneath, and a mark saying whether it is generated or edited.</dd>
+          <dt>Does well</dt><dd>The rule "no claim without evidence" can be kept per block, so it is simple to build and simple to see. A planner can always get back to the generated text. A block that contradicts the data is caught and said in words.</dd>
+          <dt>Costs</dt><dd>Reads less like a finished document while editing. Evidence is per paragraph, not per sentence, so one chip row covers several claims. Splitting and joining paragraphs needs designing.</dd>
+        </dl>
+      </div>
+
+      <h2>C. Choose the facts, then the words</h2>
+      <div class="option">
+        <div class="frame">
+          <div class="bar"><b>Slip</b><span>Project · update A to B</span><span>Summary</span><span>Changes</span><span>Health</span><b>Finish update</b><span class="right">Export</span></div>
+          <div class="body">
+            <div class="cols" style="grid-template-columns: 250px minmax(0, 1fr)">
+              <div class="box lead">
+                <div class="t"><span class="tag">1</span>What to report</div>
+                <div><span class="tick on"></span>Project completion +67d</div>
+                <div><span class="tick on"></span>Its four causes</div>
+                <div><span class="tick"></span>Section 3 handover +27d</div>
+                <div><span class="tick on"></span>Negative float, worse</div>
+                <div><span class="tick"></span>Missing logic, worse</div>
+                <div><span class="tick"></span>412 activities added</div>
+                <div class="quiet">Chosen from the summary, trace and health results</div>
+              </div>
+              <div class="box">
+                <div class="t"><span class="tag">2</span>The narrative, written from what is ticked</div>
+                <div class="say">Project completion moved 67 working days later, to 10 August 2027 <span class="chip">MS-COMPLETE</span>. Four activities in section 2 caused it <span class="chip">P03-A002-ENB-0110</span> … Negative float rose from 286 to 622 activities <span class="chip">7 · 622</span>.</div>
+                <div class="quiet">Edit the text below once the facts are right. Changing a tick afterwards asks before rewriting.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <dl class="notes">
+          <dt>Leads with</dt><dd>A checklist of the facts Slip found, ticked by default for the important ones. The text is written from what is ticked.</dd>
+          <dt>Does well</dt><dd>Every claim starts from a fact with evidence, so nothing can enter without it. The planner decides what the client hears before worrying about wording. It is clear what was left out.</dd>
+          <dt>Costs</dt><dd>Two steps before there is a document. A planner's own point, not in Slip's list, has nowhere to start from. Once the text is edited, the ticks and the words can drift apart.</dd>
+        </dl>
+      </div>
+
+      <h2>What all three share</h2>
+      <div class="option">
+        <div class="body" style="min-width: 0; padding: 0">
+          <div class="box"><div class="t">Not a choice here</div>
+            <div>A generated claim always carries chips to the activities behind it. A claim the planner writes can stand without them, but is marked as their own statement, and a claim that contradicts the data is flagged in words, not hidden.</div>
+            <div>Edited and generated text are always told apart, on screen and in the export.</div>
+            <div>Export as Markdown first; PDF is the first thing the phase plan cuts if time is short. Chips become activity codes in the exported text.</div>
+            <div>Schedule content is rendered as text, never as HTML. Exported Markdown is escaped.</div>
+          </div>
+        </div>
+        <dl class="notes">
+          <dt>Open whichever is chosen</dt><dd>Where the narrative is kept between visits (the persistence spec says IndexedDB), and whether each edit goes in the audit log. Neither exists yet.</dd>
+        </dl>
+      </div>
+    </main>
+  </body>
+</html>
