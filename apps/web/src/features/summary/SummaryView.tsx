@@ -33,6 +33,8 @@ export interface SummaryViewProps {
   onHealth: () => void;
   /** Opens Finish update, the narrative for the report. */
   onNarrative: () => void;
+  /** Opens the activity log. */
+  onAudit: () => void;
 }
 
 function Milestones({
@@ -215,6 +217,7 @@ export function SummaryView({
   onTrace,
   onHealth,
   onNarrative,
+  onAudit,
 }: SummaryViewProps) {
   const all = state.recalculation ? [...notices, state.recalculation] : notices;
   const empty = state.changes.status === 'ready' && nothingChanged(state.changes.value);
@@ -231,6 +234,9 @@ export function SummaryView({
           <Button onClick={() => onChanges('all')}>See all changes</Button>
           <Button variant="primary" onClick={onNarrative}>
             Finish update
+          </Button>
+          <Button variant="quiet" onClick={onAudit}>
+            Activity log
           </Button>
           <Button variant="quiet" onClick={onBack}>
             Back to import

@@ -2,6 +2,32 @@
 
 What was built, what Usman decided or designed, and what an agent generated. Newest first.
 
+## 14 November 2026: saving the narrative, and the audit log
+
+**Done**
+
+- An IndexedDB database in the browser. The narrative is saved for its pair of updates as the planner types, and comes back when the same two files are compared again, after a reload or another day.
+- An append-only audit log per pair: comparing a pair, using an incomplete file as it is, and editing, restoring, adding, removing and exporting the narrative. An activity log screen lists it, newest first, reached from the summary.
+- The browser is asked to keep Slip's data under storage pressure; the answer is shown on the activity log.
+- Everything fails soft: with no IndexedDB the app works and the narrative says its edits will be lost on reload.
+- Checked headlessly with Playwright: edit, add a paragraph, export, reload, load the same files, and the edits, marks and five log entries are all there, with no console errors.
+
+**Usman decided or designed**
+
+- To build persistence next. Nothing about how it looks.
+
+**The agent (Claude) generated**
+
+- All the code, tests and copy. A new dev dependency, `fake-indexeddb`, so the storage code can be unit tested in Node.
+- The activity log screen, which was not drawn: a plain list of time, who, and what happened. It is a design decision that has not been made by Usman.
+- Choices: what is logged and in what words; a narrative edit is logged once per paragraph, not per key; the pair key includes the project read from each file.
+
+**Worth Usman's attention**
+
+- A reload still goes back to the import screen; the planner drops the same files again (fast, from the cache) to get back. Saving which pair was open is not built.
+- No storage panel, and no "Clear all Slip data". The audit log can only grow.
+- Schedule edits and their approval or rejection, which the spec most wants logged, do not exist yet; they arrive with the agent panel.
+
 ## 14 November 2026: the Finish update screen
 
 **Done**

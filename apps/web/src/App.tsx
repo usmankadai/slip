@@ -1,5 +1,6 @@
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { Footer } from './app/Footer.tsx';
+import { AuditScreen } from './features/audit/AuditScreen.tsx';
 import { DevHarness } from './dev/DevHarness.tsx';
 import { ChangesScreen } from './features/changes/ChangesScreen.tsx';
 import type { ChangeKind } from './features/changes/model.ts';
@@ -10,6 +11,10 @@ import { NarrativeScreen } from './features/narrative/NarrativeScreen.tsx';
 import { SummaryScreen, type ComparedPair } from './features/summary/SummaryScreen.tsx';
 import { TraceScreen } from './features/trace/TraceScreen.tsx';
 import type { TraceTarget } from './features/trace/TraceView.tsx';
+import { count } from './shared/format.ts';
+import { appendAudit, type AuditType } from './storage/auditLog.ts';
+import { askToPersist, pairKey } from './storage/db.ts';
+import { loadNarrative, saveNarrative } from './storage/narrativeStore.ts';
 import styles from './App.module.css';
 
 const params = new URLSearchParams(location.search);
@@ -41,6 +46,60 @@ export function App() {
   const [health, setHealth] = useState(false);
   /** The activity being traced, or null. It is shown over whichever screen asked for it. */
   const [trace, setTrace] = useState<TraceTarget | null>(null);
+  /** True while the activity log is showing. */
+  const [auditOpen, setAuditOpen] = useState(false);
+  /** The key work is saved under: the two files and the project read from each. */
+  const key = pair ? pairKey(pair.a, pair.b) : '';
+  /** True while a saved narrative for this pair is being looked for. */
+  const [restoring, setRestoring] = useState(false);
+  /** Whether the last save worked: null until something has been saved. */
+  const [saved, setSaved] = useState<boolean | null>(null);
+  /** Whether the browser agreed to keep Slip's data under storage pressure. */
+  const [persisted, setPersisted] = useState<boolean | null>(null);
+
+  const audit = useCallback(
+    (type: AuditType, summary: string) => {
+      if (!key) return;
+      void appendAudit({ pair: key, actor: 'user', type, summary }).then((ok) => {
+        if (!ok) setSaved(false);
+      });
+    },
+    [key],
+  );
+
+  // Save the narrative a moment after each change, so typing does not write on every key.
+  useEffect(() => {
+    if (!key || !blocks || restoring) return;
+    const timer = setTimeout(() => void saveNarrative(key, blocks).then(setSaved), 400);
+    return () => clearTimeout(timer);
+  }, [key, blocks, restoring]);
+
+  const compare = (next: ComparedPair) => {
+    const nextKey = pairKey(next.a, next.b);
+    setBlocks(null);
+    setSaved(null);
+    setRestoring(true);
+    setPair(next);
+    // A narrative saved for this same pair, in this browser, is picked up again.
+    void loadNarrative(nextKey).then((found) => {
+      if (found) setBlocks(found);
+      setRestoring(false);
+    });
+    void askToPersist().then(setPersisted);
+    const log = (type: AuditType, summary: string) =>
+      void appendAudit({ pair: nextKey, actor: 'user', type, summary });
+    log(
+      'compared',
+      `Compared ${next.a.fileName} (${count(next.a.activities)} activities) with ${next.b.fileName} (${count(next.b.activities)} activities).`,
+    );
+    for (const [name, facts] of [
+      ['A', next.a],
+      ['B', next.b],
+    ] as const) {
+      if (facts.incomplete)
+        log('incomplete-used', `Used update ${name} as it is, though the file stopped early.`);
+    }
+  };
   if (SHOW_HARNESS) {
     return (
       <main>
@@ -81,6 +140,17 @@ export function App() {
           onBlocks={onBlocks}
           onEvidence={openEvidence}
           onBack={() => setNarrative(false)}
+          onAudit={audit}
+          saved={saved}
+          restoring={restoring}
+        />
+      ) : null}
+      {pair && auditOpen ? (
+        <AuditScreen
+          pair={pair}
+          pairKey={key}
+          persisted={persisted}
+          onBack={() => setAuditOpen(false)}
         />
       ) : null}
       {pair && health && !narrative && !changes && !trace ? (
@@ -90,25 +160,18 @@ export function App() {
           onActivities={(check) => setChanges({ kind: null, check })}
         />
       ) : null}
-      {pair && !health && !narrative && !changes && !trace ? (
+      {pair && !auditOpen && !health && !narrative && !changes && !trace ? (
         <SummaryScreen
           pair={pair}
           onBack={() => setPair(null)}
           onChanges={(kind) => setChanges({ kind })}
           onHealth={() => setHealth(true)}
           onNarrative={() => setNarrative(true)}
+          onAudit={() => setAuditOpen(true)}
           onTrace={setTrace}
         />
       ) : null}
-      {pair ? null : (
-        <ImportScreen
-          onCompare={(next) => {
-            // A new pair needs a new narrative.
-            setBlocks(null);
-            setPair(next);
-          }}
-        />
-      )}
+      {pair ? null : <ImportScreen onCompare={compare} />}
       <Footer />
     </div>
   );
