@@ -2,6 +2,24 @@
 
 What was built, what Usman decided or designed, and what an agent generated. Newest first.
 
+## 15 November 2026: options for the activity drawer
+
+**Done**
+
+- Exploration 10: three options for the activity drawer under the changes grid. Five tabs as the UI spec lists them; everything at once in three columns; or led by what changed and why, with the rest on two tabs. Each is drawn for an activity that moved with changed logic, one new in update B, and one that did not change.
+
+**Usman decided or designed**
+
+- To do the activity drawer next.
+
+**The agent (Claude) generated**
+
+- The three options, the sample activities and the write-up.
+
+**Worth Usman's attention**
+
+- The choice of option. C departs from the spec's five tabs.
+
 ## 15 November 2026: URL state
 
 **Done**
