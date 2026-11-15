@@ -5,9 +5,26 @@ import { engine } from '../../app/engine.ts';
 import type { AuditType } from '../../storage/auditLog.ts';
 import { ask, type Answer } from './loop.ts';
 import type { ProposalState } from './Proposal.tsx';
-import { ASSISTANT_MODE } from './mode.ts';
-import { scriptedTransport } from './scripted.ts';
-import type { AgentTransport, Message } from './transport.ts';
+import { switchToScripted, useAssistantMode } from './mode.ts';
+import { SUGGESTED, scriptedTransport } from './scripted.ts';
+import { liveTransport, type AgentTransport, type Message } from './transport.ts';
+
+/** Remembered for this tab only: the planner has read the notice before the first live question. */
+const NOTICE_KEY = 'slip:live-notice-read';
+const noticeRead = () => {
+  try {
+    return sessionStorage.getItem(NOTICE_KEY) === 'yes';
+  } catch {
+    return false;
+  }
+};
+const markNoticeRead = () => {
+  try {
+    sessionStorage.setItem(NOTICE_KEY, 'yes');
+  } catch {
+    // Without storage the notice is shown again after a reload, which is the safe side.
+  }
+};
 
 const toolEngine: ToolEngine = {
   request: (request) => engine().request(request as never) as never,
@@ -16,10 +33,17 @@ const toolEngine: ToolEngine = {
 export function useConversation(
   onAudit: (type: AuditType, summary: string, actor: 'agent') => void,
 ) {
-  // Scripted is the public default (D11). The live transport exists but the server is not
-  // deployed, so a build set to live mode fails loudly here rather than talking to nothing.
-  if (ASSISTANT_MODE !== 'scripted') throw new Error('The live assistant is not connected yet.');
-  const transport = useRef<AgentTransport>(scriptedTransport());
+  // Live when the server says so (D11); scripted otherwise, and from the moment the planner
+  // chooses scripted answers or live answers stop being available.
+  const mode = useAssistantMode();
+  const [preferScripted, setPreferScripted] = useState(false);
+  const live = mode === 'live' && !preferScripted;
+  const transports = useRef<{ live: AgentTransport; scripted: AgentTransport }>({
+    live: liveTransport(),
+    scripted: scriptedTransport(),
+  });
+  /** A question held back until the planner has read the notice before the first live question. */
+  const [waiting, setWaiting] = useState<string | null>(null);
   const messages = useRef<Message[]>([]);
   const [answers, setAnswers] = useState<Answer[]>([]);
   const [working, setWorking] = useState(false);
@@ -30,8 +54,8 @@ export function useConversation(
   );
   const stop = useRef<AbortController | null>(null);
 
-  const onAsk = useCallback(
-    (question: string) => {
+  const send = useCallback(
+    (question: string, transport: AgentTransport) => {
       if (stop.current) return;
       const controller = new AbortController();
       stop.current = controller;
@@ -48,14 +72,14 @@ export function useConversation(
             text: '',
             known: [],
             proposals: [],
-            scripted: transport.current.scripted,
+            scripted: transport.scripted,
             elapsedMs: 0,
             error: '',
           },
         ];
       });
       void ask({
-        transport: transport.current,
+        transport,
         engine: toolEngine,
         messages: messages.current,
         question,
@@ -65,6 +89,8 @@ export function useConversation(
       }).then((answer) => {
         stop.current = null;
         setWorking(false);
+        // Live answers are switched off or used up for today: scripted from now on.
+        if (answer.errorCode === 'off') switchToScripted();
         const tools = [...new Set(answer.steps.map((step) => step.tool))];
         const how = tools.length ? `, using ${tools.join(', ')}` : '';
         const outcome =
@@ -88,13 +114,44 @@ export function useConversation(
     [onAudit],
   );
 
+  const onAsk = useCallback(
+    (question: string) => {
+      if (live && !noticeRead()) {
+        setWaiting(question);
+        return;
+      }
+      send(question, live ? transports.current.live : transports.current.scripted);
+    },
+    [live, send],
+  );
+  const onAcceptNotice = useCallback(() => {
+    markNoticeRead();
+    const question = waiting;
+    setWaiting(null);
+    if (question) send(question, transports.current.live);
+  }, [waiting, send]);
+  const onDeclineNotice = useCallback(() => {
+    setPreferScripted(true);
+    setWaiting(null);
+  }, []);
+  /** A suggested question answered from its script, after a live answer failed. */
+  const onAskScripted = useCallback(
+    (question: string) => send(question, transports.current.scripted),
+    [send],
+  );
+
   const onStop = useCallback(() => stop.current?.abort(), []);
 
   return {
     answers,
     working,
-    scripted: transport.current.scripted,
+    scripted: !live,
+    waiting,
     onAsk,
+    onAcceptNotice,
+    onDeclineNotice,
+    onAskScripted,
+    scriptable: SUGGESTED.map((question) => question.text),
     onStop,
     decisions,
     onDecision,

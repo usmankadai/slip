@@ -20,3 +20,6 @@ fixtures/synthetic/*
 
 # Eval runs are regenerated; the published summary is docs/evals.md
 tools/evals/results/
+
+# The agent server bundled for Vercel by pnpm build
+api/_agent.mjs

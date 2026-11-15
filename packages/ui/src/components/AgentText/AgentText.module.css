@@ -1,8 +1,48 @@
+.answer {
+  display: grid;
+  gap: var(--space-2);
+}
+
 .text {
   margin: var(--space-0);
   font-size: var(--text-base);
   line-height: var(--leading-lg);
   overflow-wrap: anywhere;
+}
+
+.list {
+  margin: var(--space-0);
+  padding-left: var(--space-5);
+  font-size: var(--text-base);
+  line-height: var(--leading-lg);
+  overflow-wrap: anywhere;
+}
+
+/* A wide table scrolls inside the answer rather than widening the panel. */
+.tableWrap {
+  max-width: 100%;
+  overflow-x: auto;
+}
+
+.table {
+  border-collapse: collapse;
+  font-size: var(--text-sm);
+  line-height: var(--leading-sm);
+  font-variant-numeric: tabular-nums;
+}
+
+.table th,
+.table td {
+  padding: var(--space-1) var(--space-2);
+  border-bottom: 1px solid var(--border-subtle);
+  text-align: left;
+  vertical-align: top;
+}
+
+.table thead th {
+  background: var(--surface-2);
+  color: var(--text-secondary);
+  font-weight: var(--weight-medium);
 }
 
 .unverified {

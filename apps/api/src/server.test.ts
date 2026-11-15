@@ -478,6 +478,30 @@ describe('POST /agent/chat', () => {
 });
 
 describe('origin and other routes', () => {
+  it('allows a page served from the same origin as the API, as on a preview deployment', async () => {
+    const h = harness();
+    const app = createApp(h.deps);
+    const response = await app.request('https://preview-abc.vercel.app/agent/chat', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Origin: 'https://preview-abc.vercel.app',
+        'x-forwarded-for': '203.0.113.9',
+      },
+      body: JSON.stringify({ messages: [question] }),
+    });
+    expect(response.status).toBe(200);
+    const spoofed = await app.request('https://preview-abc.vercel.app/agent/chat', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Origin: 'https://preview-abc.vercel.app.evil.example',
+      },
+      body: JSON.stringify({ messages: [question] }),
+    });
+    expect(spoofed.status).toBe(403);
+  });
+
   it('allows only the app origin, and answers its preflight', async () => {
     const h = harness();
     const app = createApp(h.deps);

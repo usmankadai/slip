@@ -30,6 +30,8 @@ export interface Answer {
   /** Milliseconds the question took, once finished. */
   elapsedMs: number;
   error: string;
+  /** Why it failed, when the server said: "off" means live answers are not available now. */
+  errorCode?: string;
 }
 
 function inputWords(input: unknown): string {
@@ -92,6 +94,9 @@ export async function ask(options: {
       update({ status: 'stopped' });
       return answer;
     }
+    // Text written before a tool call is the model's working, not the answer: it is shown while
+    // it streams, then taken back out when the call turns out to be asking for tools.
+    const textBefore = answer.text;
     const requests: {
       toolUseId: string;
       name: string;
@@ -105,7 +110,7 @@ export async function ask(options: {
         if (event.type === 'text-delta') update({ text: answer.text + event.text });
         else if (event.type === 'tool-request') requests.push(event);
         else if (event.type === 'error') {
-          update({ status: 'error', error: event.message });
+          update({ status: 'error', error: event.message, errorCode: event.code });
           return answer;
         } else {
           messages.push({ role: 'assistant', content: event.assistant });
@@ -123,6 +128,7 @@ export async function ask(options: {
       update({ status: 'error', error: 'The answer ended without finishing.' });
       return answer;
     }
+    if (finished === 'tool_use' && answer.text !== textBefore) update({ text: textBefore });
     if (finished === 'end_turn') {
       update({ status: 'done' });
       return answer;

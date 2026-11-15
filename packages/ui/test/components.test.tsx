@@ -175,6 +175,29 @@ describe('AgentSteps', () => {
 });
 
 describe('AgentText', () => {
+  it('draws lists and tables as elements and keeps HTML as text', () => {
+    const html = renderToStaticMarkup(
+      <AgentText
+        onOpen={() => {}}
+        blocks={[
+          { kind: 'paragraph', parts: [{ kind: 'text', text: '<img src=x onerror=alert(1)>' }] },
+          { kind: 'list', ordered: true, items: [[{ kind: 'text', text: 'one', strong: true }]] },
+          {
+            kind: 'table',
+            head: [[{ kind: 'text', text: 'Check' }]],
+            rows: [[[{ kind: 'verified', text: 'MS-COMPLETE' }]]],
+          },
+        ]}
+      />,
+    );
+    expect(html).toContain('&lt;img src=x onerror=alert(1)&gt;');
+    expect(html).not.toContain('<img');
+    expect(html).toContain('<ol');
+    expect(html).toContain('<strong>one</strong>');
+    expect(html).toContain('<th scope="col">');
+    expect(html).toContain('MS-COMPLETE');
+  });
+
   it('makes verified codes chips and marks unverified ones in words', () => {
     const html = renderToStaticMarkup(
       <AgentText

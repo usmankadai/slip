@@ -32,4 +32,8 @@ The assistant is off by default. To run it live, copy `.env.example` to `.env`, 
 pnpm --filter @slip/api dev
 ```
 
+and run `pnpm dev` alongside it: the web app reaches it at `/api`.
+
+On Vercel the server runs as one function under `/api` in the app's own project. Live mode is on when these are set in the project's environment variables: `AGENT_MODE=live`, `ANTHROPIC_API_KEY`, `ANTHROPIC_MODEL`, `AGENT_EFFORT`, `APP_ORIGIN`, `AGENT_DAILY_CALL_CAP`, and `UPSTASH_REDIS_REST_URL` and `UPSTASH_REDIS_REST_TOKEN` so the limits hold across instances. Without them the site gives scripted answers.
+
 Set a spending limit on the API key in the Anthropic console. The server limits questions per visitor and model calls per day, but the limit on the key is the final backstop.

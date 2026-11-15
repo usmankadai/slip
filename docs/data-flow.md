@@ -8,7 +8,7 @@ Last checked against the code: 15 November 2026.
 
 Your XER files are never uploaded. Slip reads them in your browser and keeps the parsed schedules, your edits and the activity log in your browser's storage on this computer.
 
-The assistant has two modes. In **scripted** mode, the only mode on the public site today, nothing about your schedule leaves the browser. In **live** mode, not deployed yet, your question and the specific rows the assistant asks for to answer it are sent through Slip's server to Anthropic. The server passes them on and does not store them.
+The assistant has two modes, and the panel says which one is on. In **scripted** mode nothing about your schedule leaves the browser. In **live** mode, which the public site uses when its server is configured for it, your question and the specific rows the assistant asks for to answer it are sent through Slip's server to Anthropic. The server passes them on and does not store them. Before the first live question in a tab, a notice says exactly this, and you can choose scripted answers instead.
 
 ## In detail
 
@@ -36,6 +36,5 @@ What any website receives also applies: the host (Vercel) sees requests for the 
 
 ## Not built yet
 
-- The one-time notice before the first live question (spec: [security.md](spec/security.md)). It arrives with the live assistant.
-- The live assistant, and the setting "Send activity names to the agent".
+- The setting "Send activity names to the agent".
 - Error reporting through Sentry, with its scrubber.

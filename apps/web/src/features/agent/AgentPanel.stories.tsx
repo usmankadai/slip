@@ -88,3 +88,41 @@ export const Error: Story = {
     ],
   },
 };
+
+/** Live, before anything is asked. */
+export const LiveEmpty: Story = { args: { scripted: false, answers: [] } };
+
+/** The first live question is held until the planner has read what will be sent. */
+export const LiveFirstQuestionNotice: Story = {
+  args: {
+    scripted: false,
+    answers: [],
+    waiting: 'Is the delay the subcontractor’s fault?',
+    onAcceptNotice: noop,
+    onDeclineNotice: noop,
+  },
+};
+
+/** A live answer failed on a question that has a scripted answer. */
+export const LiveFailedWithScriptedFallback: Story = {
+  args: {
+    scripted: false,
+    scriptable: SUGGESTED.map((question) => question.text),
+    onAskScripted: noop,
+    answers: [
+      answer({
+        scripted: false,
+        status: 'error',
+        text: '',
+        steps: [],
+        error:
+          'The live assistant has reached its limit for today. Scripted answers are available.',
+      }),
+    ],
+  },
+};
+
+/** A live answer, which carries no scripted badge. */
+export const LiveAnswer: Story = {
+  args: { scripted: false, answers: [answer({ scripted: false })] },
+};

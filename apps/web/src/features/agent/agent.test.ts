@@ -7,6 +7,7 @@ import update01 from '../../../../../fixtures/synthetic/rail-1k/update-01.xer?ra
 import update02 from '../../../../../fixtures/synthetic/rail-1k/update-02.xer?raw';
 import { ask, type Answer } from './loop.ts';
 import { SUGGESTED, scriptedTransport } from './scripted.ts';
+import { readMode } from './mode.ts';
 import { liveTransport, readEvents, type AgentTransport, type Message } from './transport.ts';
 
 function loaded(): ToolEngine {
@@ -152,6 +153,27 @@ describe('the question loop', () => {
     expect(unverified(answer).map((part) => part.text)).toEqual(['NOT-A-CODE']);
   });
 
+  it('keeps the working the model writes before a tool call out of the answer', async () => {
+    const answer = await run(
+      'Why?',
+      playback([
+        [
+          { type: 'text-delta', text: 'I need to find the milestone first.' },
+          {
+            type: 'tool-request',
+            toolUseId: 't1',
+            name: 'trace_slip',
+            input: { task_code: 'MS-COMPLETE' },
+            valid: true,
+          },
+          done('tool_use'),
+        ],
+        [{ type: 'text-delta', text: 'It moved 67 days.' }, done('end_turn')],
+      ]),
+    );
+    expect(answer.text).toBe('It moved 67 days.');
+  });
+
   it('answers a tool request whose input did not fit with an error, and runs nothing', async () => {
     const answer = await run(
       'Why?',
@@ -281,5 +303,56 @@ describe('the live transport', () => {
         events.push(event);
       expect(events).toEqual([expect.objectContaining({ type: 'error', retryable: true })]);
     }
+  });
+
+  it('says live answers are off when the server has switched them off or reached its cap', async () => {
+    for (const code of ['daily-cap', 'not-configured']) {
+      const transport = liveTransport(async () =>
+        Response.json(
+          { code, message: 'The live assistant has reached its limit for today.' },
+          { status: code === 'daily-cap' ? 429 : 503 },
+        ),
+      );
+      const events: AgentEvent[] = [];
+      for await (const event of transport.send([], new AbortController().signal))
+        events.push(event);
+      expect(events).toEqual([
+        {
+          type: 'error',
+          code: 'off',
+          message: 'The live assistant has reached its limit for today.',
+          retryable: false,
+        },
+      ]);
+    }
+  });
+
+  it('never shows a server message longer than a sentence or two, and copes with no JSON', async () => {
+    const long = liveTransport(async () =>
+      Response.json({ code: 'rate-limited', message: 'x'.repeat(5000) }, { status: 429 }),
+    );
+    const events: AgentEvent[] = [];
+    for await (const event of long.send([], new AbortController().signal)) events.push(event);
+    expect((events[0] as { message: string }).message).toHaveLength(300);
+    const html = liveTransport(async () => new Response('<html>', { status: 502 }));
+    const more: AgentEvent[] = [];
+    for await (const event of html.send([], new AbortController().signal)) more.push(event);
+    expect(more[0]).toMatchObject({ code: 'rejected', retryable: false });
+  });
+});
+
+describe('which assistant answers', () => {
+  it('is live only when the server clearly says so', async () => {
+    const answer = (status: number, body: string) => async () => new Response(body, { status });
+    expect(await readMode(answer(200, '{"live":true}'))).toBe('live');
+    expect(await readMode(answer(200, '{"live":false}'))).toBe('scripted');
+    expect(await readMode(answer(200, '{"live":"yes"}'))).toBe('scripted');
+    expect(await readMode(answer(404, 'Not found'))).toBe('scripted');
+    expect(await readMode(answer(200, '<html>'))).toBe('scripted');
+    expect(
+      await readMode(async () => {
+        throw new TypeError('offline');
+      }),
+    ).toBe('scripted');
   });
 });
