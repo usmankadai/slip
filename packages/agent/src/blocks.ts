@@ -18,6 +18,40 @@ export type AnswerBlock =
 /** The most rows a table shows; the model is told to keep lists short, and the panel is narrow. */
 const MAX_ROWS = 50;
 
+const MONTHS = [
+  'January',
+  'February',
+  'March',
+  'April',
+  'May',
+  'June',
+  'July',
+  'August',
+  'September',
+  'October',
+  'November',
+  'December',
+];
+const ISO_DATE = /\b(\d{4})-(\d{2})-(\d{2})(?:[ T](\d{2}):(\d{2}))?\b/g;
+
+/**
+ * Dates as Slip writes them everywhere else: "7 May 2027", and "7 May 2027, 17:00" when a time is
+ * given. The tools hand dates to the model as "2027-05-07 17:00", and it tends to repeat them so.
+ * Anything that is not a real calendar date is left as written.
+ */
+export function readableDates(text: string): string {
+  return text.replace(
+    ISO_DATE,
+    (whole, y: string, m: string, d: string, hh?: string, mm?: string) => {
+      const month = Number(m);
+      const day = Number(d);
+      if (month < 1 || month > 12 || day < 1 || day > 31) return whole;
+      const time = hh !== undefined && Number(hh) < 24 && Number(mm) < 60 ? `, ${hh}:${mm}` : '';
+      return `${day} ${MONTHS[month - 1]} ${y}${time}`;
+    },
+  );
+}
+
 /** One line of text as parts: bold runs, and citations inside them. Backticks are dropped. */
 export function inline(text: string, known: ReadonlySet<string>): InlinePart[] {
   const parts: InlinePart[] = [];
@@ -25,8 +59,11 @@ export function inline(text: string, known: ReadonlySet<string>): InlinePart[] {
   pieces.forEach((piece, index) => {
     if (piece === '') return;
     const strong = index % 2 === 1;
-    for (const part of splitCitations(piece, known))
+    for (const found of splitCitations(piece, known)) {
+      // Dates are rewritten in text only; a citation is an activity code and stays as written.
+      const part = found.kind === 'text' ? { ...found, text: readableDates(found.text) } : found;
       parts.push(strong ? { ...part, strong } : part);
+    }
   });
   return parts;
 }

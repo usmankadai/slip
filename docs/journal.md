@@ -2,6 +2,22 @@
 
 What was built, what Usman decided or designed, and what an agent generated. Newest first.
 
+## 15 November 2026: dates in the assistant's answers
+
+**Done**
+
+- The live assistant wrote dates as the tools give them, `2027-05-07`. They are now shown as Slip writes dates everywhere else, `7 May 2027` (with `, 17:00` when a time is given), when the answer is drawn.
+- Only text is rewritten, never an activity code, and anything that is not a real calendar date is left as written. 3 tests.
+- The system prompt is unchanged, so the recorded evals still apply and no paid rerun was needed.
+
+**Usman decided or designed**
+
+- To fix the date format, after seeing it in a production answer.
+
+**The agent (Claude) generated**
+
+- The choice to fix it where answers are drawn rather than in the prompt, and the code and tests.
+
 ## 15 November 2026: the live assistant
 
 **Done**

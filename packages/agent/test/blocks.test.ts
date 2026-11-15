@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { answerBlocks, inline, partsOf } from '../src/blocks.ts';
+import { answerBlocks, inline, partsOf, readableDates } from '../src/blocks.ts';
 
 const known = new Set(['MS-COMPLETE', 'P03-A002-ENB-0110']);
 
@@ -70,5 +70,30 @@ describe('the shapes an answer may take', () => {
     const rows = Array.from({ length: 80 }, (_, k) => `| ${k} |`).join('\n');
     const blocks = answerBlocks(`| N |\n|---|\n${rows}`, known);
     expect((blocks[0] as { rows: unknown[] }).rows).toHaveLength(50);
+  });
+});
+
+describe('dates in answers', () => {
+  it('writes dates as Slip does everywhere else', () => {
+    expect(readableDates('from 2027-05-07 to 2027-08-10.')).toBe(
+      'from 7 May 2027 to 10 August 2027.',
+    );
+    expect(readableDates('finishes 2027-08-10 17:00')).toBe('finishes 10 August 2027, 17:00');
+    expect(readableDates('2026-01-31T08:00')).toBe('31 January 2026, 08:00');
+  });
+
+  it('leaves alone what is not a real calendar date', () => {
+    expect(readableDates('2027-13-01 and 2027-05-00 and 12027-05-07')).toBe(
+      '2027-13-01 and 2027-05-00 and 12027-05-07',
+    );
+  });
+
+  it('rewrites text, never an activity code', () => {
+    const parts = inline('Moved on 2027-05-07, see #2027-05-07-A.', new Set(['2027-05-07-A']));
+    expect(parts).toEqual([
+      { kind: 'text', text: 'Moved on 7 May 2027, see ' },
+      { kind: 'verified', text: '2027-05-07-A' },
+      { kind: 'text', text: '.' },
+    ]);
   });
 });

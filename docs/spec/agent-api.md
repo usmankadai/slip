@@ -101,4 +101,5 @@ The client keeps the set of task codes that appeared in tool results for the cur
 - When live answers are switched off or the daily cap is reached, the panel says so in the server's words, uses scripted answers for the rest of the page, and offers "Show a scripted answer instead" on a failed suggested question.
 - Text written before a tool call is shown while it streams and then left out of the answer.
 - Answers are drawn from an allow-list (paragraphs, lists, tables, bold) by `answerBlocks` and `AgentText`, never as HTML.
+- Dates the model repeats from the tools (`2027-05-07`) are shown as Slip writes them (`7 May 2027`), in text only, never inside an activity code. Done where the answer is drawn, not in the system prompt, so the evals stand.
 - Not built: the setting "Send activity names to the agent", conversations kept across reloads, the `#` mention picker, charts in answers, and right-aligned numbers in the model's tables.
