@@ -1,0 +1,233 @@
+<!doctype html>
+<html lang="en-GB">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Where your data goes: options</title>
+    <style>
+      /* A record of what was looked at. The product reads these values from packages/ui/src/tokens.css. */
+      :root {
+        --s0: #fbfaf7; --s1: #f4f2ec; --s2: #ebe8e0; --s3: #dedacf;
+        --t1: #1c1b18; --t2: #55524a; --t3: #6c685d;
+        --b1: #e2ded3; --b2: #898477; --accent: #5b3fd6;
+      }
+      * { box-sizing: border-box; }
+      body { margin: 0; background: var(--s0); color: var(--t1); font: 13px/20px Inter, system-ui, -apple-system, 'Segoe UI', sans-serif; font-variant-numeric: tabular-nums; }
+      header, main { max-width: 1180px; margin: 0 auto; padding: 0 32px; }
+      header { padding-top: 24px; }
+      main { padding-bottom: 64px; }
+      h1 { font-size: 20px; line-height: 28px; margin: 0 0 4px; }
+      h2 { font-size: 16px; line-height: 24px; margin: 40px 0 8px; }
+      p { margin: 0 0 8px; color: var(--t2); max-width: 760px; }
+      .controls { position: sticky; top: 0; z-index: 2; background: var(--s0); border-bottom: 1px solid var(--b1); padding: 8px 0; margin: 16px 0 0; display: flex; gap: 8px; align-items: center; }
+      .controls button { font: inherit; padding: 2px 10px; border: 1px solid var(--b2); border-radius: 4px; background: var(--s0); color: var(--t1); cursor: pointer; }
+      .controls button[aria-pressed='true'] { background: var(--t1); color: var(--s0); border-color: var(--t1); }
+      .option { display: grid; grid-template-columns: minmax(0, 1fr) 300px; gap: 24px; align-items: start; }
+      .stage { min-width: 0; overflow-x: auto; }
+      .notes { margin: 0; font-size: 12px; line-height: 16px; }
+      .notes dt { font-weight: 600; margin-top: 8px; }
+      .notes dt:first-child { margin-top: 0; }
+      .notes dd { margin: 0; color: var(--t2); }
+
+      .panel { width: 640px; border: 1px solid var(--b2); border-radius: 6px; background: var(--s0); box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08); }
+      .panel-head { display: flex; justify-content: space-between; align-items: baseline; padding: 12px 16px; border-bottom: 1px solid var(--b1); }
+      .panel-title { font-size: 16px; font-weight: 600; }
+      .close { font-size: 12px; color: var(--t2); text-decoration: underline; }
+      .panel-body { padding: 12px 16px 16px; }
+      .lead { color: var(--t1); margin: 0 0 12px; }
+      .mode { display: inline-block; font-size: 11px; line-height: 16px; padding: 0 6px; border: 1px solid var(--b2); border-radius: 3px; color: var(--t2); margin-left: 6px; font-weight: 500; }
+      .small { font-size: 12px; line-height: 16px; color: var(--t2); }
+      .quiet { font-size: 11px; line-height: 16px; color: var(--t3); }
+      code, .mono { font: 11px/16px 'JetBrains Mono', ui-monospace, monospace; }
+
+      /* A: diagram */
+      .lanes { display: grid; grid-template-columns: 1.3fr 1fr 1fr; gap: 0; border: 1px solid var(--b1); border-radius: 4px; }
+      .lane-h { padding: 6px 10px; background: var(--s2); color: var(--t2); font-size: 12px; font-weight: 500; border-right: 1px solid var(--b1); }
+      .lane-h:last-of-type { border-right: 0; }
+      .cell { padding: 6px 10px; border-top: 1px solid var(--b1); border-right: 1px solid var(--b1); font-size: 12px; line-height: 16px; min-height: 40px; position: relative; }
+      .cell:nth-child(3n) { border-right: 0; }
+      .chip { display: inline-block; padding: 2px 6px; border: 1px solid var(--t1); border-radius: 3px; background: var(--s0); font-weight: 500; }
+      .chip.ghost { border-style: dashed; border-color: var(--b2); color: var(--t2); background: transparent; font-weight: 400; }
+      .arrow { color: var(--t2); font-size: 12px; }
+      .none { color: var(--t3); }
+      .key { display: flex; gap: 16px; margin-top: 8px; }
+
+      /* B: table */
+      table { border-collapse: collapse; width: 100%; font-size: 12px; line-height: 16px; }
+      th, td { text-align: left; padding: 6px 8px; border-bottom: 1px solid var(--b1); vertical-align: top; }
+      th { background: var(--s2); color: var(--t2); font-weight: 500; }
+      td.yes { font-weight: 600; }
+      td.no { color: var(--t3); }
+      .tick::before { content: '\25CF'; margin-right: 4px; font-size: 9px; }
+      .cross::before { content: '\25CB'; margin-right: 4px; font-size: 9px; }
+      .enforce { margin-top: 12px; padding-top: 8px; border-top: 1px solid var(--b1); }
+
+      /* C: ledger */
+      .split { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+      .stays { padding: 8px 10px; background: var(--s1); border-radius: 4px; }
+      .stays ul, .sent ul { margin: 4px 0 0; padding-left: 16px; font-size: 12px; line-height: 18px; }
+      .ledger { margin-top: 12px; }
+      .ledger-h { display: flex; justify-content: space-between; font-weight: 600; padding: 4px 0; border-bottom: 1px solid var(--b2); }
+      .entry { display: grid; grid-template-columns: 56px 1fr auto; gap: 0 8px; padding: 6px 0; border-bottom: 1px solid var(--b1); font-size: 12px; line-height: 16px; }
+      .entry .t { color: var(--t3); }
+      .entry .n { text-align: right; font-weight: 600; }
+      .entry .rows { grid-column: 2 / 4; color: var(--t2); }
+      .empty { padding: 12px 0; color: var(--t2); font-size: 12px; }
+
+      /* The first-use notice */
+      .dock { width: 380px; border: 1px solid var(--b2); border-radius: 6px; background: var(--s0); }
+      .dock-head { padding: 8px 12px; border-bottom: 1px solid var(--b1); font-weight: 600; }
+      .notice { margin: 12px; padding: 10px 12px; border: 1px solid var(--b1); border-left: 3px solid var(--t1); border-radius: 4px; background: var(--s1); font-size: 12px; line-height: 18px; }
+      .notice b { display: block; font-size: 13px; margin-bottom: 4px; }
+      .notice .acts { display: flex; gap: 12px; align-items: center; margin-top: 8px; }
+      .btn { font: inherit; font-size: 12px; padding: 3px 10px; border-radius: 4px; border: 1px solid var(--accent); background: var(--accent); color: #fff; }
+      .link { color: var(--accent); font-size: 12px; text-decoration: underline; }
+      .input { margin: 0 12px 12px; padding: 6px 8px; border: 1px solid var(--b2); border-radius: 4px; color: var(--t3); font-size: 12px; }
+
+      /* Where it opens from */
+      .places { display: grid; grid-template-columns: 1fr; gap: 12px; max-width: 760px; }
+      .frame { border: 1px solid var(--b1); border-radius: 4px; padding: 8px 12px; font-size: 12px; }
+      .frame .bar { display: flex; justify-content: space-between; align-items: center; gap: 16px; white-space: nowrap; }
+      .frame .hl { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 2px; }
+      @media (max-width: 900px) { .option { grid-template-columns: 1fr; } .places { grid-template-columns: 1fr; } }
+    </style>
+  </head>
+  <body>
+    <header>
+      <h1>Exploration 09: where your data goes</h1>
+      <p>Three ways to draw the "Where your data goes" panel. Each says the same facts, taken from <code>docs/data-flow.md</code>; they differ in what they lead with. The switch shows the panel in scripted mode, the only mode on the public site today, and in live mode, which is not deployed yet.</p>
+      <p>The panel has to be exact, and believable to someone in an IT or information-security role who reads it before letting a planner load a client schedule.</p>
+      <div class="controls" id="controls">
+        <span>Assistant mode:</span>
+        <button data-mode="scripted" aria-pressed="true">Scripted (public site today)</button>
+        <button data-mode="live" aria-pressed="false">Live (not deployed)</button>
+        <button data-mode="live-used" aria-pressed="false">Live, after three questions</button>
+      </div>
+    </header>
+    <main id="main"></main>
+
+    <script>
+      const ROWS = [
+        { what: 'XER files and parsed schedules', where: 'Browser storage on this computer (OPFS)', server: false, anthropic: false },
+        { what: 'Edits you approved, the activity log, the narrative', where: 'Browser storage (IndexedDB)', server: false, anthropic: false },
+        { what: 'Your questions to the assistant', where: 'This tab', server: 'live', anthropic: 'live' },
+        { what: 'Rows the assistant asks for: codes, names, dates', where: 'This tab', server: 'live', anthropic: 'live' },
+      ];
+      const LEDGER = [
+        { t: '10:42', q: 'Why did contract completion slip?', n: 14, rows: 'P01-A001-TRK-1000, P02-A002-TRK-1007 and 12 more' },
+        { t: '10:44', q: 'Which new activities are on the critical path?', n: 6, rows: 'P02-A002-CIV-N0001, P03-A003-TRK-N0002 and 4 more' },
+        { t: '10:51', q: 'Summarise the logic changes in section 3', n: 21, rows: 'P03-A003-TRK-1014, P03-A001-TRK-1035 and 19 more' },
+      ];
+      let mode = 'scripted';
+      const live = () => mode !== 'scripted';
+      const goes = (v) => v === 'live' && live();
+
+      function head(title) {
+        const tag = live() ? 'Live assistant' : 'Scripted assistant';
+        return `<div class="panel-head"><span class="panel-title">${title}<span class="mode">${tag}</span></span><span class="close">Close</span></div>`;
+      }
+      function leadSentence() {
+        return live()
+          ? 'Your files are never uploaded. When you ask the live assistant a question, the question and the rows it needs to answer it are sent through Slip&rsquo;s server to Anthropic. Nothing is stored on the way.'
+          : 'Nothing about your schedule leaves this browser. The files are read here and kept in this browser&rsquo;s storage. The assistant is scripted: its answers are prepared in advance and run here.';
+      }
+
+      function optionA() {
+        let cells = '<div class="lane-h">Your browser</div><div class="lane-h">Slip&rsquo;s server</div><div class="lane-h">Anthropic</div>';
+        for (const r of ROWS) {
+          cells += `<div class="cell"><span class="chip">${r.what}</span><div class="quiet">${r.where}</div></div>`;
+          cells += `<div class="cell">${goes(r.server) ? '<span class="arrow">&rarr;</span> <span class="chip ghost">Passed on, not stored</span>' : '<span class="none">Never</span>'}</div>`;
+          cells += `<div class="cell">${goes(r.anthropic) ? '<span class="arrow">&rarr;</span> <span class="chip">Received to answer</span>' : '<span class="none">Never</span>'}</div>`;
+        }
+        return `<div class="panel">${head('Where your data goes')}<div class="panel-body">
+          <p class="lead">${leadSentence()}</p>
+          <div class="lanes">${cells}</div>
+          <div class="key quiet"><span>Solid: kept or used there</span><span>Dashed: passes through, not stored</span></div>
+          <p class="small" style="margin-top:12px">Like any website, the host (Vercel) sees requests for the page and its files, with your IP address. Those carry no schedule content.</p>
+        </div></div>`;
+      }
+
+      function optionB() {
+        let body = '';
+        for (const r of ROWS) {
+          const s = goes(r.server), a = goes(r.anthropic);
+          body += `<tr><td>${r.what}</td><td class="yes"><span class="tick">Yes</span></td>
+            <td class="${s ? 'yes' : 'no'}">${s ? '<span class="tick">In transit, not stored</span>' : '<span class="cross">Never</span>'}</td>
+            <td class="${a ? 'yes' : 'no'}">${a ? '<span class="tick">Yes</span>' : '<span class="cross">Never</span>'}</td></tr>`;
+        }
+        return `<div class="panel">${head('Where your data goes')}<div class="panel-body">
+          <p class="lead">${leadSentence()}</p>
+          <table><thead><tr><th>Data</th><th>Stays in this browser</th><th>Sent to Slip&rsquo;s server</th><th>Sent to Anthropic</th></tr></thead><tbody>${body}</tbody></table>
+          <div class="enforce small"><b>How this is held to</b><br>
+            The browser blocks any connection except to Slip&rsquo;s own address (Content Security Policy <code>connect-src 'self'</code>).
+            ${live() ? 'The server keeps no log of questions or rows.' : 'The live assistant is not connected on this site.'}
+            The same table is in <span class="link">docs/data-flow.md</span>, and the two are kept the same by a test.</div>
+        </div></div>`;
+      }
+
+      function optionC() {
+        const used = mode === 'live-used';
+        const sentList = live()
+          ? '<ul><li>Your question</li><li>The rows the assistant asks for: codes, names, dates</li><li>Through Slip&rsquo;s server, which does not store them, to Anthropic</li></ul>'
+          : '<ul><li>Nothing, in scripted mode</li></ul>';
+        let ledger;
+        if (!live()) ledger = '<div class="empty">The scripted assistant sends nothing, so there is nothing to list.</div>';
+        else if (!used) ledger = '<div class="empty">Nothing has been sent in this session.</div>';
+        else {
+          ledger = LEDGER.map((e) => `<div class="entry"><span class="t">${e.t}</span><span>${e.q}</span><span class="n">${e.n} rows</span><span class="rows mono">${e.rows}</span></div>`).join('');
+        }
+        const total = used ? '41 rows of 1,000 activities' : '0 rows';
+        return `<div class="panel">${head('Where your data goes')}<div class="panel-body">
+          <div class="split">
+            <div class="stays"><b>Stays in this browser</b><ul><li>Both XER files and the parsed schedules</li><li>Edits you approved and the activity log</li><li>The narrative</li></ul></div>
+            <div class="sent"><b>Leaves this browser</b>${sentList}</div>
+          </div>
+          <div class="ledger"><div class="ledger-h"><span>Sent in this session</span><span>${total}</span></div>${ledger}</div>
+          <p class="quiet" style="margin-top:8px">The list is kept in this tab only and cleared when you close it.</p>
+        </div></div>`;
+      }
+
+      function notice() {
+        return `<div class="dock"><div class="dock-head">Assistant</div>
+          <div class="notice"><b>Before your first live question</b>
+            Your question and the rows the assistant asks for to answer it, including activity codes, names and dates, will be sent through Slip&rsquo;s server to Anthropic. Your files are not uploaded.
+            <div class="acts"><span class="btn">Ask</span><span class="link">Where your data goes</span><span class="link">Use the scripted assistant</span></div></div>
+          <div class="input">Why did contract completion slip?</div></div>`;
+      }
+
+      function places() {
+        return `<div class="places">
+          <div class="frame"><div class="quiet">1. A link in every screen&rsquo;s header</div><div class="bar"><b>Northern Rail Upgrade, Phase 2</b><span class="small">See all changes &nbsp; Finish update &nbsp; <span class="hl">Where your data goes</span></span></div></div>
+          <div class="frame"><div class="quiet">2. In the footer, beside the build</div><div class="bar"><span class="small">Source &nbsp; Design system &nbsp; Performance &nbsp; <span class="hl">Where your data goes</span></span><span class="quiet">Build 55b88d0</span></div></div>
+        </div>`;
+      }
+
+      const OPTIONS = [
+        { id: 'A', title: 'A. A diagram: three places, each piece of data drawn where it goes', render: optionA,
+          notes: [['Does well', 'The spec asks for a diagram, and this is one: the answer is visible before it is read. Scripted mode shows an empty right side, which is the strongest possible message.'],
+                  ['Does badly', 'A diagram looks like a promise without saying what holds it. Needs a key for solid and dashed. Hard to keep exact as rows are added.']] },
+        { id: 'B', title: 'B. The table from the security spec, with how it is held to', render: optionB,
+          notes: [['Does well', 'The same table as security.md and docs/data-flow.md, so all three can be tested to match. Says what enforces it. Reads like documentation an IT reviewer would trust.'],
+                  ['Does badly', 'Not a diagram, which the product spec asks for. Dense for a planner who only wants to know if it is safe to load the file.']] },
+        { id: 'C', title: 'C. What stays, what leaves, and what was actually sent this session', render: optionC,
+          notes: [['Does well', 'Shows real behaviour, not only policy: every live question and the codes of the rows it sent. The only option that can be checked against what happened.'],
+                  ['Does badly', 'A new thing to build and keep right. Empty in scripted mode, which is all the public site has. Keeping the list only in the tab is itself a choice.']] },
+      ];
+
+      function render() {
+        const main = document.getElementById('main');
+        main.innerHTML = OPTIONS.map((o) => `<h2>${o.title}</h2><div class="option"><div class="stage">${o.render()}</div><dl class="notes">${o.notes.map(([dt, dd]) => `<dt>${dt}</dt><dd>${dd}</dd>`).join('')}</dl></div>`).join('') +
+          `<h2>The same in every option: the notice before the first live question</h2><div class="option"><div class="stage">${notice()}</div><dl class="notes"><dt>From the spec</dt><dd>security.md asks for a one-time notice, with a link to the panel, before the first live question in a session. Drawn once because it does not depend on the panel's option. Never shown in scripted mode.</dd></dl></div>` +
+          `<h2>Where it opens from</h2><div class="option"><div class="stage">${places()}</div><dl class="notes"><dt>Open question</dt><dd>The product spec says the top bar, but Slip has no shared top bar: each screen has its own header. The footer is on every screen already. Either way it opens as a panel over the screen, not a new page.</dd></dl></div>`;
+      }
+      document.getElementById('controls').addEventListener('click', (e) => {
+        const b = e.target.closest('button');
+        if (!b) return;
+        mode = b.dataset.mode;
+        for (const x of document.querySelectorAll('#controls button')) x.setAttribute('aria-pressed', String(x === b));
+        render();
+      });
+      render();
+    </script>
+  </body>
+</html>

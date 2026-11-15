@@ -2,6 +2,25 @@
 
 What was built, what Usman decided or designed, and what an agent generated. Newest first.
 
+## 15 November 2026: options for where your data goes
+
+**Done**
+
+- `docs/data-flow.md`: what leaves the browser, to whom and when, checked against the code. Today nothing about the schedule leaves: the assistant panel uses only the scripted transport, and the Content Security Policy allows connections to Slip's own origin only.
+- Exploration 09: three options for the "Where your data goes" panel (a diagram, the security table with how it is held to, and a list of what was actually sent this session), the notice before the first live question, and two places it could open from.
+
+**Usman decided or designed**
+
+- To do the data flow panel next.
+
+**The agent (Claude) generated**
+
+- `docs/data-flow.md`, the three options, the notice and the write-up.
+
+**Worth Usman's attention**
+
+- Two decisions: which option, and whether the panel opens from each screen's header or from the footer. The spec says "the top bar", which Slip does not have.
+
 ## 15 November 2026: the agent comparison experiment
 
 **Done**
