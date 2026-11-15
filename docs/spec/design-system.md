@@ -43,6 +43,10 @@ Guidance aimed at coding agents. For each component: when to use it, when not to
 - Performance budgets ([performance budgets](performance.md))
 - `pnpm check:secrets` on the built bundle
 
+### What is built (15 November 2026)
+
+How each check is enforced, and the departures from the list above, are in [D23](../decisions/D23-how-design-system-rules-are-enforced.md). In short: `slip/no-raw-color` and `slip/no-raw-spacing` lint code; a repository test checks CSS and that every screen has loading, empty and error stories; `pnpm a11y` runs axe on every story and is in `pnpm check` and CI. `packages/ui/AGENTS.md` is written. Not built: the screenshot test for every story.
+
 ## Storybook
 Run with `pnpm storybook`; built by `pnpm build:storybook`, which is part of `pnpm check`. Telemetry is off. So far it holds the foundation pages only (colour, slip scale, type, density, space and shape); every value shown is read from the tokens on the page. It is not deployed yet.
 

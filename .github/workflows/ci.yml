@@ -53,6 +53,23 @@ jobs:
       # Fails if anything that looks like a secret reached the browser bundle.
       - run: pnpm check:secrets
 
+  a11y:
+    name: Accessibility (axe on every story)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v5
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 24
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm --filter @slip/a11y exec playwright install chromium
+      - run: pnpm build:storybook
+      # Fails on any serious or critical axe violation in any story.
+      - run: pnpm a11y
+
   perf:
     name: Performance budgets (100K subset)
     runs-on: ubuntu-latest

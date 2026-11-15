@@ -24,6 +24,10 @@
 }
 
 .lineLink {
+  /* At least 24px tall, the minimum target size (WCAG 2.5.8). */
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--space-6);
   padding: var(--space-0);
   border: 0;
   background: none;

@@ -2,6 +2,32 @@
 
 What was built, what Usman decided or designed, and what an agent generated. Newest first.
 
+## 15 November 2026: the design-system checks
+
+**Done**
+
+- `tools/eslint-plugin-slip` with two lint rules, `no-raw-color` and `no-raw-spacing`, on the app and the design system.
+- A repository test that fails on raw colours, or raw margin, padding or gap, in any CSS file outside `tokens.css`, and on any screen without stories for loading, empty and error.
+- axe on every Storybook story (101 of them), failing on serious or critical violations, in `pnpm check` and as its own CI job.
+- `packages/ui/AGENTS.md`: the rules for agents writing UI, which of them are checked and how, and every component's use in one line.
+- Stories for the agent panel's states, which the new check found missing.
+- The first axe run found two real faults, both fixed: the health screen's "See them" buttons had spoken names that did not contain their visible words, and the summary's "What changed" links were under the 24px minimum target size.
+
+**Usman decided or designed**
+
+- To do the design-system checks next.
+
+**The agent (Claude) generated**
+
+- All the code, tests, the runner and `AGENTS.md`.
+- D23: how the rules are enforced, including two departures from the spec. Required states are checked through stories rather than rendered branches, and CSS is checked by a test rather than a linter, to avoid a new dependency.
+
+**Worth Usman's attention**
+
+- Nothing raw was found in the existing code: the rules confirm what was already true and stop it slipping.
+- The screenshot test for every story is not built; it needs Docker and committed baselines.
+- The agent comparison experiment (the same UI tasks with and without these rules) is now possible, and is the headline item the spec gives these checks.
+
 ## 14 November 2026: approving the assistant's changes
 
 **Done**
