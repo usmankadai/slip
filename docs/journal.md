@@ -2,6 +2,29 @@
 
 What was built, what Usman decided or designed, and what an agent generated. Newest first.
 
+## 15 November 2026: the activity drawer
+
+**Done**
+
+- Selecting a row in the changes grid opens a drawer under it (exploration 10, option C). What changed comes first: the fields that changed with update A, update B and the change; the relationships added, removed or changed; and one sentence from the trace on why it moved, with Open the trace. Logic lists predecessors and successors; Everything lists every field in both updates. Close, or Escape, hides it until the next selection.
+- `TabBar` in `packages/ui`, with arrow keys, Home and End, a contract, stories and a test.
+- The drawer's model is pure and has 10 tests, including a new activity, an unchanged one, more links than the engine lists, and the sentence.
+- Checked headlessly against the release build under the production headers. At 1,000 activities the drawer was ready in 58ms and the sentence in 350ms; at 350,000, 203ms and 484ms. No long tasks on the main thread after selecting, or after moving through ten rows with the arrow keys. No policy violations.
+- The new spacing check caught a raw negative margin in the first version of `TabBar`. It was fixed, not excused.
+
+**Usman decided or designed**
+
+- Option C ("C, led by changes"), accepting Claude's recommendation.
+
+**The agent (Claude) generated**
+
+- All the code, tests, stories and wording. The two departures from the mock are recorded in exploration 10.
+
+**Worth Usman's attention**
+
+- The sentence on why it moved names the two largest causes. On long paths those may be a small part of the slip (at 350,000, two causes of 19 and 17 days for a 117 day slip, with six more). It says how many more there are; the trace screen has the rest.
+- The selected activity is not in the URL yet, so a reload closes the drawer.
+
 ## 15 November 2026: options for the activity drawer
 
 **Done**

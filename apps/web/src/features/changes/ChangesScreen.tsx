@@ -6,6 +6,7 @@ import { engine } from '../../app/engine.ts';
 import { longDate, plural } from '../../shared/format.ts';
 import type { SlotFacts } from '../import/types.ts';
 import type { TraceTarget } from '../trace/TraceView.tsx';
+import { ActivityDrawer } from '../activity/ActivityDrawer.tsx';
 import { ChangesGrid } from './ChangesGrid.tsx';
 import { Gantt } from './gantt/Gantt.tsx';
 import {
@@ -102,6 +103,10 @@ export function ChangesScreen({
   );
   const scale = useMemo(() => ({ origin, pxPerDay: PX_PER_DAY[zoom] }), [origin, zoom]);
   const [width, setWidth] = useState(ASSUMED_WIDTH);
+  /** The activity shown in the drawer, or null when the drawer is closed. */
+  const [drawerCode, setDrawerCode] = useState<string | null>(null);
+  /** False after the planner closes the drawer; selecting another row opens it again. */
+  const [drawerOpen, setDrawerOpen] = useState(true);
   /** The rows on screen, 0-based, for fitting the time axis to them. */
   const onScreen = useRef({ start: 0, end: 0 });
   /** True once the axis has been fitted to the first rows of a view. */
@@ -157,6 +162,14 @@ export function ChangesScreen({
   useEffect(() => {
     if (selected) selectedActivity.current = selected.activity;
   }, [selected]);
+  // The drawer follows the selection. It keeps the last activity while a new view's rows load.
+  const selectedCode = selected?.code;
+  useEffect(() => {
+    if (selectedCode) setDrawerCode(selectedCode);
+  }, [selectedCode]);
+  useEffect(() => {
+    if (lostSelection) setDrawerCode(null);
+  }, [lostSelection]);
 
   // After a new filter or sort, find the selected activity again and bring it back into view.
   const viewKey = JSON.stringify([spec, sort]);
@@ -260,6 +273,7 @@ export function ChangesScreen({
   const onSelectRow = useCallback((row: number) => {
     setSelectedRow(row);
     setLostSelection(false);
+    setDrawerOpen(true);
   }, []);
 
   const traceSelected = () => {
@@ -283,6 +297,7 @@ export function ChangesScreen({
         if (event.key === 't' && !typing && !event.metaKey && !event.ctrlKey && !event.altKey) {
           traceSelected();
         }
+        if (event.key === 'Escape' && !typing && drawerOpen && drawerCode) setDrawerOpen(false);
       }}
     >
       <header className={styles.header}>
@@ -463,6 +478,10 @@ export function ChangesScreen({
           )}
         </p>
       </div>
+
+      {drawerOpen && drawerCode ? (
+        <ActivityDrawer code={drawerCode} onClose={() => setDrawerOpen(false)} onTrace={onTrace} />
+      ) : null}
     </main>
   );
 }

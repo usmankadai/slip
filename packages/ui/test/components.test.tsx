@@ -13,6 +13,7 @@ import {
   ProposedEditCard,
   SegmentedControl,
   Skeleton,
+  TabBar,
   barLength,
   formatDelta,
 } from '../src/index.ts';
@@ -274,5 +275,35 @@ describe('Dialog', () => {
   it('always has a way to close it', () => {
     expect(html).toMatch(/<button type="button"[^>]*>Close<\/button>/);
     expect(html).toContain('Nothing leaves.');
+  });
+});
+
+describe('TabBar', () => {
+  const html = renderToStaticMarkup(
+    <TabBar
+      label="Activity"
+      idPrefix="d"
+      value="logic"
+      onChange={() => {}}
+      tabs={[
+        { value: 'changed', label: 'What changed' },
+        { value: 'logic', label: 'Logic', note: '3 in, 2 out' },
+      ]}
+    />,
+  );
+
+  it('is a named tab list with the chosen tab selected and in the tab order', () => {
+    expect(html).toContain('role="tablist" aria-label="Activity"');
+    expect(html).toMatch(
+      /id="d-tab-logic" aria-selected="true" aria-controls="d-panel-logic" tabindex="0"/,
+    );
+    expect(html).toMatch(
+      /id="d-tab-changed" aria-selected="false" aria-controls="d-panel-changed" tabindex="-1"/,
+    );
+  });
+
+  it('shows a note beside its label', () => {
+    expect(html).toContain('Logic<span');
+    expect(html).toContain('3 in, 2 out</span>');
   });
 });

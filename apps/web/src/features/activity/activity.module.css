@@ -1,0 +1,158 @@
+.drawer {
+  display: flex;
+  flex-direction: column;
+  flex: none;
+  height: 300px;
+  min-height: 0;
+  border-top: 1px solid var(--border-strong);
+  background: var(--surface-0);
+}
+
+.header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--space-1) var(--space-3);
+  padding: var(--space-2) var(--space-0);
+}
+
+.name {
+  margin: var(--space-0);
+  font-size: var(--text-md);
+  line-height: var(--leading-md);
+  font-weight: var(--weight-semibold);
+  overflow-wrap: anywhere;
+}
+
+.code {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  line-height: var(--leading-xs);
+  color: var(--text-secondary);
+}
+
+.slip {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  font-size: var(--text-sm);
+}
+
+.push {
+  margin-left: auto;
+}
+
+.body {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+  padding: var(--space-3) var(--space-0);
+}
+
+.body:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: -2px;
+}
+
+.columns {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: var(--space-6);
+}
+
+.label {
+  margin: var(--space-0) var(--space-0) var(--space-1);
+  font-size: var(--text-xs);
+  line-height: var(--leading-xs);
+  font-weight: var(--weight-semibold);
+  color: var(--text-muted);
+}
+
+.label + .table,
+.label + .say {
+  margin-bottom: var(--space-3);
+}
+
+.say {
+  margin: var(--space-0) var(--space-0) var(--space-2);
+  font-size: var(--text-sm);
+  line-height: var(--leading-sm);
+  color: var(--text-secondary);
+}
+
+.quiet {
+  font-size: var(--text-xs);
+  line-height: var(--leading-xs);
+  color: var(--text-muted);
+  font-weight: var(--weight-regular);
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--text-sm);
+  line-height: var(--leading-sm);
+}
+
+.table th,
+.table td {
+  padding: var(--space-1) var(--space-2);
+  border-bottom: 1px solid var(--border-subtle);
+  text-align: left;
+  vertical-align: top;
+}
+
+.table thead th {
+  background: var(--surface-2);
+  color: var(--text-secondary);
+  font-weight: var(--weight-medium);
+}
+
+.table tbody th {
+  font-weight: var(--weight-regular);
+}
+
+.number {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.table .number {
+  text-align: right;
+}
+
+/* A changed field: a bar on the left and heavier text, not colour. */
+.changed th {
+  box-shadow: inset 3px 0 0 var(--text-primary);
+  font-weight: var(--weight-semibold);
+}
+
+.change {
+  font-weight: var(--weight-semibold);
+}
+
+.removed td {
+  color: var(--text-muted);
+}
+
+.removed td:nth-child(3) {
+  text-decoration: line-through;
+}
+
+.why {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2) var(--space-3);
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-control);
+  background: var(--surface-1);
+}
+
+.why .say {
+  flex: 1 1 240px;
+  margin: var(--space-0);
+  color: var(--text-primary);
+}
