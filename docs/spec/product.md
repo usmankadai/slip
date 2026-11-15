@@ -32,7 +32,7 @@ Every import, edit, approval, rejection and export is logged with a timestamp, a
 Applied edits can be reverted from the audit timeline. A revert is itself an edit: it reruns CPM and writes an audit entry. There is no silent history rewrite.
 
 ## Data flow view
-A "Where your data goes" panel, reachable from the top bar, shows as a simple diagram exactly what stays in the browser and what is sent to the server and to Anthropic ([security and privacy](security.md)). It must always match the real behaviour; update it in the same change as any change to data flow.
+A "Where your data goes" panel, opened from the footer of every screen, shows as a table exactly what stays in the browser and what is sent to the server and to Anthropic, and what holds that true ([security and privacy](security.md); exploration 09, option B, chosen over a diagram on 15 November 2026). It must always match the real behaviour; update it in the same change as any change to data flow.
 
 ## Out of scope (do not build unless asked)
 - Authentication, multi-tenant accounts, real P6 / Oracle Primavera Cloud API sync

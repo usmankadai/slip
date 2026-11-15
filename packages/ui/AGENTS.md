@@ -30,19 +30,20 @@ Widths, heights and positions in pixels are allowed: they are layout, often comp
 
 Each has a contract in its README. The one-line version:
 
-| Component          | Use for                                                                                                                            | Not for                              |
-| ------------------ | ---------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------ |
-| `Button`           | An action. `primary` for the one main action on a screen, `quiet` for secondary ones                                               | Navigation; a choice among options   |
-| `SegmentedControl` | Choosing one of two to eight options that are all visible: density, kind of change                                                 | An action; several on/off switches   |
-| `Notice`           | A message that stays until the situation changes: a check, a warning, a question. `attention` is a heavier left edge, not a colour | Something that disappears on its own |
-| `ProgressBar`      | A job the planner waits on, with what is happening and its units                                                                   | A value in the data                  |
-| `Skeleton`         | Holding the shape of a loading panel, inside a container that says in words what is loading                                        | Anything under 300ms; alone          |
-| `DeltaCell`        | How far a date moved, in working days: number and bar on a fixed scale                                                             | Durations, float, counts             |
-| `EntityChip`       | One piece of evidence beside a claim; opens what it names                                                                          | Data values; decoration              |
-| `AgentSteps`       | The assistant's working, folded into one line                                                                                      | Progress of a file read              |
-| `AgentText`        | The text of an assistant's answer, with checked citations                                                                          | Narrative text; the planner's words  |
-| `ScriptedBadge`    | Every scripted answer                                                                                                              | Live answers                         |
-| `ProposedEditCard` | A change the assistant proposed, before and after, for approval                                                                    | Changes made without asking          |
+| Component          | Use for                                                                                                                            | Not for                                                               |
+| ------------------ | ---------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------- |
+| `Button`           | An action. `primary` for the one main action on a screen, `quiet` for secondary ones                                               | Navigation; a choice among options                                    |
+| `SegmentedControl` | Choosing one of two to eight options that are all visible: density, kind of change                                                 | An action; several on/off switches                                    |
+| `Notice`           | A message that stays until the situation changes: a check, a warning, a question. `attention` is a heavier left edge, not a colour | Something that disappears on its own                                  |
+| `ProgressBar`      | A job the planner waits on, with what is happening and its units                                                                   | A value in the data                                                   |
+| `Skeleton`         | Holding the shape of a loading panel, inside a container that says in words what is loading                                        | Anything under 300ms; alone                                           |
+| `DeltaCell`        | How far a date moved, in working days: number and bar on a fixed scale                                                             | Durations, float, counts                                              |
+| `EntityChip`       | One piece of evidence beside a claim; opens what it names                                                                          | Data values; decoration                                               |
+| `AgentSteps`       | The assistant's working, folded into one line                                                                                      | Progress of a file read                                               |
+| `AgentText`        | The text of an assistant's answer, with checked citations                                                                          | Narrative text; the planner's words                                   |
+| `ScriptedBadge`    | Every scripted answer                                                                                                              | Live answers                                                          |
+| `ProposedEditCard` | A change the assistant proposed, before and after, for approval                                                                    | Changes made without asking                                           |
+| `Dialog`           | Something opened to read or answer, then closed to go back: where your data goes                                                   | A message that should stay on screen; activity detail beside the grid |
 
 ## Density
 

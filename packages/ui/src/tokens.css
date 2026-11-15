@@ -97,6 +97,8 @@
 
   /* Elevation: borders everywhere, a shadow only on floating layers */
   --shadow-floating: 0 4px 16px rgb(28 27 24 / 14%);
+  /* Behind a dialog: dims the screen without hiding it. */
+  --backdrop: rgb(28 27 24 / 32%);
 
   --z-base: 0;
   --z-sticky: 10;

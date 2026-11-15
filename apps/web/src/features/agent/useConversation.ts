@@ -5,6 +5,7 @@ import { engine } from '../../app/engine.ts';
 import type { AuditType } from '../../storage/auditLog.ts';
 import { ask, type Answer } from './loop.ts';
 import type { ProposalState } from './Proposal.tsx';
+import { ASSISTANT_MODE } from './mode.ts';
 import { scriptedTransport } from './scripted.ts';
 import type { AgentTransport, Message } from './transport.ts';
 
@@ -15,7 +16,9 @@ const toolEngine: ToolEngine = {
 export function useConversation(
   onAudit: (type: AuditType, summary: string, actor: 'agent') => void,
 ) {
-  // Scripted is the public default (D11). The live transport exists but the server is not deployed.
+  // Scripted is the public default (D11). The live transport exists but the server is not
+  // deployed, so a build set to live mode fails loudly here rather than talking to nothing.
+  if (ASSISTANT_MODE !== 'scripted') throw new Error('The live assistant is not connected yet.');
   const transport = useRef<AgentTransport>(scriptedTransport());
   const messages = useRef<Message[]>([]);
   const [answers, setAnswers] = useState<Answer[]>([]);

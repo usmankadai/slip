@@ -1,6 +1,6 @@
 /** The links in the app footer. Built from build-time values, which are checked before use. */
 
-const REPOSITORY = 'https://github.com/usmankadai/slip';
+export const REPOSITORY = 'https://github.com/usmankadai/slip';
 /** The design system's Storybook, deployed as its own project (D21). VITE_STORYBOOK_URL overrides it. */
 export const STORYBOOK = 'https://slip-design-system.usmankadai.dev';
 
