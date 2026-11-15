@@ -24,6 +24,27 @@ What was built, what Usman decided or designed, and what an agent generated. New
 
 - `pnpm visual` is untested on this machine until Docker runs under this account.
 - The screenshot check is not part of `pnpm check`, because it needs Docker.
+## 15 November 2026: PDF export of the narrative
+
+**Done**
+
+- Export as PDF on the Finish update screen, beside Export as Markdown. It saves an A4 file: the title, each paragraph with its heading, the evidence, the marks for edited and own paragraphs, and page numbers. It is logged in the activity log with its page count.
+- A small PDF writer with no new dependency (D25), loaded only on the first PDF export.
+- Every string is escaped, so nothing in a name or the planner's words can change the page. Characters the PDF's fonts cannot show become a question mark, and the screen says how many and that the Markdown export keeps them.
+- 11 tests: escaping and hostile text, the character set, wrapping, page breaks, and that the file's cross-reference table and stream lengths are correct.
+- Checked through the app against the release build under the production headers: the writer loads only on the first export, the file opens in macOS's PDF renderer, a hostile paragraph prints literally, and there were no policy violations.
+
+**Usman decided or designed**
+
+- To do PDF export next.
+
+**The agent (Claude) generated**
+
+- The writer, the layout of the page, the note's wording, and D25, including the choice not to use a library or the print dialog.
+
+**Worth Usman's attention**
+
+- Names in scripts outside Windows Latin (Polish, Greek, Chinese) come out as question marks in the PDF. Embedding a Unicode font would fix it, at the cost of a larger chunk. That is worth deciding if real projects have such names.
 
 ## 15 November 2026: the performance HUD and the missing numbers
 

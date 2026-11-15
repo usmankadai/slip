@@ -38,5 +38,5 @@ Do not write "the schedule never leaves the browser" anywhere without the live-m
 - `pnpm check:secrets` scans the built bundle for key patterns and the names of server-only variables. It is part of `pnpm check` and of the CI build job.
 - `vercel.json` also sets the cache rules from [persistence](persistence.md): hashed assets for a year, the page itself never.
 - Checked by hand in Chromium against the release build: the import and generate workers and the browser cache all work under the policy, with no violations reported.
-- Not yet: an automated end-to-end test that fails on any policy violation (it arrives with the end-to-end suite), `pnpm audit` in CI, Dependabot, and the CSV, PDF and Markdown export rules.
+- Not yet: an automated end-to-end test that fails on any policy violation (it arrives with the end-to-end suite), `pnpm audit` in CI, Dependabot, and the CSV export rule. Markdown export escapes its content (`escapeMarkdown`) and PDF export writes every string escaped ([D25](../decisions/D25-pdf-without-a-library.md)); both have tests with hostile text.
 
