@@ -30,7 +30,15 @@ type ResultOf<T extends EngineRequest['type']> = Extract<EngineResult, { type: T
 interface Pending {
   resolve: (result: EngineResult) => void;
   reject: (error: EngineRequestError) => void;
+  type: string;
+  sent: number;
 }
+
+/**
+ * The last finished round trip to the engine, for the performance HUD. Two plain fields set once
+ * per reply, so keeping them costs nothing whether or not the HUD is showing.
+ */
+export const engineStats = { lastType: '', lastMs: 0 };
 
 export class EngineClient {
   private worker: Worker;
@@ -50,6 +58,8 @@ export class EngineClient {
       const waiting = this.pending.get(reply.requestId);
       if (!waiting) return;
       this.pending.delete(reply.requestId);
+      engineStats.lastType = waiting.type;
+      engineStats.lastMs = performance.now() - waiting.sent;
       if (reply.ok) waiting.resolve(reply.result);
       else waiting.reject(new EngineRequestError(reply.code, reply.message));
     };
@@ -73,7 +83,12 @@ export class EngineClient {
   ): Promise<ResultOf<T>> {
     const requestId = this.nextId++;
     return new Promise<ResultOf<T>>((resolve, reject) => {
-      this.pending.set(requestId, { resolve: resolve as (result: EngineResult) => void, reject });
+      this.pending.set(requestId, {
+        resolve: resolve as (result: EngineResult) => void,
+        reject,
+        type: request.type,
+        sent: performance.now(),
+      });
       const message: EngineMessage = {
         kind: 'request',
         requestId,

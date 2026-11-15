@@ -2,7 +2,7 @@
  * Small descriptions of a schedule and of one activity, for callers that
  * need more than grid cells: the agent's tools and the activity drawer.
  */
-import { NONE, stringAt, type ScheduleData } from '@slip/xer';
+import { NONE, getTransferList, stringAt, type ScheduleData } from '@slip/xer';
 import type { DiffDates } from './diff.ts';
 
 export interface ScheduleInfo {
@@ -17,6 +17,8 @@ export interface ScheduleInfo {
   /** Whether the dates shown are recalculated (after CPM or an edit) or as stored in the file. */
   recalculated: boolean;
   edits: number;
+  /** Bytes of typed arrays the schedule itself holds in the engine. */
+  bytes: number;
 }
 
 export interface LinkDetail {
@@ -74,6 +76,7 @@ export function scheduleInfo(
     defaultCalendar: data.calendars.defaultIndex,
     recalculated,
     edits,
+    bytes: getTransferList(data).reduce((total, buffer) => total + buffer.byteLength, 0),
   };
 }
 

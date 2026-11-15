@@ -2,6 +2,43 @@
 
 What was built, what Usman decided or designed, and what an agent generated. Newest first.
 
+## 15 November 2026: the performance HUD and the missing numbers
+
+**Done**
+
+- The performance HUD, on `Shift+P`. It shows:
+  - activities in each update
+  - frame time p50 and p95 over the last 2 seconds
+  - the last engine request and how long it took
+  - the page's JS heap
+  - the bytes the schedules hold in the engine
+- The HUD is a separate chunk, loaded the first time it is shown. While hidden, nothing of it runs.
+- The perf suite now drives the real screens, timed inside the page: drop both files, wait for the summary's answer, open the grid, and sweep it from top to bottom with the frame rate uncapped. It also checks the initial JavaScript budget.
+- `docs/perf.md`, latest local run, median of 5 on the Apple M3:
+
+| | 100K | 350K | 1M | Budget |
+| --- | ---: | ---: | ---: | --- |
+| Drop to the summary's answer | 0.97s | 2.13s | 5.67s | 1.0s, 2.5s, 6.0s |
+| Grid and Gantt sweep, p95 frame time | 3.4ms | 2.1ms | 2.1ms | 16.7ms |
+
+- No long tasks while scrolling, and the app shell's initial JavaScript is 146KB gzipped against 250KB. Every budget in the spec now has a measured number.
+
+**Usman decided or designed**
+
+- To do the performance HUD next.
+
+**The agent (Claude) generated**
+
+- The HUD, its wording and placement (bottom left, above the footer), and the perf tests.
+- How "first rows visible after file drop" is measured. Slip opens on the summary, so the first content is the summary's answer, not grid rows; this is stated in the spec.
+
+**Worth Usman's attention**
+
+- Drop to the summary is within budget at every size, but only just: 97% of it at 100K, 85% at 350K, 95% at 1M. It is the number most likely to go over as features are added.
+- Opening the grid at 1M takes 0.82s after the summary. That is not budgeted, but it is noticeable.
+- The HUD has no visible way in apart from `Shift+P`. For the demo it may want a mention in the footer or the README.
+- The run that wrote `docs/perf.md` was on this branch's working tree before commit, so its commit line shows main's.
+
 ## 15 November 2026: relationship lines
 
 **Done**

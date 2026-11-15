@@ -15,14 +15,17 @@ export default defineConfig({
   retries: 0,
   timeout: 15 * 60 * 1000,
   reporter: [['list']],
+  globalSetup: './src/setup.ts',
   globalTeardown: './src/report.ts',
   use: {
     baseURL: `http://localhost:${PORT}`,
     browserName: 'chromium',
     headless: true,
     launchOptions: {
-      // Lets the suite force a garbage collection before reading memory.
-      args: ['--js-flags=--expose-gc'],
+      // Lets the suite force a garbage collection before reading memory. The other two let
+      // animation frames run as fast as the work allows, so a frame time measures Slip's work and
+      // not the display's refresh rate.
+      args: ['--js-flags=--expose-gc', '--disable-gpu-vsync', '--disable-frame-rate-limit'],
     },
   },
   webServer: {
