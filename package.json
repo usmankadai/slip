@@ -13,6 +13,8 @@
     "storybook": "pnpm --filter @slip/ui storybook",
     "build:storybook": "pnpm --filter @slip/ui build-storybook",
     "a11y": "node tools/a11y/src/run.ts",
+    "visual": "scripts/visual.sh",
+    "visual:update": "scripts/visual.sh --update",
     "lint": "eslint .",
     "format": "prettier --write .",
     "format:check": "prettier --check .",

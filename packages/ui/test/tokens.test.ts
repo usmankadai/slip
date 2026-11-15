@@ -134,4 +134,13 @@ describe('density', () => {
     expect(Number(compact)).toBe(ROW_HEIGHT.compact);
     expect(Number(comfortable)).toBe(ROW_HEIGHT.comfortable);
   });
+
+  it('sets compact again on a compact container, so it holds inside a comfortable one', () => {
+    const block = (name: string) =>
+      new RegExp(`\\[data-density='${name}'\\]\\s*\\{([^}]*)\\}`).exec(css)?.[1] ?? '';
+    const names = (body: string) => [...body.matchAll(/(--[\w-]+):/g)].map((m) => m[1]).sort();
+    expect(names(block('compact'))).toEqual(names(block('comfortable')));
+    const compactRow = /--row-height:\s*(\d+)px/.exec(block('compact'))?.[1];
+    expect(Number(compactRow)).toBe(ROW_HEIGHT.compact);
+  });
 });

@@ -122,6 +122,14 @@
   --delta-number: 64px;
 }
 
+/* Compact is set again on a compact container, so it holds inside a comfortable one. */
+[data-density='compact'] {
+  --row-height: 24px;
+  --cell-padding-x: 8px;
+  --grid-text: var(--text-sm);
+  --grid-leading: var(--leading-sm);
+}
+
 [data-density='comfortable'] {
   --row-height: 32px;
   --cell-padding-x: 12px;

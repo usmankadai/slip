@@ -17,5 +17,7 @@ The design-system spec lists automated checks: lint rules for raw colours, raw s
 ## Consequences
 
 - `pnpm check` takes longer: about a minute more for axe over 101 stories on the build machine.
-- **Not built:** the screenshot test for every story in the Playwright Docker image. It needs Docker locally and in CI and baselines committed; it is the next check to add.
+- **The screenshot test (added 15 November 2026).** `tools/visual` reads the built Storybook's index, so every story is covered without listing it, and takes a full-page screenshot of each in compact and comfortable density. Baselines live in `tools/visual/baselines/<density>/`. Any pixel that differs beyond Playwright's default colour threshold fails; there is no tolerance in pixel count. Animations and the caret are switched off, and each shot waits for fonts and two frames.
+- **Where it runs.** Only inside `mcr.microsoft.com/playwright:v1.65.0-noble`: the `visual` CI job runs in that container, and `pnpm visual` runs the same image locally (`pnpm visual:update` rewrites baselines). In CI a story with no baseline gets one written, the job fails, and the new images are uploaded as the `visual-baselines` artifact to be checked and committed. Differences are uploaded as `visual-differences`.
+- **Not in `pnpm check`.** It needs Docker, so it is a CI job and its own command. The first baselines were made by CI because Docker on the build machine belongs to another account.
 - The first axe run found two real faults, both fixed: buttons whose spoken name did not contain their visible words, and links under the 24px target size.

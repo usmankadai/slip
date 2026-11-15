@@ -63,6 +63,18 @@ export function Gantt({
   const canvas = useRef<HTMLCanvasElement>(null);
   const [size, setSize] = useState({ width: 0, height: 0 });
   const [ratio, setRatio] = useState(1);
+  // Canvas text uses whatever font is loaded when it is drawn and is not redrawn when the web
+  // font arrives, so the chart paints again once fonts are ready.
+  const [fontsReady, setFontsReady] = useState(false);
+  useEffect(() => {
+    let current = true;
+    void document.fonts.ready.then(() => {
+      if (current) setFontsReady(true);
+    });
+    return () => {
+      current = false;
+    };
+  }, []);
   const theme = useRef<GanttTheme | null>(null);
   const drag = useRef<{ x: number; origin: number; moved: boolean } | null>(null);
 
@@ -102,7 +114,19 @@ export function Gantt({
       ),
     );
     return () => cancelAnimationFrame(frame);
-  }, [size, ratio, rowHeight, offset, firstRow, rows, selectedRow, scale, dataDate, logic]);
+  }, [
+    size,
+    ratio,
+    rowHeight,
+    offset,
+    firstRow,
+    rows,
+    selectedRow,
+    scale,
+    dataDate,
+    logic,
+    fontsReady,
+  ]);
 
   useEffect(() => {
     if (size.width > 0) onWidth?.(size.width);

@@ -2,6 +2,28 @@
 
 What was built, what Usman decided or designed, and what an agent generated. Newest first.
 
+## 15 November 2026: a screenshot of every story
+
+**Done**
+
+- `tools/visual`: a full-page screenshot of every Storybook story in both densities, 236 in all, compared with committed baselines. Any pixel that differs fails.
+- It runs only in the official Playwright image: as a CI job in that container, and locally through `pnpm visual`. A story with no baseline fails CI and uploads its new image to be checked and committed.
+- The first baselines were made by CI. Docker on the build machine runs under another macOS account, so this account cannot reach it.
+- The first CI images showed a second fault. A compact container inside a comfortable one took the comfortable row height, because only comfortable had a token rule. The app never nests them, but a component placed that way would not line up with its Gantt. Compact now sets its own values too, with a test that both densities set the same tokens.
+- Three local runs matched 236 of 236 after one fix, which the suite found. The Gantt drew its month labels before the web font had loaded and never redrew them, so a chart could keep the fallback font. It now repaints once fonts are ready.
+
+**Usman decided or designed**
+
+- To do the screenshot tests next.
+
+**The agent (Claude) generated**
+
+- The suite, the CI job, the Docker script, the tolerance (none beyond the colour threshold) and the D23 update.
+
+**Worth Usman's attention**
+
+- `pnpm visual` is untested on this machine until Docker runs under this account.
+- The screenshot check is not part of `pnpm check`, because it needs Docker.
 ## 15 November 2026: PDF export of the narrative
 
 **Done**
