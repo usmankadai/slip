@@ -3,7 +3,7 @@ import { splitCitations } from '@slip/agent';
 import { AgentSteps, AgentText, Button, Notice, ScriptedBadge } from '@slip/ui';
 import type { EditsController } from '../../app/useEdits.ts';
 import type { Answer } from './loop.ts';
-import { ProposalView, type ProposalState } from './ProposalView.tsx';
+import { Proposal, type ProposalState } from './Proposal.tsx';
 import type { SuggestedQuestion } from './scripted.ts';
 import styles from './agent.module.css';
 
@@ -68,7 +68,7 @@ function AnswerView({
           ? answer.proposals.map((proposal, number) => {
               const key = `${index}:${number}`;
               return (
-                <ProposalView
+                <Proposal
                   key={key}
                   proposal={proposal}
                   edits={edits}

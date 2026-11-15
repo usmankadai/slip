@@ -4,7 +4,7 @@ import type { ToolEngine } from '@slip/agent/run';
 import { engine } from '../../app/engine.ts';
 import type { AuditType } from '../../storage/auditLog.ts';
 import { ask, type Answer } from './loop.ts';
-import type { ProposalState } from './ProposalView.tsx';
+import type { ProposalState } from './Proposal.tsx';
 import { scriptedTransport } from './scripted.ts';
 import type { AgentTransport, Message } from './transport.ts';
 

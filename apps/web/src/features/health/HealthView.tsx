@@ -57,7 +57,7 @@ function Check({
         {row.hasOffenders ? (
           <Button
             variant="quiet"
-            aria-label={`See the activities counted against ${row.name}`}
+            aria-label={`See them: the activities counted against ${row.name}`}
             onClick={() => onActivities({ id: row.id, name: row.name })}
           >
             See them

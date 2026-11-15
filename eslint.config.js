@@ -2,6 +2,7 @@ import js from '@eslint/js';
 import tseslint from 'typescript-eslint';
 import globals from 'globals';
 import prettier from 'eslint-config-prettier';
+import slip from './tools/eslint-plugin-slip/src/index.ts';
 
 /** Packages that run in workers, Node and tests. They must stay free of the DOM and React. */
 const PURE_PACKAGES = ['packages/xer/**/*.ts', 'packages/engine/**/*.ts', 'packages/gen/**/*.ts'];
@@ -64,6 +65,16 @@ export default tseslint.config(
       'packages/ui/.storybook/**/*.{ts,tsx}',
     ],
     languageOptions: { globals: globals.node },
+  },
+  {
+    // Design values come from tokens.css (design-system spec). Tests may hold colour strings as data.
+    files: ['apps/web/src/**/*.{ts,tsx}', 'packages/ui/src/**/*.{ts,tsx}'],
+    ignores: ['**/*.test.{ts,tsx}'],
+    plugins: { slip },
+    rules: {
+      'slip/no-raw-color': 'error',
+      'slip/no-raw-spacing': 'error',
+    },
   },
   prettier,
 );

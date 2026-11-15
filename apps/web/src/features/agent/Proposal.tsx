@@ -47,8 +47,8 @@ export interface ProposalState {
   outcome?: string;
 }
 
-/** A proposal in an answer: the engine's preview of its effect, and the planner's decision. */
-export function ProposalView({
+/** A proposal in an answer (a container: it asks the engine): the engine's preview of its effect, and the planner's decision. */
+export function Proposal({
   proposal,
   edits,
   decision,
