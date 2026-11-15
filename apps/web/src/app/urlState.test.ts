@@ -1,5 +1,13 @@
 import { describe, expect, it } from 'vitest';
-import { HOME_VIEW, namesPair, readUrl, updateId, writeUrl, type UrlState } from './urlState.ts';
+import {
+  HOME_VIEW,
+  namesPair,
+  readUrl,
+  sameScreen,
+  updateId,
+  writeUrl,
+  type UrlState,
+} from './urlState.ts';
 
 const HASH_A = '3f9c0a1b2c3d'.padEnd(64, '0');
 const HASH_B = 'aa11bb22cc33'.padEnd(64, '1');
@@ -32,6 +40,14 @@ describe('the URL for a view', () => {
     },
     { pair, view: { underneath: 'summary', changes: { kind: 'added' }, trace: 'MS-COMPLETE' } },
     { pair, view: { underneath: 'log', changes: null, trace: null } },
+    {
+      pair,
+      view: {
+        underneath: 'summary',
+        changes: { kind: 'dates', sel: 'P01-A001-TRK-1000' },
+        trace: null,
+      },
+    },
     { pair, view: { underneath: 'summary', changes: null, trace: 'P01 A001/TRK#1000' } },
   ];
 
@@ -62,6 +78,20 @@ describe('a URL that was typed, cut short or tampered with', () => {
     expect(readUrl(`${base}&c=all&check=15`).view.changes).toEqual({ kind: 'all' });
     expect(readUrl(`${base}&c=all&check=1.5`).view.changes).toEqual({ kind: 'all' });
     expect(readUrl(`${base}&check=3`).view.changes).toBeNull();
+  });
+
+  it('drops a selection that is not a code, or has no grid to be in', () => {
+    expect(readUrl(`${base}&c=all&sel=${'x'.repeat(61)}`).view.changes).toEqual({ kind: 'all' });
+    expect(readUrl(`${base}&c=all&sel=${encodeURIComponent('a\tb')}`).view.changes).toEqual({
+      kind: 'all',
+    });
+    expect(readUrl(`${base}&sel=P01`).view.changes).toBeNull();
+  });
+
+  it('treats a new selection as the same screen, so it replaces the history step', () => {
+    const grid = { underneath: 'summary' as const, changes: { kind: null }, trace: null };
+    expect(sameScreen(grid, { ...grid, changes: { kind: null, sel: 'A' } })).toBe(true);
+    expect(sameScreen(grid, { ...grid, trace: 'A' })).toBe(false);
   });
 
   it('drops a trace code that is too long or not printable', () => {

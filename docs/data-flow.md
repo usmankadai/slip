@@ -19,12 +19,12 @@ The assistant has two modes. In **scripted** mode, the only mode on the public s
 | Questions to the assistant, live mode | Yes | In transit, not stored | Yes |
 | Rows the assistant asks for, live mode: activity codes, names and dates | Yes | In transit, not stored | Yes |
 | Anything, scripted mode | Yes | Never | Never |
-| The page address: the two files' short ids and at most two activity codes | Yes | With each page load, as for any website; not stored by Slip | Never |
+| The page address: the two files' short ids and at most three activity codes | Yes | With each page load, as for any website; not stored by Slip | Never |
 | Error reports | Not collected yet | Never | Never |
 
 The parsed schedules are kept in browser storage (OPFS); edits, the activity log and the narrative in IndexedDB. Both stay on this computer until the browser's data for the site is cleared.
 
-What any website receives also applies: the host (Vercel) sees requests for the page and its files, with your IP address and the page address, as it would for any site. The address names the two files by a short id made from their content (the first 12 characters of a SHA-256 hash, and the project number) and can hold up to two activity codes: the one being traced and the one the grid was opened on. It never holds activity names, dates or text the planner typed (`apps/web/src/app/urlState.ts`).
+What any website receives also applies: the host (Vercel) sees requests for the page and its files, with your IP address and the page address, as it would for any site. The address names the two files by a short id made from their content (the first 12 characters of a SHA-256 hash, and the project number) and can hold up to three activity codes: the one being traced, the one the grid was opened on and the one selected. It never holds activity names, dates or text the planner typed (`apps/web/src/app/urlState.ts`).
 
 ## How this is enforced
 
