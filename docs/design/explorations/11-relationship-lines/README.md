@@ -1,6 +1,6 @@
 # Exploration 11: relationship lines on the Gantt
 
-Status: **options drawn on 15 November 2026, waiting for Usman's decision.**
+Status: **decided on 15 November 2026: option C, the driving path.**
 
 ## Problem
 
@@ -25,8 +25,13 @@ Things the mock made visible:
 
 ## Decision
 
-Not made. Usman chooses.
+**Option C: the selected activity's links, its driving path heavy, and the links that changed labelled.** Chosen by Usman on 15 November 2026 ("C, driving path"), accepting Claude's recommendation. The reasons are Claude's, which he accepted.
+
+- It is the only option where the lines answer the question Slip exists for: why did this move.
+- It matches the activity drawer (exploration 10, option C), which also leads with what changed and why, and it reuses the same trace.
+- A was rejected because the default sort turns it into a tangle and it hides off-screen links. B was kept as the fallback if C proves too busy on the real canvas.
+- Nothing is drawn with no row selected.
 
 ## What changed
 
-Nothing yet.
+- 15 November 2026: built. Two things the mock did not show. A line between two bars that are both beyond the same edge of the chart is left out, because it would only run along that edge. Off-screen links are gathered into one stub per direction for each visible activity, with words, rather than one per link. Removed links are drawn between the activities as they are in update B.
