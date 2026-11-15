@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import type { SortSpec } from '@slip/engine';
+import type { LogicLink, SortSpec } from '@slip/engine';
 import { Button, Notice, SegmentedControl, type Density } from '@slip/ui';
 import { NONE } from '@slip/xer';
 import { engine } from '../../app/engine.ts';
@@ -53,6 +53,7 @@ const DATA_DATE_AT = 0.2;
 /** A guess at the chart's width before it has been measured, for the first placement only. */
 const ASSUMED_WIDTH = 520;
 const SEARCH_DELAY_MS = 250;
+const LOGIC_DELAY_MS = 150;
 
 export function ChangesScreen({
   pair,
@@ -178,6 +179,34 @@ export function ChangesScreen({
   useEffect(() => {
     if (lostSelection) setDrawerCode(null);
   }, [lostSelection]);
+
+  // The selected activity's logic, for the lines on the Gantt. Asked for a moment after the
+  // selection settles, so moving through rows with the arrow keys does not queue a trace per row.
+  const selectedIndex = selected?.activity;
+  const logicView = JSON.stringify([spec, sort]);
+  const [logic, setLogic] = useState<{ activity: number; links: LogicLink[] } | null>(null);
+  useEffect(() => {
+    if (selectedIndex === undefined || gantt === 'hidden') return;
+    let current = true;
+    const timer = setTimeout(() => {
+      engine()
+        .request({ type: 'logic', activity: selectedIndex, filter: spec, sort })
+        .then(
+          (result) => {
+            if (current) setLogic({ activity: result.activity, links: result.links });
+          },
+          () => {
+            if (current) setLogic(null);
+          },
+        );
+    }, LOGIC_DELAY_MS);
+    return () => {
+      current = false;
+      clearTimeout(timer);
+    };
+    // `logicView` stands for the filter and sort: the rows of the ends change with them.
+  }, [selectedIndex, logicView, gantt]);
+  const lines = logic && logic.activity === selectedIndex ? logic.links : null;
 
   // The address bar follows the selection.
   const reportSelect = useRef(onSelect);
@@ -504,6 +533,7 @@ export function ChangesScreen({
                     onScrollRows={rows.scrollBy}
                     onKeyDown={rows.onKeyDown}
                     onWidth={setWidth}
+                    logic={lines}
                   />
                 )
           }

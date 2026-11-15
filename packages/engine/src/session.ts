@@ -136,6 +136,12 @@ export type EngineRequest =
    * hold it. Lets a grid keep the planner's place when the filter or sort changes.
    */
   | { type: 'locate'; slot: Slot; activity: number; filter?: FilterSpec; sort?: SortSpec | null }
+  /**
+   * The logic around one activity of update B, for drawing on the Gantt: its predecessors and
+   * successors, the links removed since update A, and its driving path, each with the rows its
+   * two ends sit at in a filtered and sorted view.
+   */
+  | { type: 'logic'; activity: number; filter?: FilterSpec; sort?: SortSpec | null }
   /** What is loaded: project, data date, counts and calendars, per update. */
   | { type: 'info' }
   /** One activity by exact code, in both updates, with its relationships and what changed. */
@@ -238,6 +244,7 @@ export type EngineResult =
   | ({ type: 'revertEdit' } & EditResult)
   | { type: 'edits'; edits: EditPatch[] }
   | { type: 'locate'; slot: Slot; activity: number; row: number; total: number }
+  | ({ type: 'logic' } & LogicResult)
   | { type: 'info'; a: ScheduleInfo | null; b: ScheduleInfo | null }
   | {
       type: 'activity';
@@ -286,7 +293,39 @@ interface Loaded {
 interface CachedView {
   key: string;
   indices: Int32Array;
+  /** Row of each activity in this view, or -1. Built the first time it is asked for. */
+  rowOf?: Int32Array;
 }
+
+export interface LogicLink {
+  /** Activity indices in update B. */
+  pred: number;
+  succ: number;
+  /** Rows of the two ends in the view asked about, or -1 when the view does not hold one. */
+  predRow: number;
+  succRow: number;
+  /** A RelType value. */
+  relType: number;
+  /** `added` or `removed` since update A; `kept` when it is in both, or the activity is new. */
+  state: 'kept' | 'added' | 'removed';
+  /** On the driving path back from the activity, as the trace walks it. */
+  driving: boolean;
+}
+
+export interface LogicResult {
+  activity: number;
+  /** The activity's own row in the view, or -1. */
+  row: number;
+  /** Its own links first, then the rest of its driving path. */
+  links: LogicLink[];
+  /** Links removed since update A whose other activity is no longer in update B, so cannot be drawn. */
+  removedGone: number;
+  /** True when there were more links than are returned. */
+  truncated: boolean;
+}
+
+/** The most links a logic answer holds. A driving path can be thousands of steps long. */
+const MAX_LOGIC_LINKS = 400;
 
 /** The most typed-array memory cached views may hold before the least recently used are dropped. */
 const VIEW_CACHE_BYTES = 64 * 1024 * 1024;
@@ -335,6 +374,8 @@ export class EngineSession {
           return { type: 'edits', edits: this.need('b').edits.map((edit) => ({ ...edit })) };
         case 'locate':
           return { type: 'locate', ...this.locate(request) };
+        case 'logic':
+          return { type: 'logic', ...this.logic(request) };
         case 'rows':
           return { type: 'rows', ...this.rows(request) };
         default:
@@ -801,10 +842,28 @@ export class EngineSession {
     }
     const indices = this.sorted(slot, loaded, this.filtered(slot, loaded, filter), sort);
     this.views.push({ key, indices });
-    let bytes = this.views.reduce((total, view) => total + view.indices.byteLength, 0);
-    while (bytes > VIEW_CACHE_BYTES && this.views.length > 1)
-      bytes -= this.views.shift()!.indices.byteLength;
+    this.trimViews();
     return indices;
+  }
+
+  private trimViews() {
+    const size = (view: CachedView) => view.indices.byteLength + (view.rowOf?.byteLength ?? 0);
+    let bytes = this.views.reduce((total, view) => total + size(view), 0);
+    while (bytes > VIEW_CACHE_BYTES && this.views.length > 1) bytes -= size(this.views.shift()!);
+  }
+
+  /** Row of every activity in a view, or -1, built once per view. */
+  private rowsOf(slot: Slot, filter: FilterSpec, sort: SortSpec | null): Int32Array {
+    const indices = this.view(slot, filter, sort);
+    // view() leaves the view it returned last in the cache.
+    const cached = this.views[this.views.length - 1]!;
+    if (!cached.rowOf) {
+      const rowOf = new Int32Array(this.need(slot).data.n).fill(-1);
+      for (let k = 0; k < indices.length; k++) rowOf[indices[k]!] = k;
+      cached.rowOf = rowOf;
+      this.trimViews();
+    }
+    return cached.rowOf;
   }
 
   private filtered(slot: Slot, loaded: Loaded, filter: FilterSpec): Int32Array {
@@ -899,6 +958,107 @@ export class EngineSession {
     }
     const view = this.view(slot, request.filter ?? {}, request.sort ?? null);
     return { slot, activity, row: view.indexOf(activity), total: view.length };
+  }
+
+  private logic(request: Extract<EngineRequest, { type: 'logic' }>): LogicResult {
+    const b = this.need('b');
+    const s = request.activity;
+    if (!Number.isInteger(s) || s < 0 || s >= b.data.n) {
+      throw new EngineError('bad-request', 'There is no such activity.');
+    }
+    const rowOf = this.rowsOf('b', request.filter ?? {}, request.sort ?? null);
+    const a = this.slots.a;
+    const diff = a ? this.ensureDiff() : null;
+    const d = b.data;
+    const sA = diff ? diff.matchA[s]! : -1;
+
+    const links = new Map<string, LogicLink>();
+    const add = (pred: number, succ: number, relType: number, state: LogicLink['state']) => {
+      const key = `${pred}>${succ}`;
+      if (!links.has(key)) {
+        links.set(key, {
+          pred,
+          succ,
+          predRow: rowOf[pred]!,
+          succRow: rowOf[succ]!,
+          relType,
+          state,
+          driving: false,
+        });
+      }
+    };
+
+    // Its links in update B, and which of them are new since update A.
+    const aSide = (offsets: Int32Array, targets: Int32Array) => {
+      const out = new Set<number>();
+      if (a && sA >= 0) for (let k = offsets[sA]!; k < offsets[sA + 1]!; k++) out.add(targets[k]!);
+      return out;
+    };
+    const aPreds = a ? aSide(a.data.predOffsets, a.data.predTargets) : new Set<number>();
+    const aSuccs = a ? aSide(a.data.succOffsets, a.data.succTargets) : new Set<number>();
+    const stateOf = (other: number, aOthers: Set<number>): LogicLink['state'] => {
+      if (!diff || sA < 0) return 'kept';
+      const otherA = diff.matchA[other]!;
+      return otherA >= 0 && aOthers.has(otherA) ? 'kept' : 'added';
+    };
+    const bPreds = new Set<number>();
+    const bSuccs = new Set<number>();
+    for (let k = d.predOffsets[s]!; k < d.predOffsets[s + 1]!; k++) {
+      const p = d.predTargets[k]!;
+      bPreds.add(p);
+      add(p, s, d.predType[k]!, stateOf(p, aPreds));
+    }
+    for (let k = d.succOffsets[s]!; k < d.succOffsets[s + 1]!; k++) {
+      const n = d.succTargets[k]!;
+      bSuccs.add(n);
+      add(s, n, d.succType[k]!, stateOf(n, aSuccs));
+    }
+
+    // Links in update A that are gone, drawn between the activities as they are in update B.
+    let removedGone = 0;
+    if (a && diff && sA >= 0) {
+      const ad = a.data;
+      for (let k = ad.predOffsets[sA]!; k < ad.predOffsets[sA + 1]!; k++) {
+        const p = diff.matchB[ad.predTargets[k]!]!;
+        if (p < 0) removedGone++;
+        else if (!bPreds.has(p)) add(p, s, ad.predType[k]!, 'removed');
+      }
+      for (let k = ad.succOffsets[sA]!; k < ad.succOffsets[sA + 1]!; k++) {
+        const n = diff.matchB[ad.succTargets[k]!]!;
+        if (n < 0) removedGone++;
+        else if (!bSuccs.has(n)) add(s, n, ad.succType[k]!, 'removed');
+      }
+    }
+
+    // The driving path back from it, from the trace.
+    if (a && diff) {
+      const trace = traceSlip(
+        a.data,
+        d,
+        diff,
+        a.clocks,
+        b.clocks,
+        this.dates(a),
+        this.dates(b),
+        s,
+        { maxNodes: 2000, maxContributors: 1 },
+      );
+      for (let k = 0; k < trace.edgePred.length; k++) {
+        const pred = trace.edgePred[k]!;
+        const succ = trace.edgeSucc[k]!;
+        add(pred, succ, trace.edgeType[k]!, 'kept');
+        links.get(`${pred}>${succ}`)!.driving = true;
+      }
+    }
+
+    const all = [...links.values()];
+    return {
+      activity: s,
+      row: rowOf[s]!,
+      links: all.slice(0, MAX_LOGIC_LINKS),
+      removedGone,
+      truncated: all.length > MAX_LOGIC_LINKS,
+    };
   }
 
   private rows(request: Extract<EngineRequest, { type: 'rows' }>): RowsResult {

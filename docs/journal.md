@@ -2,6 +2,38 @@
 
 What was built, what Usman decided or designed, and what an agent generated. Newest first.
 
+## 15 November 2026: relationship lines
+
+**Done**
+
+- Selecting an activity draws its logic on the Gantt (exploration 11, option C):
+  - its driving path heavy, and its other links thin
+  - links added since update A labelled "New link"
+  - links removed dashed, pale and labelled "Removed"
+  - a dashed stub with words for links whose other end is off screen ("2 above", "1 not in this view")
+- A new engine request, `logic`, returns those links with the rows of both ends in the current view. The row of every activity in a view is built once and cached with the view.
+- Tests:
+  - 4 engine tests on a small pair with a link added and one removed
+  - 3 on the generated 1,000-activity pair, checking the drawn driving path is the trace's and includes every driver the generator planted
+  - 8 on the line layout
+- Checked headlessly against the release build under the production headers, at 1,000 and 350,000 activities:
+  - no long tasks on the main thread after selecting, or after moving through ten rows
+  - no policy violations
+  - the engine answers in a few milliseconds at 350,000
+
+**Usman decided or designed**
+
+- Option C ("C, driving path"), accepting Claude's recommendation.
+
+**The agent (Claude) generated**
+
+- All the code and tests, the line weights and the wording on the canvas.
+
+**Worth Usman's attention**
+
+- Line weights and dashes are placeholders drawn with existing tokens. Telling three weights apart without colour is worth checking on a real screen.
+- A driving path can run to hundreds of links. Only those with an end on screen are drawn.
+
 ## 15 November 2026: options for relationship lines
 
 **Done**

@@ -6,6 +6,7 @@ import {
   type KeyboardEvent,
   type PointerEvent,
 } from 'react';
+import type { LogicLink } from '@slip/engine';
 import { MINUTES_PER_DAY } from '@slip/xer';
 import { count, longDate } from '../../../shared/format.ts';
 import styles from '../changes.module.css';
@@ -34,6 +35,8 @@ export interface GanttProps {
   onKeyDown: (event: KeyboardEvent) => void;
   /** Told the chart's width in pixels once it is known, and when it changes. */
   onWidth?: (width: number) => void;
+  /** The selected activity's logic, drawn as lines; null when nothing is selected. */
+  logic?: readonly LogicLink[] | null;
 }
 
 /**
@@ -55,6 +58,7 @@ export function Gantt({
   onScrollRows,
   onKeyDown,
   onWidth,
+  logic = null,
 }: GanttProps) {
   const canvas = useRef<HTMLCanvasElement>(null);
   const [size, setSize] = useState({ width: 0, height: 0 });
@@ -93,12 +97,12 @@ export function Gantt({
     const frame = requestAnimationFrame(() =>
       paintGantt(
         context,
-        { ...size, ratio, rowHeight, offset, firstRow, rows, selectedRow, scale, dataDate },
+        { ...size, ratio, rowHeight, offset, firstRow, rows, selectedRow, scale, dataDate, logic },
         theme.current!,
       ),
     );
     return () => cancelAnimationFrame(frame);
-  }, [size, ratio, rowHeight, offset, firstRow, rows, selectedRow, scale, dataDate]);
+  }, [size, ratio, rowHeight, offset, firstRow, rows, selectedRow, scale, dataDate, logic]);
 
   useEffect(() => {
     if (size.width > 0) onWidth?.(size.width);
@@ -114,7 +118,7 @@ export function Gantt({
   const label =
     total === 0
       ? 'Gantt chart. No rows.'
-      : `Gantt chart of rows ${count(firstRow + 1)} to ${count(Math.min(total, firstRow + rows.length))} of ${count(total)}, from ${from} to ${to}. Each bar is this update; a coloured line beneath it runs from the previous finish. Every date drawn here is in the grid beside it.`;
+      : `Gantt chart of rows ${count(firstRow + 1)} to ${count(Math.min(total, firstRow + rows.length))} of ${count(total)}, from ${from} to ${to}. Each bar is this update; a coloured line beneath it runs from the previous finish.${logic && logic.length > 0 ? " Lines show the selected activity's links and its driving path; the activity panel below lists them." : ''} Every date drawn here is in the grid beside it.`;
 
   return (
     <canvas

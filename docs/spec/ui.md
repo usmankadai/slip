@@ -48,5 +48,5 @@ Built in `apps/web/src/features/changes/gantt`, following exploration 02, option
 | Hover tooltips with a keyboard equivalent | Not built. There are no tooltips |
 | Visual regression at DPR 1 and 2 | Not built |
 
-Not built: relationship lines, the today line, summary bars, and zoom by gesture. The time axis has three fixed scales, is dragged or scrolled sideways, fits itself to the rows on screen when a view first loads, and moves to show a selected activity's bar.
+Relationship lines (exploration 11, option C): only for the selected activity. Its driving path is heavy, its other links thin, links added since update A are labelled "New link", links removed are dashed, pale and labelled "Removed", and links whose other end is off screen end in a dashed stub with words ("2 above", "1 below", "1 not in this view"). The activity drawer lists the same links as text. Not built: the today line, summary bars, and zoom by gesture. The time axis has three fixed scales, is dragged or scrolled sideways, fits itself to the rows on screen when a view first loads, and moves to show a selected activity's bar.
 

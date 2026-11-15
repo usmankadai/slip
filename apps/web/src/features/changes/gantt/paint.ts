@@ -2,7 +2,9 @@
  * Draws the Gantt on a canvas. Positions come from geometry.ts and colours
  * from the design tokens; nothing here decides what a mark means.
  */
+import type { LogicLink } from '@slip/engine';
 import { rowMarks, type GanttRow } from './geometry.ts';
+import { layoutLogic, stubLabel, type LineStyle, type RowAnchor } from './logic.ts';
 import { ticks, xOf, type TimeScale } from './scale.ts';
 
 /** Colours and type, read from the tokens once per theme, never written here. */
@@ -13,6 +15,8 @@ export interface GanttTheme {
   line: string;
   lineStrong: string;
   text: string;
+  /** Strong text, for the driving path and changed links. */
+  ink: string;
   bar: string;
   progress: string;
   ghost: string;
@@ -31,6 +35,7 @@ const TOKENS: Record<keyof GanttTheme, string> = {
   line: '--border-subtle',
   lineStrong: '--border-strong',
   text: '--text-muted',
+  ink: '--text-primary',
   bar: '--gantt-bar',
   progress: '--gantt-progress',
   ghost: '--gantt-ghost',
@@ -68,6 +73,8 @@ export interface GanttFrame {
   scale: TimeScale;
   /** Data date of this update, in minutes since the epoch. */
   dataDate: number;
+  /** The selected activity's logic, to draw as lines, or null for none. */
+  logic?: readonly LogicLink[] | null;
 }
 
 /** Snaps a 1px line to device pixels so it stays sharp. */
@@ -155,6 +162,9 @@ export function paintGantt(
     context.stroke();
   }
 
+  /** Where each drawn row's bar is, for the relationship lines. */
+  const anchors = new Map<number, RowAnchor>();
+
   frame.rows.forEach((row, index) => {
     const y = rowHeight + index * rowHeight - frame.offset;
     const selected = frame.firstRow + index === frame.selectedRow;
@@ -171,6 +181,24 @@ export function paintGantt(
 
     const marks = rowMarks(row, scale, width);
     const cy = y + barTop + barHeight / 2;
+    const anchorX =
+      marks.bar !== null
+        ? [marks.bar.x, marks.bar.x + marks.bar.width]
+        : marks.diamond !== null
+          ? [marks.diamond, marks.diamond]
+          : marks.barOff === 'left'
+            ? [0, 0]
+            : marks.barOff === 'right'
+              ? [width, width]
+              : null;
+    if (anchorX) {
+      anchors.set(frame.firstRow + index, {
+        x0: anchorX[0]!,
+        x1: anchorX[1]!,
+        cy,
+        ...(marks.barOff ? { off: marks.barOff } : {}),
+      });
+    }
     const tailY = y + barTop + barHeight + 2;
 
     // The previous bar in full, for the selected activity only.
@@ -237,6 +265,10 @@ export function paintGantt(
     }
   });
 
+  if (frame.logic && frame.logic.length > 0) {
+    paintLogic(context, frame.logic, anchors, theme, ratio, rowHeight, height);
+  }
+
   // The data date, over the rows.
   const today = xOf(frame.dataDate, scale);
   if (today >= 0 && today <= width) {
@@ -271,4 +303,98 @@ export function paintGantt(
   context.moveTo(0, crisp(rowHeight - 1, ratio));
   context.lineTo(width, crisp(rowHeight - 1, ratio));
   context.stroke();
+}
+
+const LINE: Record<LineStyle, { width: number; dash: number[] }> = {
+  driving: { width: 2.5, dash: [] },
+  added: { width: 1.5, dash: [] },
+  link: { width: 1, dash: [] },
+  removed: { width: 1, dash: [4, 3] },
+};
+
+/** Words on the chart, on a patch of the surface so lines behind them do not cut through. */
+function label(
+  context: CanvasRenderingContext2D,
+  theme: GanttTheme,
+  text: string,
+  x: number,
+  y: number,
+) {
+  const width = context.measureText(text).width;
+  context.fillStyle = theme.surface;
+  context.fillRect(x - 2, y - 7, width + 4, 14);
+  context.fillStyle = theme.ink;
+  context.fillText(text, x, y);
+}
+
+/**
+ * The selected activity's logic (exploration 11, option C): its driving path heavy, its other
+ * links thin, links added since update A labelled, links removed dashed and pale, and a stub with
+ * words for every direction in which links leave the screen.
+ */
+function paintLogic(
+  context: CanvasRenderingContext2D,
+  links: readonly LogicLink[],
+  anchors: Map<number, RowAnchor>,
+  theme: GanttTheme,
+  ratio: number,
+  top: number,
+  bottom: number,
+) {
+  const { lines, stubs } = layoutLogic(links, (row) => anchors.get(row) ?? null);
+  context.font = `600 11px ${theme.font}`;
+  context.textBaseline = 'middle';
+  context.lineJoin = 'round';
+
+  for (const line of lines) {
+    const look = LINE[line.style];
+    const colour =
+      line.style === 'removed' ? theme.ghost : line.style === 'link' ? theme.lineStrong : theme.ink;
+    context.strokeStyle = colour;
+    context.fillStyle = colour;
+    context.lineWidth = look.width;
+    context.setLineDash(look.dash);
+    context.beginPath();
+    line.points.forEach(([x, y], k) => (k === 0 ? context.moveTo(x, y) : context.lineTo(x, y)));
+    context.stroke();
+    context.setLineDash([]);
+    // An arrowhead into the successor, pointing the way the last step runs.
+    const [x2, y2] = line.points.at(-1)!;
+    const [x1] = line.points.at(-2)!;
+    const way = x2 >= x1 ? 1 : -1;
+    const size = 3 + look.width;
+    context.beginPath();
+    context.moveTo(x2, y2);
+    context.lineTo(x2 - way * size, y2 - size * 0.7);
+    context.lineTo(x2 - way * size, y2 + size * 0.7);
+    context.closePath();
+    context.fill();
+    if (line.label) {
+      const [tx, ty] = line.points[1]!;
+      label(context, theme, line.label, tx + 4, ty - 8);
+    }
+  }
+
+  context.font = `500 11px ${theme.font}`;
+  for (const stub of stubs) {
+    context.strokeStyle = stub.driving ? theme.ink : theme.lineStrong;
+    context.lineWidth = stub.driving ? 2 : 1;
+    context.setLineDash([2, 3]);
+    context.beginPath();
+    context.moveTo(stub.x, stub.y);
+    const words = stubLabel(stub);
+    if (stub.toward === 'hidden') {
+      context.lineTo(stub.x + 14, stub.y);
+      context.stroke();
+      context.setLineDash([]);
+      label(context, theme, words, stub.x + 18, stub.y);
+    } else {
+      const edge = stub.toward === 'above' ? top + 2 : bottom - 2;
+      context.lineTo(stub.x, edge);
+      context.stroke();
+      context.setLineDash([]);
+      label(context, theme, words, stub.x + 5, stub.toward === 'above' ? top + 10 : bottom - 10);
+    }
+  }
+  context.lineWidth = 1 / ratio;
 }
