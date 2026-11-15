@@ -1,0 +1,220 @@
+<!doctype html>
+<html lang="en-GB">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Relationship lines: options</title>
+    <style>
+      /* A record of what was looked at. The product reads these values from packages/ui/src/tokens.css. */
+      :root {
+        --s0: #fbfaf7; --s1: #f4f2ec; --s2: #ebe8e0;
+        --t1: #1c1b18; --t2: #55524a; --t3: #6c685d;
+        --b1: #e2ded3; --b2: #898477; --accent: #5b3fd6; --critical: #9b1c1c;
+        --bar: #55524a; --ghost: #b9b5aa;
+      }
+      * { box-sizing: border-box; }
+      body { margin: 0; background: var(--s0); color: var(--t1); font: 13px/20px Inter, system-ui, -apple-system, 'Segoe UI', sans-serif; font-variant-numeric: tabular-nums; }
+      header, main { max-width: 1240px; margin: 0 auto; padding: 0 24px; }
+      header { padding-top: 24px; }
+      main { padding-bottom: 64px; }
+      h1 { font-size: 20px; line-height: 28px; margin: 0 0 4px; }
+      h2 { font-size: 16px; line-height: 24px; margin: 36px 0 4px; }
+      p { margin: 0 0 8px; color: var(--t2); max-width: 860px; }
+      .controls { position: sticky; top: 0; z-index: 2; background: var(--s0); border-bottom: 1px solid var(--b1); padding: 8px 0; margin: 16px 0 0; display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+      .controls button { font: inherit; padding: 2px 10px; border: 1px solid var(--b2); border-radius: 4px; background: var(--s0); color: var(--t1); cursor: pointer; }
+      .controls button[aria-pressed='true'] { background: var(--t1); color: var(--s0); border-color: var(--t1); }
+      .controls .gap { width: 16px; }
+      .notes { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 4px 24px; margin: 0 0 12px; font-size: 12px; line-height: 16px; }
+      .notes dt { font-weight: 600; }
+      .notes dd { margin: 0 0 4px; color: var(--t2); }
+      .frame { display: grid; grid-template-columns: 420px 1fr; border: 1px solid var(--b1); border-radius: 6px; overflow: hidden; width: 1190px; }
+      .grid { font-size: 12px; }
+      .grid .r { display: grid; grid-template-columns: 36px 150px 1fr 52px; height: 24px; align-items: center; border-bottom: 1px solid var(--b1); padding: 0 6px; gap: 6px; }
+      .grid .r.h { background: var(--s2); color: var(--t2); }
+      .grid .r.sel { background: #ece8fb; box-shadow: inset 3px 0 0 var(--accent); }
+      .grid .r span:first-child { text-align: right; color: var(--t3); }
+      .grid .r span:last-child { text-align: right; font-weight: 600; }
+      .grid .code { font: 11px/16px 'JetBrains Mono', ui-monospace, monospace; color: var(--t2); overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+      .grid .nm { overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+      svg { display: block; border-left: 1px solid var(--b2); }
+      .legend { display: flex; gap: 20px; font-size: 11px; color: var(--t3); margin-top: 6px; }
+      .legend svg { display: inline-block; vertical-align: middle; border: 0; margin-right: 4px; }
+    </style>
+  </head>
+  <body>
+    <header>
+      <h1>Exploration 11: relationship lines on the Gantt</h1>
+      <p>Three ways to draw logic on the canvas Gantt beside the changes grid. The grid shows a window of a filtered, sorted view, and by default it is sorted by finish slip, not by logic. Activities that are linked are rarely next to each other, and most of an activity's links lead to rows that are not on screen. That is what makes this hard: P6 draws every link because its rows are in logic order; Slip's are not.</p>
+      <p>Drawn with 14 rows of the 1,000 activity fixture's shape. The activity drawer already lists every predecessor and successor as text, so the lines are for seeing, not the only record. Colours are placeholders from the tokens; the slip colours are not used for lines, since warm means late.</p>
+      <div class="controls" id="controls">
+        <span>Sorted by:</span>
+        <button data-sort="slip" aria-pressed="true">Finish slip (the default)</button>
+        <button data-sort="start" aria-pressed="false">Start</button>
+        <span class="gap"></span>
+        <span>Selected:</span>
+        <button data-sel="5" aria-pressed="true">Install catenary, section 2</button>
+        <button data-sel="-1" aria-pressed="false">Nothing</button>
+      </div>
+    </header>
+    <main id="main"></main>
+
+    <script>
+      // id, code, name, start day, finish day, slip days, critical, A finish day
+      const ACTS = [
+        [0, 'P01-A001-TRK-0990', 'Erect masts, section 2', 10, 30, 41, true, -11],
+        [1, 'P01-A003-CIV-0410', 'Piling, mast bases 40 to 62', 2, 36, 0, true, null],
+        [2, 'P01-A002-DES-0120', 'OLE design freeze', 0, 8, 2, false, 6],
+        [3, 'P01-A001-TRK-0995', 'Install registration arms', 33, 46, 30, true, 16],
+        [4, 'P02-A004-CIV-2200', 'Excavate, chainage 14+200', 4, 18, 0, false, 18],
+        [5, 'P01-A001-TRK-1000', 'Install catenary, section 2', 38, 64, 67, true, -3],
+        [6, 'P01-A001-TRK-1010', 'Wire run and tension, section 2', 64, 78, 67, true, 11],
+        [7, 'MS-S2-ENERG', 'Energisation, section 2', 83, 83, 67, true, 16],
+        [8, 'P02-A004-CIV-2210', 'Drainage, chainage 14+200', 18, 30, 0, false, 30],
+        [9, 'P03-A002-TRK-0170', 'Survey catenary, section 3', 40, 52, 12, false, 40],
+        [10, 'P02-A002-TRK-1007', 'Tamp and align track, section 2', 50, 60, 27, false, 33],
+        [11, 'P03-A003-TRK-1014', 'Backfill retaining wall', 20, 34, 20, false, 14],
+        [12, 'P01-A004-TRK-1021', 'Pour ballast, section 3', 26, 40, 18, false, 22],
+        [13, 'P02-A004-CIV-2220', 'Backfill, chainage 14+200', 30, 38, 0, false, 38],
+      ];
+      // pred, succ, type, state: '' | 'added' | 'removed', driving
+      const LINKS = [
+        [1, 0, 'FS', 'added', true], [0, 3, 'SS', '', false], [0, 5, 'FS', '', true], [3, 5, 'SS', '', false],
+        [2, 5, 'FS', 'removed', false], [5, 6, 'FS', '', true], [6, 7, 'FS', '', true], [4, 8, 'FS', '', true],
+        [8, 13, 'FS', '', true], [9, 10, 'FS', '', false], [11, 12, 'FS', '', true], [12, 10, 'FS', '', false],
+        [2, 9, 'FS', '', false],
+      ];
+      // Links to activities that are not among these rows: activity, direction, count.
+      const OFFSCREEN = { 5: { up: 1, down: 0 }, 7: { up: 0, down: 2 }, 0: { up: 1, down: 0 }, 10: { up: 0, down: 1 } };
+      let sort = 'slip';
+      let sel = 5;
+      const ROW = 24, HEAD = 24, W = 770, DAY = 8, X0 = 20;
+
+      function order() {
+        const list = [...ACTS];
+        if (sort === 'slip') list.sort((a, b) => b[5] - a[5] || a[0] - b[0]);
+        else list.sort((a, b) => a[3] - b[3] || a[0] - b[0]);
+        return list;
+      }
+      const x = (d) => X0 + d * DAY;
+
+      function bars(rows) {
+        let s = '';
+        rows.forEach((a, i) => {
+          const y = HEAD + i * ROW;
+          if (i % 2) s += `<rect x="0" y="${y}" width="${W}" height="${ROW}" fill="transparent"/>`;
+          s += `<line x1="0" x2="${W}" y1="${y + ROW}" y2="${y + ROW}" stroke="var(--b1)"/>`;
+          if (a[0] === sel) s += `<rect x="0" y="${y}" width="${W}" height="${ROW}" fill="#ece8fb"/>`;
+          if (a[7] !== null) s += `<line x1="${x(a[7])}" x2="${x(a[7])}" y1="${y + 6}" y2="${y + 18}" stroke="var(--ghost)" stroke-width="2"/>`;
+          if (a[3] === a[4]) s += `<path d="M${x(a[4])} ${y + 6} l6 6 l-6 6 l-6 -6z" fill="${a[6] ? 'var(--critical)' : 'var(--bar)'}"/>`;
+          else s += `<rect x="${x(a[3])}" y="${y + 8}" width="${x(a[4]) - x(a[3])}" height="8" fill="${a[6] ? 'url(#hatch)' : 'var(--bar)'}" stroke="${a[6] ? 'var(--critical)' : 'none'}"/>`;
+        });
+        return s;
+      }
+      function rowOf(rows) { const m = new Map(); rows.forEach((a, i) => m.set(a[0], i)); return m; }
+      function path(rows, l, style) {
+        const at = rowOf(rows);
+        const p = ACTS[l[0]], s = ACTS[l[1]];
+        const yp = HEAD + at.get(l[0]) * ROW + 12, ys = HEAD + at.get(l[1]) * ROW + 12;
+        const fromX = l[2] === 'SS' ? x(p[3]) : x(p[4]);
+        const toX = x(s[3]);
+        const out = l[2] === 'SS' ? fromX - 6 : fromX + 6;
+        const mid = ys > yp ? ys - 8 : ys + 8;
+        const d = toX - 6 >= out
+          ? `M${fromX} ${yp} H${out} V${ys} H${toX}`
+          : `M${fromX} ${yp} H${out} V${mid} H${toX - 6} V${ys} H${toX}`;
+        return `<path d="${d}" fill="none" stroke="${style.color}" stroke-width="${style.width}" ${style.dash ? `stroke-dasharray="${style.dash}"` : ''} marker-end="url(#${style.marker})"/>`;
+      }
+      function stub(rows, id, dir, n, label) {
+        const at = rowOf(rows).get(id);
+        if (at === undefined || !n) return '';
+        const a = ACTS[id];
+        const y = HEAD + at * ROW + 12;
+        const xx = dir === 'up' ? x(a[3]) - 12 : x(a[4]) + 12;
+        const yEnd = dir === 'up' ? HEAD + 2 : HEAD + rows.length * ROW - 2;
+        return `<path d="M${dir === 'up' ? x(a[3]) : x(a[4])} ${y} H${xx} V${yEnd}" fill="none" stroke="var(--t2)" stroke-width="1.5" stroke-dasharray="2 2"/>` +
+          `<text x="${xx + 4}" y="${dir === 'up' ? HEAD + 12 : yEnd - 4}" font-size="11" fill="var(--t2)">${label ?? `${n} ${dir === 'up' ? 'above' : 'below'}`}</text>`;
+      }
+      function svg(inner, rows) {
+        const h = HEAD + rows.length * ROW;
+        return `<svg width="${W}" height="${h}" viewBox="0 0 ${W} ${h}">
+          <defs>
+            <pattern id="hatch" width="5" height="5" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="5" height="5" fill="#f6e3e3"/><line x1="0" y1="0" x2="0" y2="5" stroke="var(--critical)" stroke-width="2"/></pattern>
+            <marker id="arrow" viewBox="0 0 6 6" refX="5" refY="3" markerWidth="6" markerHeight="6" orient="auto"><path d="M0 0 L6 3 L0 6z" fill="var(--b2)"/></marker>
+            <marker id="arrowDark" viewBox="0 0 6 6" refX="5" refY="3" markerWidth="6" markerHeight="6" orient="auto"><path d="M0 0 L6 3 L0 6z" fill="var(--t1)"/></marker>
+            <marker id="arrowAccent" viewBox="0 0 6 6" refX="5" refY="3" markerWidth="6" markerHeight="6" orient="auto"><path d="M0 0 L6 3 L0 6z" fill="var(--t1)"/></marker>
+          </defs>
+          <rect width="${W}" height="${HEAD}" fill="var(--s2)"/>
+          <text x="8" y="16" font-size="11" fill="var(--t2)">Jun 2027</text><text x="${x(30)}" y="16" font-size="11" fill="var(--t2)">Jul</text><text x="${x(60)}" y="16" font-size="11" fill="var(--t2)">Aug</text>
+          ${bars(rows)}${inner}</svg>`;
+      }
+      function grid(rows) {
+        return `<div class="grid"><div class="r h"><span>Row</span><span>Activity code</span><span>Name</span><span>Slip</span></div>${rows
+          .map((a, i) => `<div class="r ${a[0] === sel ? 'sel' : ''}"><span>${i + 1}</span><span class="code">${a[1]}</span><span class="nm">${a[2]}</span><span>${a[5] ? '+' + a[5] + 'd' : '0d'}</span></div>`)
+          .join('')}</div>`;
+      }
+
+      function optionA() {
+        const rows = order();
+        const inner = LINKS.filter((l) => l[3] !== 'removed').map((l) => path(rows, l, { color: 'var(--b2)', width: 1, marker: 'arrow' })).join('');
+        return `<div class="frame">${grid(rows)}${svg(inner, rows)}</div>
+          <div class="legend"><span>Every link between rows on screen, thin and neutral. Links to rows off screen are not drawn.</span></div>`;
+      }
+      function optionB() {
+        const rows = order();
+        if (sel < 0) return `<div class="frame">${grid(rows)}${svg('', rows)}</div><div class="legend"><span>Nothing selected, so no lines.</span></div>`;
+        const mine = LINKS.filter((l) => l[3] !== 'removed' && (l[0] === sel || l[1] === sel));
+        let inner = mine.map((l) => path(rows, l, { color: 'var(--t1)', width: 1.5, marker: 'arrowDark' })).join('');
+        const off = OFFSCREEN[sel];
+        if (off) inner += stub(rows, sel, 'up', off.up) + stub(rows, sel, 'down', off.down);
+        return `<div class="frame">${grid(rows)}${svg(inner, rows)}</div>
+          <div class="legend"><span>Only the selected activity's predecessors and successors. A dashed stub at the edge says how many lead off screen.</span></div>`;
+      }
+      function optionC() {
+        const rows = order();
+        if (sel < 0) return `<div class="frame">${grid(rows)}${svg('', rows)}</div><div class="legend"><span>Nothing selected, so no lines.</span></div>`;
+        // The selected activity's links, plus the driving chain back from it.
+        const chain = new Set([sel]);
+        let grew = true;
+        while (grew) { grew = false; for (const l of LINKS) if (l[4] && chain.has(l[1]) && !chain.has(l[0]) && l[3] !== 'removed') { chain.add(l[0]); grew = true; } }
+        const shown = LINKS.filter((l) => l[0] === sel || l[1] === sel || (l[4] && chain.has(l[1]) && chain.has(l[0])));
+        let inner = shown.map((l) => {
+          if (l[3] === 'removed') return path(rows, l, { color: 'var(--ghost)', width: 1.5, dash: '4 3', marker: 'arrow' });
+          const driving = l[4] && chain.has(l[1]);
+          return path(rows, l, { color: 'var(--t1)', width: driving ? 2.5 : 1, marker: 'arrowDark' });
+        }).join('');
+        // Labels for links that changed.
+        const at = rowOf(rows);
+        for (const l of shown.filter((l) => l[3])) {
+          const s = ACTS[l[1]], p = ACTS[l[0]];
+          const y = HEAD + at.get(l[0]) * ROW + 4;
+          inner += `<text x="${x(p[4]) + 10}" y="${y + 6}" font-size="10" font-weight="600" fill="var(--t1)">${l[3] === 'added' ? 'New link' : 'Removed'}</text>`;
+        }
+        const off = OFFSCREEN[sel];
+        if (off) inner += stub(rows, sel, 'up', off.up) + stub(rows, sel, 'down', off.down);
+        return `<div class="frame">${grid(rows)}${svg(inner, rows)}</div>
+          <div class="legend"><span>Heavy: the driving path back from the selected activity. Thin: its other links. Dashed and pale: a link removed since update A. "New link": added since update A.</span></div>`;
+      }
+
+      const OPTIONS = [
+        { title: 'A. Every link between the rows on screen', render: optionA,
+          notes: [['Does well', 'What a P6 user expects, and works with nothing selected. Shows clusters of logic when sorted by start.'], ['Does badly', 'Sorted by slip, the default, it is a tangle of long verticals that says little. Silent about links that leave the screen, which is most of them at scale.'], ['Cost', 'Every visible row’s links and their rows in the current view, each time the view scrolls.']] },
+        { title: 'B. The selected activity’s links only', render: optionB,
+          notes: [['Does well', 'Readable in any sort. Says how many links lead off screen instead of hiding them. Matches the Logic tab in the drawer.'], ['Does badly', 'Nothing drawn until a row is selected. Shows links, not why the activity moved.'], ['Cost', 'One activity’s links, found once per selection.']] },
+        { title: 'C. The selected activity’s links, its driving path, and what changed', render: optionC,
+          notes: [['Does well', 'Draws the answer to "why did this move": the driving chain is heavy, and links added or removed since update A are marked in words, so the line shows the cause.'], ['Does badly', 'The most to read and build. Removed links come from update A and point at where an activity used to be. Three weights of line must stay distinct without colour.'], ['Cost', 'One trace per selection, which the drawer already runs.']] },
+      ];
+
+      function render() {
+        document.getElementById('main').innerHTML = OPTIONS.map((o) => `<h2>${o.title}</h2><dl class="notes">${o.notes.map(([dt, dd]) => `<div><dt>${dt}</dt><dd>${dd}</dd></div>`).join('')}</dl>${o.render()}`).join('');
+      }
+      document.getElementById('controls').addEventListener('click', (e) => {
+        const b = e.target.closest('button');
+        if (!b) return;
+        if (b.dataset.sort) { sort = b.dataset.sort; for (const x of document.querySelectorAll('[data-sort]')) x.setAttribute('aria-pressed', String(x === b)); }
+        if (b.dataset.sel) { sel = Number(b.dataset.sel); for (const x of document.querySelectorAll('[data-sel]')) x.setAttribute('aria-pressed', String(x === b)); }
+        render();
+      });
+      render();
+    </script>
+  </body>
+</html>
