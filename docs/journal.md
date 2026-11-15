@@ -2,6 +2,24 @@
 
 What was built, what Usman decided or designed, and what an agent generated. Newest first.
 
+## 15 November 2026: options for relationship lines
+
+**Done**
+
+- Exploration 11: three options for logic on the Gantt. Every link between the rows on screen; only the selected activity's links, with a stub for those off screen; or the selected activity's links with its driving path heavy and links added or removed since update A labelled. Each can be switched between the default sort by slip and a sort by start, with and without a selection.
+
+**Usman decided or designed**
+
+- To do relationship lines next.
+
+**The agent (Claude) generated**
+
+- The three options, the sample rows and links, and the write-up.
+
+**Worth Usman's attention**
+
+- The choice of option, and whether lines should show with nothing selected.
+
 ## 15 November 2026: the selection in the URL
 
 **Done**
