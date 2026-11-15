@@ -6,14 +6,16 @@ Part of the Slip spec. Start at [CLAUDE.md](../../CLAUDE.md).
 Planlab sells to organisations that ask where their data goes. Slip should be able to answer that question precisely.
 
 ## What leaves the browser (keep `docs/data-flow.md` and the in-app panel in step with this)
-| Data | Stays in browser | Sent to Slip's server | Sent to Anthropic |
-|---|---|---|---|
+| Data | Stays in this browser | Sent to Slip's server | Sent to Anthropic |
+| --- | --- | --- | --- |
 | XER files and parsed schedules | Yes | Never | Never |
-| Edits, audit log | Yes | Never | Never |
-| Agent questions (live mode) | Yes | In transit, not stored | Yes |
-| Tool results (live mode): the specific rows the agent asked for, including activity codes, names and dates | Yes | In transit, not stored | Yes |
-| Anything, in scripted mode | Yes | Never | Never |
-| Error reports (if Sentry is on) | n/a | n/a | Never; scrubbed events go to Sentry |
+| Edits, the activity log and the narrative | Yes | Never | Never |
+| Questions to the assistant, live mode | Yes | In transit, not stored | Yes |
+| Rows the assistant asks for, live mode: activity codes, names and dates | Yes | In transit, not stored | Yes |
+| Anything, scripted mode | Yes | Never | Never |
+| Error reports | Not collected yet | Never | Never |
+
+When error reporting is added (Sentry, with the scrubber), its row becomes: scrubbed events go to Sentry, never to Anthropic. The in-app panel and `docs/data-flow.md` print this same table from `apps/web/src/features/dataflow/flows.ts`; a test fails if they differ.
 
 Do not write "the schedule never leaves the browser" anywhere without the live-mode qualification. The accurate claim is: the files are never uploaded, and in live mode only the rows the agent asks for are sent to answer the question.
 

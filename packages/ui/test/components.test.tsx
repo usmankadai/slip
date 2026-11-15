@@ -6,6 +6,7 @@ import {
   Button,
   ScriptedBadge,
   DeltaCell,
+  Dialog,
   EntityChip,
   Notice,
   ProgressBar,
@@ -253,5 +254,25 @@ describe('ProposedEditCard', () => {
       <ProposedEditCard {...props} state="rejected" outcome="Rejected." />,
     );
     expect(rejected).not.toContain('>Undo<');
+  });
+});
+
+describe('Dialog', () => {
+  const html = renderToStaticMarkup(
+    <Dialog open onClose={() => {}} title="Where your data goes">
+      Nothing leaves.
+    </Dialog>,
+  );
+
+  it('is a native dialog named by its title', () => {
+    const labelled = /<dialog[^>]*aria-labelledby="([^"]+)"/.exec(html)?.[1];
+    expect(labelled).toBeTruthy();
+    expect(html).toContain(`<h2 id="${labelled}"`);
+    expect(html).toContain('Where your data goes</h2>');
+  });
+
+  it('always has a way to close it', () => {
+    expect(html).toMatch(/<button type="button"[^>]*>Close<\/button>/);
+    expect(html).toContain('Nothing leaves.');
   });
 });

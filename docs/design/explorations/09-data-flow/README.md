@@ -1,6 +1,6 @@
 # Exploration 09: where your data goes
 
-Status: **options drawn on 15 November 2026, waiting for Usman's decision.**
+Status: **decided on 15 November 2026: option B, opened from the footer.**
 
 ## Problem
 
@@ -27,8 +27,12 @@ Things the mock made visible:
 
 ## Decision
 
-Not made. Two choices are Usman's: the option, and where the panel opens from.
+**Option B, the table with how it is held to, opened from a link in the footer.** Chosen by Usman on 15 November 2026 ("B, footer link"), accepting Claude's recommendation. The reasons below are Claude's, which he accepted.
+
+- B is the most exact for an IT or information-security reviewer, and the only option a test can hold to the written statements in `docs/data-flow.md` and security.md.
+- A was rejected because a drawing does not say what makes it true. C was rejected for now because it is empty on the public site; it could be added under B once live mode exists.
+- The footer is on every screen already, and Slip has no shared top bar.
 
 ## What changed
 
-Nothing yet.
+- 15 November 2026: built. The table always shows the live-mode rows, marked "Live mode is not on this site" in scripted mode, so the panel prints exactly the rows `docs/data-flow.md` and security.md print; a test holds the three together.

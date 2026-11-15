@@ -2,6 +2,31 @@
 
 What was built, what Usman decided or designed, and what an agent generated. Newest first.
 
+## 15 November 2026: where your data goes
+
+**Done**
+
+- "Where your data goes" in the footer of every screen opens a dialog with exploration 09's option B: one sentence for the current mode, the table of what stays and what leaves, and what holds it true.
+- The table has one source, `apps/web/src/features/dataflow/flows.ts`. A test fails if `docs/data-flow.md` or the security spec prints different rows. Both now print the same six rows; the security spec's error-report row says "not collected yet", with a note of what it becomes when Sentry is added.
+- The assistant's mode is one constant read by both the conversation and the panel, so they cannot disagree.
+- `Dialog` in `packages/ui`: the native `dialog` element, with a contract, stories and a test, and a `--backdrop` token.
+- Checked headlessly against the release build under the production headers: the dialog opens, keeps focus inside, closes with Escape, Close or a click outside, gives focus back to the link, and the policy reported no violations.
+
+**Usman decided or designed**
+
+- Option B, opened from the footer ("B, footer link"), accepting Claude's recommendation.
+
+**The agent (Claude) generated**
+
+- All the code, the wording of the panel and the test. The reasons recorded in exploration 09 are Claude's, accepted by Usman.
+- Two departures from the mock: the table always shows the live-mode rows, marked "Live mode is not on this site" in scripted mode, so the panel prints exactly what the documents print; and a "Not collected yet" row for error reports.
+
+**Worth Usman's attention**
+
+- The panel has no loading, empty or error state, because its content is part of the page. It is not named `*Panel.tsx`, so the repository check does not ask for them. That is a judgement about the four-state rule, not an exemption from it.
+- The notice before the first live question is not built; it arrives with the live assistant.
+- The product spec now says the panel is a table opened from the footer, not a diagram in the top bar.
+
 ## 15 November 2026: options for where your data goes
 
 **Done**

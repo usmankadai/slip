@@ -24,3 +24,14 @@
 .build {
   font-family: var(--font-mono);
 }
+
+/* Opens a dialog, so it is a button, drawn like the links beside it. */
+.open {
+  padding: var(--space-0);
+  border: 0;
+  background: none;
+  font: inherit;
+  color: var(--text-secondary);
+  text-decoration: underline;
+  cursor: pointer;
+}

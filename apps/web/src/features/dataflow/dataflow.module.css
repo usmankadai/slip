@@ -1,0 +1,74 @@
+.panel {
+  display: grid;
+  gap: var(--space-3);
+}
+
+.lead {
+  margin: var(--space-0);
+  font-size: var(--text-md);
+  line-height: var(--leading-md);
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--text-sm);
+  line-height: var(--leading-sm);
+}
+
+.table th,
+.table td {
+  padding: var(--space-2);
+  border-bottom: 1px solid var(--border-subtle);
+  text-align: left;
+  vertical-align: top;
+}
+
+.table thead th {
+  background: var(--surface-2);
+  color: var(--text-secondary);
+  font-weight: var(--weight-medium);
+}
+
+.table tbody th {
+  font-weight: var(--weight-regular);
+}
+
+.note {
+  display: block;
+  color: var(--text-muted);
+  font-size: var(--text-xs);
+  line-height: var(--leading-xs);
+}
+
+.goes {
+  font-weight: var(--weight-semibold);
+}
+
+.never {
+  color: var(--text-muted);
+}
+
+.mark {
+  margin-right: var(--space-1);
+  font-size: var(--text-xs);
+}
+
+.heading {
+  margin: var(--space-0);
+  font-size: var(--text-base);
+  line-height: var(--leading-base);
+  font-weight: var(--weight-semibold);
+}
+
+.list {
+  margin: var(--space-0);
+  padding-left: var(--space-4);
+  color: var(--text-secondary);
+  font-size: var(--text-sm);
+  line-height: var(--leading-base);
+}
+
+.list code {
+  font-family: var(--font-mono);
+}

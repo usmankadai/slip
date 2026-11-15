@@ -32,3 +32,4 @@ export {
   type MilestoneEffect,
   type ProposedEditCardProps,
 } from './components/ProposedEditCard/ProposedEditCard.tsx';
+export { Dialog, type DialogProps } from './components/Dialog/Dialog.tsx';
