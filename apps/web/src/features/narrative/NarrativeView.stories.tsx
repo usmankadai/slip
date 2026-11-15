@@ -129,6 +129,7 @@ const meta: Meta<typeof NarrativeView> = {
     onRemove: noop,
     onAdd: noop,
     onExport: noop,
+    onExportPdf: noop,
     onEvidence: noop,
     onRetry: noop,
     onBack: noop,
@@ -171,5 +172,13 @@ export const Loading: Story = { args: { state: { status: 'loading' } } };
 export const Error: Story = {
   args: {
     state: { status: 'error', message: 'Something went wrong while comparing the two updates.' },
+  },
+};
+
+/** After a PDF export that had to replace characters its font cannot show. */
+export const PdfCharactersReplaced: Story = {
+  args: {
+    exportNote:
+      "The PDF is saved. 3 characters the PDF's font cannot show appear as a question mark. The Markdown export keeps every character.",
   },
 };

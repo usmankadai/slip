@@ -14,9 +14,9 @@ import {
 } from './model.ts';
 import { NarrativeView, type NarrativeState } from './NarrativeView.tsx';
 
-/** Saves text as a file in the planner's downloads. Nothing leaves the browser. */
-function download(name: string, text: string) {
-  const url = URL.createObjectURL(new Blob([text], { type: 'text/markdown;charset=utf-8' }));
+/** Saves a file in the planner's downloads. Nothing leaves the browser. */
+function download(name: string, content: string | Uint8Array<ArrayBuffer>, type: string) {
+  const url = URL.createObjectURL(new Blob([content], { type }));
   const link = document.createElement('a');
   link.href = url;
   link.download = name;
@@ -48,6 +48,7 @@ export function NarrativeScreen({
   restoring: boolean;
 }) {
   const [failure, setFailure] = useState('');
+  const [exportNote, setExportNote] = useState('');
   const run = useRef(0);
   const next = useRef(1);
 
@@ -119,11 +120,45 @@ export function NarrativeScreen({
         if (!blocks) return;
         const date = formatXerDate(pair.b.dataDate).slice(0, 10) || 'undated';
         const name = `update-narrative-${date}.md`;
-        download(name, toMarkdown(pair.b.projectName, pair.a.dataDate, pair.b.dataDate, blocks));
+        download(
+          name,
+          toMarkdown(pair.b.projectName, pair.a.dataDate, pair.b.dataDate, blocks),
+          'text/markdown;charset=utf-8',
+        );
         const edited = blocks.filter((block) => markOf(block) !== 'generated').length;
         onAudit(
           'narrative-exported',
           `Exported the narrative as ${name}: ${blocks.length} paragraphs, ${edited} edited or your own.`,
+        );
+      }}
+      exportNote={exportNote}
+      onExportPdf={() => {
+        if (!blocks) return;
+        const date = formatXerDate(pair.b.dataDate).slice(0, 10) || 'undated';
+        const name = `update-narrative-${date}.pdf`;
+        setExportNote('');
+        // The PDF writer is loaded only when it is first used.
+        import('./pdf.ts').then(
+          ({ toPdf }) => {
+            const pdf = toPdf(pair.b.projectName, pair.a.dataDate, pair.b.dataDate, blocks);
+            download(name, pdf.bytes as Uint8Array<ArrayBuffer>, 'application/pdf');
+            const edited = blocks.filter((block) => markOf(block) !== 'generated').length;
+            const replaced =
+              pdf.replaced > 0
+                ? ` ${pdf.replaced} ${pdf.replaced === 1 ? 'character' : 'characters'} the PDF's font cannot show appear as a question mark.`
+                : '';
+            onAudit(
+              'narrative-exported',
+              `Exported the narrative as ${name}: ${blocks.length} paragraphs, ${edited} edited or your own, ${pdf.pages} ${pdf.pages === 1 ? 'page' : 'pages'}.${replaced}`,
+            );
+            if (replaced) {
+              setExportNote(
+                `The PDF is saved.${replaced} The Markdown export keeps every character.`,
+              );
+            }
+          },
+          () =>
+            setExportNote('Slip could not load the PDF writer. Try again, or export as Markdown.'),
         );
       }}
       onEvidence={onEvidence}

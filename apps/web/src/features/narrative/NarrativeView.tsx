@@ -18,6 +18,10 @@ export interface NarrativeViewProps {
   onRemove: (id: string) => void;
   onAdd: () => void;
   onExport: () => void;
+  /** Saves the narrative as a PDF. */
+  onExportPdf: () => void;
+  /** What happened with the last PDF export, when there is something to say: a failure, or replaced characters. */
+  exportNote?: string;
   onEvidence: (evidence: Evidence) => void;
   onRetry: () => void;
   onBack: () => void;
@@ -107,8 +111,19 @@ function BlockEditor({
 
 /** Finish update, layout B: paragraph blocks, each with its own evidence. Presentational. */
 export function NarrativeView(props: NarrativeViewProps) {
-  const { projectName, dataDateA, dataDateB, state, onAdd, onExport, onRetry, onBack, saved } =
-    props;
+  const {
+    projectName,
+    dataDateA,
+    dataDateB,
+    state,
+    onAdd,
+    onExport,
+    onExportPdf,
+    exportNote,
+    onRetry,
+    onBack,
+    saved,
+  } = props;
   const blocks = state.status === 'ready' ? state.blocks : [];
   const marks = blocks.map(markOf);
   const tally = (mark: string) => marks.filter((m) => m === mark).length;
@@ -125,11 +140,16 @@ export function NarrativeView(props: NarrativeViewProps) {
           <Button variant="primary" disabled={state.status !== 'ready'} onClick={onExport}>
             Export as Markdown
           </Button>
+          <Button disabled={state.status !== 'ready'} onClick={onExportPdf}>
+            Export as PDF
+          </Button>
           <Button variant="quiet" onClick={onBack}>
             Back to summary
           </Button>
         </div>
       </header>
+
+      {exportNote ? <Notice tone="attention">{exportNote}</Notice> : null}
 
       {state.status === 'loading' ? (
         <section className={styles.block} aria-busy="true">
