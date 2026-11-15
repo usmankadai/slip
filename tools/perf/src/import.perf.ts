@@ -2,28 +2,11 @@
  * Import performance: a cold import of one file, and reopening it from the
  * browser cache, at each size the mode asks for. Medians over several runs.
  */
-import { mkdirSync, readFileSync, writeFileSync, existsSync } from 'node:fs';
-import { dirname } from 'node:path';
 import { expect, test } from '@playwright/test';
 import type { PerfImport } from '../../../apps/web/src/dev/perfTypes.ts';
-import { BUDGETS, RESULTS_FILE, currentMode, median, type SizeResult } from './budgets.ts';
+import { BUDGETS, currentMode, median, record, type SizeResult } from './budgets.ts';
 
 const mode = currentMode();
-
-function record(result: SizeResult): void {
-  mkdirSync(dirname(RESULTS_FILE), { recursive: true });
-  const all: SizeResult[] = existsSync(RESULTS_FILE)
-    ? JSON.parse(readFileSync(RESULTS_FILE, 'utf8'))
-    : [];
-  writeFileSync(
-    RESULTS_FILE,
-    JSON.stringify([...all.filter((r) => r.activities !== result.activities), result], null, 2),
-  );
-}
-
-test.beforeAll(() => {
-  if (existsSync(RESULTS_FILE)) writeFileSync(RESULTS_FILE, '[]');
-});
 
 for (const activities of mode.sizes) {
   test(`import ${activities.toLocaleString('en-GB')} activities`, async ({ page }) => {

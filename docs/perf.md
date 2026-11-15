@@ -35,34 +35,43 @@ Cache size on disk for both updates: 111MB at 350K and about 320MB at 1M.
 Written by `pnpm perf`. Release build served by `vite preview`, headless Chromium, synthetic rail fixtures at seed 42, median of 5 runs.
 
 - Machine: Apple M3, 8 cores, 16GB, darwin 27.2.0 arm64
-- Commit: 7f51418
+- Commit: f33c688
 
 | Per file, median of 5 | 100K | 350K | 1M |
 |---|---|---|---|
 | File size | 27MB | 93MB | 267MB |
-| Hash | 0.11s | 0.38s | 1.18s |
-| Parse | 0.22s | 0.79s | 2.49s |
-| Pack and write to cache | 0.02s | 0.07s | 0.28s |
-| **Full import** | **0.35s** | **1.24s** | **3.98s** |
+| Hash | 0.11s | 0.40s | 1.11s |
+| Parse | 0.23s | 0.82s | 2.31s |
+| Pack and write to cache | 0.02s | 0.07s | 0.23s |
+| **Full import** | **0.37s** | **1.32s** | **3.66s** |
 | Budget | 1.50s, within | 4.00s, within | 10.00s, within |
-| **Reopen from cache** | **0.12s** | **0.40s** | **1.23s** |
+| **Reopen from cache** | **0.12s** | **0.42s** | **1.17s** |
 | Budget | 0.30s, within | 0.60s, within | 1.50s, within |
 | Main thread long tasks, worst import | 0 | 0 | 0 |
-| JS heap, both updates loaded | 2MB | 2MB | 2MB |
+| JS heap, both updates loaded | 3MB | 3MB | 3MB |
 | Typed arrays, both updates loaded | 32MB | 110MB | 317MB |
-| **Memory total** | **33MB** | **112MB** | **318MB** |
+| **Memory total** | **34MB** | **113MB** | **319MB** |
 | Budget (starting estimate) | 250MB, within | 700MB, within | 1800MB, within |
-| **CPM, one update, in the worker** | **0.05s** | **0.14s** | **0.38s** |
+| **CPM, one update, in the worker** | **0.07s** | **0.14s** | **0.38s** |
 | Budget | 0.30s, within | 1.00s, within | 3.00s, within |
-| **Diff of two updates, in the worker** | **0.07s** | **0.31s** | **1.18s** |
+| **Diff of two updates, in the worker** | **0.09s** | **0.30s** | **1.02s** |
 | Budget | 0.30s, within | 1.00s, within | 3.00s, within |
 | Hand both schedules to the engine | 0.01s | 0.01s | 0.03s |
-| First rows of "changed, worst slip first" | 0.01s | 0.02s | 0.07s |
-| Next rows of the same view | 0.00s | 0.00s | 0.12s |
+| First rows of "changed, worst slip first" | 0.01s | 0.03s | 0.18s |
+| Next rows of the same view | 0.00s | 0.00s | 0.01s |
 | Text search over all codes and names | 0.01s | 0.02s | 0.06s |
-| Sort all activities by code | 0.02s | 0.08s | 0.22s |
+| Sort all activities by code | 0.02s | 0.08s | 0.23s |
 | Main thread long tasks while the engine works | 0 | 0 | 0 |
-| Generate the pair in the browser | 0.55s | 1.85s | 5.21s |
+| Generate the pair in the browser | 0.57s | 1.89s | 5.34s |
+| **Drop both files to the summary's answer** | **0.97s** | **2.13s** | **5.67s** |
+| Budget: first rows visible after file drop | 1.00s, within | 2.50s, within | 6.00s, within |
+| Summary to the first rows of the grid | 0.05s | 0.21s | 0.82s |
+| **Grid and Gantt sweep, p95 frame time** | **3.4ms** | **2.1ms** | **2.1ms** |
+| Budget | 16.7ms, within | 16.7ms, within | 16.7ms, within |
+| Frames in the 3s sweep | 1464 | 1858 | 1880 |
+| Main thread long tasks while scrolling | 0 | 0 | 0 |
 
-CPM, diff and the row requests are single runs. Not measured yet: first rows on screen, scroll frame times, Firefox and Safari.
+Initial JavaScript for the app shell, gzipped: **146KB**, budget 250KB, within.
+
+CPM, diff and the row requests are single runs. The screens are driven as a planner would: both files dropped on the import screen, the summary, then the changes grid swept from the first row to the last over 3 seconds with the Gantt beside it. Frame rate is not capped to the display (`--disable-frame-rate-limit`), so a frame time is the work Slip does. Not measured yet: Firefox and Safari.
 <!-- perf:end -->

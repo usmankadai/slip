@@ -5,7 +5,13 @@
 import { execFileSync } from 'node:child_process';
 import { existsSync, readFileSync, writeFileSync } from 'node:fs';
 import { arch, cpus, platform, release, totalmem } from 'node:os';
-import { BUDGETS, RESULTS_FILE, currentMode, type SizeResult } from './budgets.ts';
+import {
+  BUDGETS,
+  BUNDLE_BUDGET_KB,
+  RESULTS_FILE,
+  currentMode,
+  type SizeResult,
+} from './budgets.ts';
 
 const START = '<!-- perf:start -->';
 const END = '<!-- perf:end -->';
@@ -69,17 +75,48 @@ function table(results: SizeResult[]): string {
     row('Sort all activities by code', (r) => seconds(r.sortByCodeMs)),
     row('Main thread long tasks while the engine works', (r) => String(r.engineLongTasks)),
     row('Generate the pair in the browser', (r) => seconds(r.generateMs)),
+    row("**Drop both files to the summary's answer**", (r) =>
+      r.dropToSummaryMs === undefined ? 'not run' : `**${seconds(r.dropToSummaryMs)}**`,
+    ),
+    row('Budget: first rows visible after file drop', (r) =>
+      r.dropToSummaryMs === undefined
+        ? ''
+        : `${seconds(BUDGETS[r.activities]!.firstRowsMs)}, ${verdict(r.dropToSummaryMs < BUDGETS[r.activities]!.firstRowsMs)}`,
+    ),
+    row('Summary to the first rows of the grid', (r) =>
+      r.summaryToRowsMs === undefined ? 'not run' : seconds(r.summaryToRowsMs),
+    ),
+    row('**Grid and Gantt sweep, p95 frame time**', (r) =>
+      r.scrollP95Ms === undefined ? 'not run' : `**${r.scrollP95Ms.toFixed(1)}ms**`,
+    ),
+    row('Budget', (r) =>
+      r.scrollP95Ms === undefined
+        ? ''
+        : `${BUDGETS[r.activities]!.frameMs}ms, ${verdict(r.scrollP95Ms < BUDGETS[r.activities]!.frameMs)}`,
+    ),
+    row('Frames in the 3s sweep', (r) =>
+      r.scrollFrames === undefined ? '' : String(r.scrollFrames),
+    ),
+    row('Main thread long tasks while scrolling', (r) =>
+      r.scrollLongTasks === undefined ? '' : String(r.scrollLongTasks),
+    ),
   ].join('\n');
 }
 
 export default function report(): void {
   if (!existsSync(RESULTS_FILE)) return;
-  const results = (JSON.parse(readFileSync(RESULTS_FILE, 'utf8')) as SizeResult[]).sort(
+  const all = (JSON.parse(readFileSync(RESULTS_FILE, 'utf8')) as SizeResult[]).sort(
     (a, b) => a.activities - b.activities,
   );
+  const shell = all.find((r) => r.activities === 0)?.initialJsKb;
+  const results = all.filter((r) => r.activities > 0);
   if (results.length === 0) return;
   const mode = currentMode();
-  const body = table(results);
+  const bundle =
+    shell === undefined
+      ? ''
+      : `\n\nInitial JavaScript for the app shell, gzipped: **${Math.round(shell)}KB**, budget ${BUNDLE_BUDGET_KB}KB, ${shell < BUNDLE_BUDGET_KB ? 'within' : '**over**'}.`;
+  const body = table(results) + bundle;
   console.log(`\nPerf results (${mode.name} mode)\n${body}\n`);
   if (mode.name !== 'local' || !existsSync(DOC)) return;
 
@@ -100,7 +137,7 @@ export default function report(): void {
     '',
     body,
     '',
-    'CPM, diff and the row requests are single runs. Not measured yet: first rows on screen, scroll frame times, Firefox and Safari.',
+    'CPM, diff and the row requests are single runs. The screens are driven as a planner would: both files dropped on the import screen, the summary, then the changes grid swept from the first row to the last over 3 seconds with the Gantt beside it. Frame rate is not capped to the display (`--disable-frame-rate-limit`), so a frame time is the work Slip does. Not measured yet: Firefox and Safari.',
     END,
   ].join('\n');
   const doc = readFileSync(DOC, 'utf8');

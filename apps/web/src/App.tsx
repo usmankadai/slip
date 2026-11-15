@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { Suspense, lazy, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Footer } from './app/Footer.tsx';
 import { AgentDock } from './features/agent/AgentDock.tsx';
 import { AuditScreen } from './features/audit/AuditScreen.tsx';
@@ -34,12 +34,38 @@ import { Button, Notice } from '@slip/ui';
 import { loadNarrative, saveNarrative } from './storage/narrativeStore.ts';
 import styles from './App.module.css';
 
+/** Loaded the first time it is shown, so it adds nothing to the page until then. */
+const PerformanceHud = lazy(() => import('./app/hud/PerformanceHud.tsx'));
+
+/** True when a key press is meant for a text field, not for a shortcut. */
+const typing = (target: EventTarget | null) =>
+  target instanceof HTMLElement &&
+  (target.isContentEditable || ['INPUT', 'TEXTAREA', 'SELECT'].includes(target.tagName));
+
 const params = new URLSearchParams(location.search);
 /** The undesigned developer harness, kept for the perf suite and for timing imports by hand. */
 const SHOW_HARNESS = params.has('dev') || params.has('perf');
 
 export function App() {
   const [pair, setPair] = useState<ComparedPair | null>(null);
+  /** The performance HUD, shown and hidden with Shift+P. */
+  const [hud, setHud] = useState(false);
+  useEffect(() => {
+    const onKey = (event: KeyboardEvent) => {
+      if (
+        event.key === 'P' &&
+        event.shiftKey &&
+        !event.metaKey &&
+        !event.ctrlKey &&
+        !event.altKey
+      ) {
+        if (typing(event.target)) return;
+        setHud((shown) => !shown);
+      }
+    };
+    addEventListener('keydown', onKey);
+    return () => removeEventListener('keydown', onKey);
+  }, []);
   /** What the changes screen opens on, or null while it is not showing. */
   const [changes, setChanges] = useState<{
     kind: ChangeKind | null;
@@ -471,6 +497,11 @@ export function App() {
         />
       ) : null}
       <Footer />
+      {hud ? (
+        <Suspense fallback={null}>
+          <PerformanceHud onClose={() => setHud(false)} />
+        </Suspense>
+      ) : null}
     </div>
   );
 }

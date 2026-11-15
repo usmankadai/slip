@@ -1,3 +1,5 @@
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
+import { dirname } from 'node:path';
 /**
  * Budgets from docs/spec/performance.md, in milliseconds unless named
  * otherwise. Change them there first, with a decision record; never loosen
@@ -16,6 +18,10 @@ export interface Budget {
   cpmMs: number;
   /** "Diff of two updates". */
   diffMs: number;
+  /** "First rows visible after file drop", measured as dropping both files to the summary's answer. */
+  firstRowsMs: number;
+  /** "Grid + Gantt scroll, p95 frame time". */
+  frameMs: number;
 }
 
 export const BUDGETS: Record<number, Budget> = {
@@ -26,6 +32,8 @@ export const BUDGETS: Record<number, Budget> = {
     memoryMb: 250,
     cpmMs: 300,
     diffMs: 300,
+    firstRowsMs: 1000,
+    frameMs: 16.7,
   },
   350_000: {
     fullImportMs: 4000,
@@ -34,6 +42,8 @@ export const BUDGETS: Record<number, Budget> = {
     memoryMb: 700,
     cpmMs: 1000,
     diffMs: 1000,
+    firstRowsMs: 2500,
+    frameMs: 16.7,
   },
   1_000_000: {
     fullImportMs: 10000,
@@ -42,6 +52,8 @@ export const BUDGETS: Record<number, Budget> = {
     memoryMb: 1800,
     cpmMs: 3000,
     diffMs: 3000,
+    firstRowsMs: 6000,
+    frameMs: 16.7,
   },
 };
 
@@ -95,6 +107,34 @@ export interface SizeResult {
   searchMs: number;
   sortByCodeMs: number;
   engineLongTasks: number;
+  /** The real screens (ui.perf.ts). Missing when that file was not run. */
+  dropToSummaryMs?: number;
+  summaryToRowsMs?: number;
+  scrollP95Ms?: number;
+  scrollFrames?: number;
+  scrollLongTasks?: number;
+  /** Only on the entry for 0 activities: the app shell's initial JavaScript, gzipped. */
+  initialJsKb?: number;
 }
 
 export const RESULTS_FILE = 'test-results/perf-results.json';
+
+/** "The initial JavaScript for the app shell is at most 250 KB compressed." */
+export const BUNDLE_BUDGET_KB = 250;
+
+/** Adds one size's results to the file, merged with anything another test wrote for that size. */
+export function record(result: Partial<SizeResult> & { activities: number }): void {
+  mkdirSync(dirname(RESULTS_FILE), { recursive: true });
+  const all: SizeResult[] = existsSync(RESULTS_FILE)
+    ? JSON.parse(readFileSync(RESULTS_FILE, 'utf8'))
+    : [];
+  const before = all.find((r) => r.activities === result.activities);
+  writeFileSync(
+    RESULTS_FILE,
+    JSON.stringify(
+      [...all.filter((r) => r.activities !== result.activities), { ...before, ...result }],
+      null,
+      2,
+    ),
+  );
+}
