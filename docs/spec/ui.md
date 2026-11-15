@@ -15,7 +15,7 @@ Part of the Slip spec. Start at [CLAUDE.md](../../CLAUDE.md).
 ## Layout
 - Top bar: project breadcrumb, update A vs B selector, "Where your data goes", Finish update button.
 - Left: grid (columns configurable). Centre: Gantt. Right: switchable panel (Trace, Health, Agent, Audit).
-- Bottom drawer for the selected activity: General, Changes, Predecessors, Successors, Trace.
+- Bottom drawer for the selected activity (exploration 10, option C, chosen 15 November 2026): a What changed tab first, with the fields that changed, the logic that changed and one sentence from the trace on why it moved; then Logic (predecessors and successors) and Everything (every field in both updates). This replaces the five tabs first listed (General, Changes, Predecessors, Successors, Trace); nothing in them is lost.
 - Use our own visual identity. **Do not copy Planlab's branding, colours or logo.** It should look like it belongs in the same category, not like a clone.
 
 ## Canvas rules (Gantt and network view)

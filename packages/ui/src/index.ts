@@ -33,3 +33,10 @@ export {
   type ProposedEditCardProps,
 } from './components/ProposedEditCard/ProposedEditCard.tsx';
 export { Dialog, type DialogProps } from './components/Dialog/Dialog.tsx';
+export {
+  TabBar,
+  tabId,
+  tabPanelId,
+  type Tab,
+  type TabBarProps,
+} from './components/TabBar/TabBar.tsx';

@@ -1,6 +1,6 @@
 # Exploration 10: the activity drawer
 
-Status: **options drawn on 15 November 2026, waiting for Usman's decision.**
+Status: **decided on 15 November 2026: option C, led by what changed.**
 
 ## Problem
 
@@ -25,8 +25,13 @@ Things the mock made visible:
 
 ## Decision
 
-Not made. Usman chooses.
+**Option C, led by what changed, with the reason; the rest a tab away.** Chosen by Usman on 15 November 2026 ("C, led by changes"), accepting Claude's recommendation. The reasons are Claude's, which he accepted.
+
+- It answers the planner's question first: which fields changed, which links were added or removed, and one sentence on why the activity moved.
+- A was rejected because the cause and its effect sit on different tabs. B was rejected as too dense for 300px.
+- The departure from the spec's five tabs is recorded here and in the UI spec: General, Predecessors and Successors become Everything and Logic; Changes and Trace become the first tab.
+- The sentence on why it moved comes from the trace. If it proves weak for ordinary activities, the first tab keeps an "Open the trace" button in its place.
 
 ## What changed
 
-Nothing yet.
+- 15 November 2026: built. Two differences from the mock. The header does not say which milestone the activity drives, because that needs a second search; the trace sentence names the largest causes instead. Link changes are listed only when the engine has listed every link both ways (30 or fewer); otherwise the drawer says the logic changed without comparing link by link. The sentence on why it moved arrived within half a second at 350,000 activities, so it stays.
