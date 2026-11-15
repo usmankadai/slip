@@ -6,3 +6,4 @@ fixtures
 # The spec is hand-formatted (tables, code blocks); leave it as written.
 CLAUDE.md
 docs
+api/_agent.mjs

@@ -16,6 +16,8 @@ export default tseslint.config(
       '**/coverage/**',
       '**/test-results/**',
       'fixtures/**',
+      // The agent server bundled for Vercel by pnpm build.
+      'api/_agent.mjs',
     ],
   },
   js.configs.recommended,

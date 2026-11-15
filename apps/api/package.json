@@ -5,7 +5,8 @@
   "type": "module",
   "scripts": {
     "dev": "node --env-file-if-exists=../../.env src/server.ts",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "build:vercel": "esbuild src/vercel.ts --bundle --platform=node --format=esm --target=node24 --outfile=../../api/_agent.mjs --log-level=warning --banner:js=\"import { createRequire } from 'node:module'; const require = createRequire(import.meta.url);\""
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^1.8.0",
@@ -16,7 +17,8 @@
   },
   "devDependencies": {
     "@types/node": "^24.19.2",
-    "typescript": "^6.0.3"
+    "typescript": "^6.0.3",
+    "esbuild": "0.28.2"
   },
   "exports": {
     "./app": "./src/app.ts",

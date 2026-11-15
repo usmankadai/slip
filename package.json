@@ -9,7 +9,7 @@
   },
   "scripts": {
     "dev": "pnpm --filter @slip/web dev",
-    "build": "pnpm --filter @slip/web build",
+    "build": "pnpm --filter @slip/web build && pnpm --filter @slip/api build:vercel",
     "storybook": "pnpm --filter @slip/ui storybook",
     "build:storybook": "pnpm --filter @slip/ui build-storybook",
     "a11y": "node tools/a11y/src/run.ts",
