@@ -17,5 +17,6 @@ The data-model spec asks for shareable view state in the URL, so a link or a rel
 
 ## Consequences
 
-- The page address is now in the "what leaves the browser" table, the panel and `docs/data-flow.md`: the host sees two short ids and up to two activity codes with each page load.
-- **Not built:** the grid's selection (`sel`), layout (`l`), columns (`cols`) and other filters (`f`), and density. A reload keeps the screen but not those. A link to a pair the browser has in its cache but not open still asks for the files, because the URL does not carry what is needed to find the cache entry and its import report.
+- The page address is now in the "what leaves the browser" table, the panel and `docs/data-flow.md`: the host sees two short ids and up to three activity codes with each page load.
+- **Added the same day:** the grid's selection (`sel`, a task code), which the activity drawer shows. A new selection replaces the history step. A code that is not in update B is kept in the URL and the grid says so, until the planner selects something.
+- **Not built:** layout (`l`), columns (`cols`), other filters (`f`) and density. A reload keeps the screen and selection but not those. A link to a pair the browser has in its cache but not open still asks for the files, because the URL does not carry what is needed to find the cache entry and its import report.

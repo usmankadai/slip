@@ -10,6 +10,7 @@
  * - `q`: the activity code the grid was opened on, from the narrative's evidence or the assistant.
  *   Text the planner types into the grid's search is never written: it could be part of a name.
  * - `check`: a health check whose activities the grid shows.
+ * - `sel`: the activity selected in the grid, by its task code. The drawer shows it.
  * - `t`: the activity whose slip is traced, by its task code.
  *
  * Only task codes and Slip's own words go in the URL, never activity names or other schedule
@@ -22,7 +23,7 @@ export type Underneath = 'summary' | 'health' | 'finish' | 'log';
 export interface UrlView {
   underneath: Underneath;
   /** `text` is an activity code the grid opened on, never typed search text. */
-  changes: { kind: ChangeKind | null; text?: string; check?: number } | null;
+  changes: { kind: ChangeKind | null; text?: string; check?: number; sel?: string } | null;
   trace: string | null;
 }
 
@@ -70,6 +71,8 @@ export function readUrl(search: string): UrlState {
     if (code && CODE.test(code)) changes.text = code;
     const check = Number(params.get('check'));
     if (Number.isInteger(check) && check >= 1 && check <= 14) changes.check = check;
+    const sel = params.get('sel');
+    if (sel && CODE.test(sel)) changes.sel = sel;
   }
 
   const t = params.get('t');
@@ -91,6 +94,7 @@ export function writeUrl(state: UrlState): string {
     params.set('c', changes.kind ?? 'everything');
     if (changes.text && CODE.test(changes.text)) params.set('q', changes.text);
     if (changes.check) params.set('check', String(changes.check));
+    if (changes.sel && CODE.test(changes.sel)) params.set('sel', changes.sel);
   }
   if (trace && CODE.test(trace)) params.set('t', trace);
   return `?${params.toString()}`;
@@ -108,7 +112,8 @@ export function namesPair(
 }
 
 /**
- * Whether two views show the same screen, differing only in what the changes grid filters by.
+ * Whether two views show the same screen, differing only in what the changes grid filters by or
+ * which activity is selected.
  * Moving between those replaces the browser's history entry instead of adding one.
  */
 export function sameScreen(a: UrlView, b: UrlView): boolean {

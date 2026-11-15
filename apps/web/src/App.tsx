@@ -45,6 +45,8 @@ export function App() {
     kind: ChangeKind | null;
     check?: { id: number; name: string };
     text?: string;
+    /** The selected activity's code, for the address bar. */
+    sel?: string;
   } | null>(null);
   /** True while the Finish update screen is showing, or waiting behind the changes screen. */
   const [narrative, setNarrative] = useState(false);
@@ -122,6 +124,7 @@ export function App() {
             kind: view.changes.kind,
             ...(check ? { check } : {}),
             ...(view.changes.text ? { text: view.changes.text } : {}),
+            ...(view.changes.sel ? { sel: view.changes.sel } : {}),
           }
         : null,
     );
@@ -229,6 +232,7 @@ export function App() {
                   kind: changes.kind,
                   ...(changes.text ? { text: changes.text } : {}),
                   ...(changes.check ? { check: changes.check.id } : {}),
+                  ...(changes.sel ? { sel: changes.sel } : {}),
                 }
               : null,
             trace: trace?.code ?? null,
@@ -337,6 +341,16 @@ export function App() {
             initialKind={changes.kind}
             check={changes.check}
             initialText={changes.text}
+            initialSelected={changes.sel}
+            onSelect={(code) =>
+              setChanges((open) => {
+                if (!open || open.sel === (code ?? undefined)) return open;
+                const next = { ...open };
+                if (code) next.sel = code;
+                else delete next.sel;
+                return next;
+              })
+            }
             backLabel={narrative ? 'Finish update' : health ? 'health' : 'summary'}
             onBack={() => setChanges(null)}
             onTrace={setTrace}
@@ -347,6 +361,7 @@ export function App() {
                       kind,
                       ...(check && open.check ? { check: open.check } : {}),
                       ...(code && open.text ? { text: open.text } : {}),
+                      ...(open.sel ? { sel: open.sel } : {}),
                     }
                   : open,
               )

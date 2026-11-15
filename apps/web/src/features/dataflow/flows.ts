@@ -45,7 +45,7 @@ export const FLOWS: readonly Flow[] = [
   },
   { data: 'Anything, scripted mode', stays: 'Yes', server: 'Never', anthropic: 'Never' },
   {
-    data: "The page address: the two files' short ids and at most two activity codes",
+    data: "The page address: the two files' short ids and at most three activity codes",
     stays: 'Yes',
     server: 'With each page load, as for any website; not stored by Slip',
     anthropic: 'Never',

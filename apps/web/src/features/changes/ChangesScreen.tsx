@@ -63,6 +63,8 @@ export function ChangesScreen({
   onBack,
   onTrace,
   onFilter,
+  initialSelected,
+  onSelect,
 }: {
   pair: { a: SlotFacts; b: SlotFacts };
   /** The kind of change to open on, or null for every activity. */
@@ -81,6 +83,10 @@ export function ChangesScreen({
    * of change, and whether the health check and the code it opened on still apply.
    */
   onFilter?: (view: { kind: ChangeKind | null; check: boolean; code: boolean }) => void;
+  /** An activity to select when the screen opens, by its code: from the address bar. */
+  initialSelected?: string;
+  /** Told the code of the selected activity, or null when the selection is lost. */
+  onSelect?: (code: string | null) => void;
 }) {
   const [filter, setFilter] = useState<GridFilter>({
     kind: initialKind,
@@ -93,6 +99,8 @@ export function ChangesScreen({
   const [selectedRow, setSelectedRow] = useState<number | null>(null);
   const [reveal, setReveal] = useState<{ row: number; nonce: number } | null>(null);
   const [lostSelection, setLostSelection] = useState(false);
+  /** A code from the address bar that is not an activity in update B. */
+  const [unknownSelected, setUnknownSelected] = useState<string | null>(null);
   const [position, setPosition] = useState({ first: 0, last: 0 });
   const [removed, setRemoved] = useState(0);
   const [gantt, setGantt] = useState<'shown' | 'hidden'>('shown');
@@ -170,6 +178,56 @@ export function ChangesScreen({
   useEffect(() => {
     if (lostSelection) setDrawerCode(null);
   }, [lostSelection]);
+
+  // The address bar follows the selection.
+  const reportSelect = useRef(onSelect);
+  reportSelect.current = onSelect;
+  useEffect(() => {
+    if (selectedCode) reportSelect.current?.(selectedCode);
+  }, [selectedCode]);
+  useEffect(() => {
+    if (lostSelection) reportSelect.current?.(null);
+  }, [lostSelection]);
+
+  // An activity named in the address bar is found and selected once, when the screen opens.
+  useEffect(() => {
+    if (!initialSelected) return;
+    let current = true;
+    void (async () => {
+      try {
+        const found = await engine().request({ type: 'activity', taskCode: initialSelected });
+        if (!current) return;
+        if (!found.current) {
+          // The code stays in the address bar until the planner selects something, so the
+          // screen says the same thing however often it is opened again.
+          setUnknownSelected(initialSelected);
+          return;
+        }
+        const activity = found.current.index;
+        const at = await engine().request({
+          type: 'locate',
+          slot: 'b',
+          activity,
+          filter: spec,
+          sort,
+        });
+        if (!current) return;
+        if (at.row < 0) {
+          setLostSelection(true);
+          return;
+        }
+        selectedActivity.current = activity;
+        setSelectedRow(at.row);
+        setReveal((previous) => ({ row: at.row, nonce: (previous?.nonce ?? 0) + 1 }));
+      } catch {
+        // The grid still opens; only the selection is not restored.
+      }
+    })();
+    return () => {
+      current = false;
+    };
+    // Once, on opening: later selections come from the planner.
+  }, []);
 
   // After a new filter or sort, find the selected activity again and bring it back into view.
   const viewKey = JSON.stringify([spec, sort]);
@@ -455,6 +513,11 @@ export function ChangesScreen({
       <div>
         {lostSelection ? (
           <Notice>The activity you had selected is hidden by this filter.</Notice>
+        ) : null}
+        {unknownSelected && !selected ? (
+          <Notice>
+            The link selected {unknownSelected}, which is not an activity in update B.
+          </Notice>
         ) : null}
         <p className={styles.status} aria-live="polite">
           {status === 'loading' ? (

@@ -2,6 +2,23 @@
 
 What was built, what Usman decided or designed, and what an agent generated. Newest first.
 
+## 15 November 2026: the selection in the URL
+
+**Done**
+
+- The activity selected in the changes grid is in the URL as `sel`, so a reload or a link opens the grid with that row selected, scrolled to, and in the drawer. A new selection replaces the history step instead of adding one.
+- A link whose selected code is not in update B says so on the grid ("The link selected X, which is not an activity in update B"). A selection hidden by a new filter is dropped from the URL, as before.
+- The URL can now hold three activity codes, so the what-leaves-the-browser row, the panel and both documents say three.
+- Checked headlessly against the release build under the production headers: select, select again (no new history step), reload, change the filter, Back, a fresh browser with the link, an unknown code. No policy violations.
+
+**Usman decided or designed**
+
+- To put the selection in the URL next.
+
+**The agent (Claude) generated**
+
+- The code, tests and the wording of the new notice.
+
 ## 15 November 2026: the activity drawer
 
 **Done**
