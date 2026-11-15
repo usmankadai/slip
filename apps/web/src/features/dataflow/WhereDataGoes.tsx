@@ -68,7 +68,9 @@ export function WhereDataGoes({ mode }: { mode: AssistantMode }) {
         )}
         <li>
           Like any website, the host (Vercel) sees requests for the page and its files, with your IP
-          address. Those requests carry no schedule content.
+          address and the page address. The address names the two files by a short id made from
+          their content and can hold up to two activity codes: the one being traced and the one the
+          grid was opened on. It never holds names, dates or anything you typed.
         </li>
         <li>
           The same table is in{' '}

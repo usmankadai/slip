@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Footer } from './app/Footer.tsx';
 import { AgentDock } from './features/agent/AgentDock.tsx';
 import { AuditScreen } from './features/audit/AuditScreen.tsx';
@@ -19,7 +19,18 @@ import { reopenSchedule } from './storage/reopen.ts';
 import { clearOpenPair, loadOpenPair, saveOpenPair } from './storage/session.ts';
 import { engine } from './app/engine.ts';
 import { useEdits } from './app/useEdits.ts';
-import { Notice } from '@slip/ui';
+import {
+  HOME_VIEW,
+  namesPair,
+  readUrl,
+  sameScreen,
+  updateId,
+  writeUrl,
+  type UrlState,
+  type UrlView,
+} from './app/urlState.ts';
+import { NONE } from '@slip/xer';
+import { Button, Notice } from '@slip/ui';
 import { loadNarrative, saveNarrative } from './storage/narrativeStore.ts';
 import styles from './App.module.css';
 
@@ -62,6 +73,61 @@ export function App() {
   const [saved, setSaved] = useState<boolean | null>(null);
   /** Whether the browser agreed to keep Slip's data under storage pressure. */
   const [persisted, setPersisted] = useState<boolean | null>(null);
+  /** The pair whose schedules are in the engine, even while the import screen shows. */
+  const loadedPair = useRef<ComparedPair | null>(null);
+  /** A link to a pair this browser does not have open, waiting for its two files. */
+  const [wanted, setWanted] = useState<UrlState | null>(null);
+  /** True while a view from the address bar is being looked up and put on screen. */
+  const [applying, setApplying] = useState(false);
+
+  /**
+   * Puts a view from the address bar on screen. The URL holds only codes and numbers, so the
+   * traced activity's name and dates, and a health check's name, are asked of the engine.
+   */
+  const applyView = useCallback(async (view: UrlView) => {
+    setApplying(true);
+    let target: TraceTarget | null = null;
+    if (view.trace) {
+      try {
+        const found = await engine().request({ type: 'activity', taskCode: view.trace });
+        if (found.current) {
+          target = {
+            code: found.current.taskCode,
+            name: found.current.name,
+            was: found.previous?.finish ?? NONE,
+            now: found.current.finish,
+          };
+        }
+      } catch {
+        // An activity the engine cannot find is left out; the screen beneath still opens.
+      }
+    }
+    let check: { id: number; name: string } | undefined;
+    const checkId = view.changes?.check;
+    if (checkId) {
+      try {
+        const health = await engine().request({ type: 'health', slot: 'b' });
+        const found = health.checks.find((c) => c.id === checkId);
+        if (found) check = { id: found.id, name: found.name };
+      } catch {
+        // Without its name the check cannot be shown honestly, so the grid opens without it.
+      }
+    }
+    setAuditOpen(view.underneath === 'log');
+    setNarrative(view.underneath === 'finish');
+    setHealth(view.underneath === 'health');
+    setChanges(
+      view.changes
+        ? {
+            kind: view.changes.kind,
+            ...(check ? { check } : {}),
+            ...(view.changes.text ? { text: view.changes.text } : {}),
+          }
+        : null,
+    );
+    setTrace(target);
+    setApplying(false);
+  }, []);
 
   const audit = useCallback(
     (type: AuditType, summary: string, actor: 'user' | 'agent' = 'user') => {
@@ -88,6 +154,7 @@ export function App() {
   const open = useCallback(
     (next: ComparedPair) => {
       const nextKey = pairKey(next.a, next.b);
+      loadedPair.current = next;
       setBlocks(null);
       setSaved(null);
       setRestoring(true);
@@ -115,8 +182,15 @@ export function App() {
     if (SHOW_HARNESS) return;
     let current = true;
     void (async () => {
+      const url = readUrl(location.search);
       const saved = await loadOpenPair();
       if (!current) return;
+      if (url.pair && !(saved && namesPair(url, saved))) {
+        // A link to updates this browser does not have open: ask for the files.
+        setWanted(url);
+        setReopening('');
+        return;
+      }
       if (!saved) {
         setReopening('');
         return;
@@ -131,6 +205,8 @@ export function App() {
         await engine().load('b', b);
         if (!current) return;
         open(saved);
+        if (url.pair) await applyView(url.view);
+        if (!current) return;
         setReopening('');
       } catch {
         void clearOpenPair();
@@ -140,12 +216,84 @@ export function App() {
     return () => {
       current = false;
     };
-  }, [open]);
+  }, [open, applyView]);
+
+  /** What is on screen, as the address bar should show it. */
+  const view = useMemo<UrlView>(
+    () =>
+      pair
+        ? {
+            underneath: auditOpen ? 'log' : narrative ? 'finish' : health ? 'health' : 'summary',
+            changes: changes
+              ? {
+                  kind: changes.kind,
+                  ...(changes.text ? { text: changes.text } : {}),
+                  ...(changes.check ? { check: changes.check.id } : {}),
+                }
+              : null,
+            trace: trace?.code ?? null,
+          }
+        : HOME_VIEW,
+    [pair, auditOpen, narrative, health, changes, trace],
+  );
+  const shown = useRef<{ pairId: string; view: UrlView } | null>(null);
+
+  // The address bar follows the screen. Moving to another screen adds a step to the browser's
+  // history, so Back and Forward work; changing a filter on the same screen replaces it.
+  useEffect(() => {
+    if (SHOW_HARNESS || applying || wanted) return;
+    if (reopening === 'checking' || reopening === 'reopening') return;
+    const ids = pair ? { a: updateId(pair.a), b: updateId(pair.b) } : null;
+    const pairId = ids ? `${ids.a}:${ids.b}` : '';
+    const search = writeUrl({ pair: ids, view });
+    const before = shown.current;
+    shown.current = { pairId, view };
+    if (search === location.search) return;
+    const url = search || location.pathname;
+    if (before === null || (before.pairId === pairId && sameScreen(before.view, view))) {
+      history.replaceState(null, '', url);
+    } else {
+      history.pushState(null, '', url);
+    }
+  }, [pair, view, applying, reopening, wanted]);
+
+  // Back and Forward in the browser.
+  useEffect(() => {
+    if (SHOW_HARNESS) return;
+    const onPop = () => {
+      const url = readUrl(location.search);
+      shown.current = null;
+      if (!url.pair) {
+        setWanted(null);
+        void applyView(HOME_VIEW);
+        setPair(null);
+        void clearOpenPair();
+        return;
+      }
+      const loaded = loadedPair.current;
+      if (loaded && namesPair(url, loaded)) {
+        setWanted(null);
+        setPair(loaded);
+        void saveOpenPair(loaded);
+        void applyView(url.view);
+        return;
+      }
+      setPair(null);
+      setWanted(url);
+    };
+    addEventListener('popstate', onPop);
+    return () => removeEventListener('popstate', onPop);
+  }, [applyView]);
 
   const compare = (next: ComparedPair) => {
     const nextKey = pairKey(next.a, next.b);
     setReopening('');
     open(next);
+    if (wanted) {
+      // The files a link asked for: carry on to the view it points to. Other files: their summary.
+      if (namesPair(wanted, next)) void applyView(wanted.view);
+      setWanted(null);
+    }
     const log = (type: AuditType, summary: string) =>
       void appendAudit({ pair: nextKey, actor: 'user', type, summary });
     log(
@@ -192,6 +340,17 @@ export function App() {
             backLabel={narrative ? 'Finish update' : health ? 'health' : 'summary'}
             onBack={() => setChanges(null)}
             onTrace={setTrace}
+            onFilter={({ kind, check, code }) =>
+              setChanges((open) =>
+                open
+                  ? {
+                      kind,
+                      ...(check && open.check ? { check: open.check } : {}),
+                      ...(code && open.text ? { text: open.text } : {}),
+                    }
+                  : open,
+              )
+            }
           />
         </div>
       ) : null}
@@ -250,7 +409,30 @@ export function App() {
         </main>
       ) : null}
       {pair || reopening === 'checking' || reopening === 'reopening' ? null : (
-        <>
+        // One block, so a notice above the import screen sits on top of it, not in a row of its own.
+        <div className={styles.stack}>
+          {wanted?.pair ? (
+            <div className={styles.reopening}>
+              <Notice
+                title="This link is for two updates this browser does not have open"
+                action={
+                  <Button
+                    variant="quiet"
+                    onClick={() => {
+                      setWanted(null);
+                      history.replaceState(null, '', location.pathname);
+                    }}
+                  >
+                    Start without the link
+                  </Button>
+                }
+              >
+                Drop the two files it was made from, and Slip will open the view the link points to.
+                Files are matched by their content, not their names: update A is{' '}
+                <code>{wanted.pair.a}</code> and update B is <code>{wanted.pair.b}</code>.
+              </Notice>
+            </div>
+          ) : null}
           {reopening === 'failed' ? (
             <div className={styles.reopening}>
               <Notice title="Slip could not reopen the updates you had open">
@@ -260,7 +442,7 @@ export function App() {
             </div>
           ) : null}
           <ImportScreen onCompare={compare} />
-        </>
+        </div>
       )}
       {pair && !reopening ? (
         <AgentDock

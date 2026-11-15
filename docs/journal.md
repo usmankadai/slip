@@ -2,6 +2,30 @@
 
 What was built, what Usman decided or designed, and what an agent generated. Newest first.
 
+## 15 November 2026: URL state
+
+**Done**
+
+- The address bar follows the screen: which two updates, the screen underneath, the changes grid and its kind of change, a health check, and the traced activity. A reload lands on the same screen, and the browser's Back and Forward move between screens.
+- A link opened in a browser that does not have the pair open shows a notice over the import screen with the two file ids. Dropping files with the same content carries on to the linked view.
+- Everything read from the URL is checked against a pattern or a list; a tampered URL opens the import screen or the summary. 13 unit tests.
+- The page address is a new row in what leaves the browser: the host sees two short file ids and up to two activity codes with each page load. The panel, `docs/data-flow.md` and the security spec say so, held together by the existing test.
+- A layout fault fixed on the way: a notice above the import screen took half the window.
+- Checked headlessly against the release build under the production headers: summary to health and back and forward, trace survives a reload, a fresh browser with the link asks for the files and then opens the trace, a tampered URL is ignored, no policy violations.
+
+**Usman decided or designed**
+
+- To do URL state next.
+
+**The agent (Claude) generated**
+
+- All the code, tests and D24, including the departures from the spec: hash ids only, no fixture ids; typed search never written; the notice's wording, which Usman had not seen before it was built.
+
+**Worth Usman's attention**
+
+- The notice for a link to files this browser lacks ("This link is for two updates this browser does not have open") was built without being shown to you first. It uses the existing `Notice`; the wording is easy to change.
+- Not in the URL yet: the grid's selection, layout, columns, other filters and density.
+
 ## 15 November 2026: where your data goes
 
 **Done**
