@@ -20,6 +20,8 @@ What was built, what Usman decided or designed, and what an agent generated. New
 - The first one named the same four drivers the generator planted.
 - New tests: the answer parser (7), refusals and the mode check (3), dropping working text (1), the same-origin check (1), drawing lists and tables (1).
 
+- After merging, production showed `/api/health` live with shared limits, but `/api/agent/chat` was Vercel's own 404: the catch-all function matched one path segment only. Fixed with one function per route; found by asking a question on the live site.
+
 **Usman decided or designed**
 
 - Live on the public site, with limits.
