@@ -1,0 +1,423 @@
+diff --git a/apps/web/src/features/changes/ChangesGrid.stories.tsx b/apps/web/src/features/changes/ChangesGrid.stories.tsx
+index 4dfafce..877315b 100644
+--- a/apps/web/src/features/changes/ChangesGrid.stories.tsx
++++ b/apps/web/src/features/changes/ChangesGrid.stories.tsx
+@@ -21,6 +21,7 @@ const NAMES = [
+   'Lay sleepers, section 2',
+ ];
+ const SLIPS = [67, 27, 20, 18, 16, 5, 2, 0, -3, -10, -46, null];
++const STATUSES = ['notStarted', 'inProgress', 'complete', 'notStarted', null] as const;
+ const FLAGS = [
+   Change.FinishMoved | Change.JoinedCriticalPath,
+   Change.FinishMoved | Change.DurationChanged,
+@@ -36,6 +37,7 @@ function fakeRow(position: number): GridRow {
+     activity: position,
+     code: `P0${(position % 3) + 1}-A00${(position % 5) + 1}-TRK-${String(((position * 7) % 9000) + 1000)}`,
+     name: NAMES[position % NAMES.length]!,
++    status: STATUSES[position % STATUSES.length]!,
+     was: slip === null ? -2147483648 : JUNE + (position % 200) * DAY,
+     now: JUNE + ((position % 200) + (slip ?? 0)) * DAY,
+     slipDays: slip,
+diff --git a/apps/web/src/features/changes/ChangesGrid.tsx b/apps/web/src/features/changes/ChangesGrid.tsx
+index 7ddb132..a49ddcd 100644
+--- a/apps/web/src/features/changes/ChangesGrid.tsx
++++ b/apps/web/src/features/changes/ChangesGrid.tsx
+@@ -8,7 +8,7 @@ import {
+   type ReactNode,
+ } from 'react';
+ import type { SortSpec } from '@slip/engine';
+-import { DeltaCell, ROW_HEIGHT, Skeleton, type Density } from '@slip/ui';
++import { DeltaCell, ROW_HEIGHT, Skeleton, StatusCell, type Density } from '@slip/ui';
+ import { NONE } from '@slip/xer';
+ import { count, shortDate, workingDays } from '../../shared/format.ts';
+ import styles from './changes.module.css';
+@@ -79,6 +79,7 @@ function Cells({ row, position }: { row: GridRow | undefined; position: number }
+         <span role="gridcell" className={styles.cell} />
+         <span role="gridcell" className={styles.cell} />
+         <span role="gridcell" className={styles.cell} />
++        <span role="gridcell" className={styles.cell} />
+       </>
+     );
+   }
+@@ -93,6 +94,9 @@ function Cells({ row, position }: { row: GridRow | undefined; position: number }
+       <span role="gridcell" className={styles.cell} title={row.name}>
+         {row.name}
+       </span>
++      <span role="gridcell" className={styles.cell}>
++        <StatusCell status={row.status} />
++      </span>
+       <span role="gridcell" className={`${styles.cell} ${styles.date}`}>
+         {shortDate(row.was)}
+       </span>
+diff --git a/apps/web/src/features/changes/changes.module.css b/apps/web/src/features/changes/changes.module.css
+index c00ca91..57816de 100644
+--- a/apps/web/src/features/changes/changes.module.css
++++ b/apps/web/src/features/changes/changes.module.css
+@@ -120,10 +120,12 @@
+ 
+ .row {
+   display: grid;
+-  grid-template-columns: 72px 168px minmax(220px, 1fr) 104px 104px 168px 96px minmax(150px, 240px);
++  grid-template-columns:
++    72px 168px minmax(220px, 1fr) 112px 104px 104px 168px 96px
++    minmax(150px, 240px);
+   align-items: center;
+   height: var(--row-height);
+-  min-width: 1100px;
++  min-width: 1212px;
+   border-bottom: 1px solid var(--border-subtle);
+   cursor: default;
+ }
+diff --git a/apps/web/src/features/changes/changes.test.ts b/apps/web/src/features/changes/changes.test.ts
+index 95f5552..9bbbf05 100644
+--- a/apps/web/src/features/changes/changes.test.ts
++++ b/apps/web/src/features/changes/changes.test.ts
+@@ -1,7 +1,9 @@
+ import { describe, expect, it } from 'vitest';
+ import { Change } from '@slip/engine';
++import { NONE, Status } from '@slip/xer';
+ import {
+   COLUMNS,
++  activityStatus,
+   DEFAULT_FILTER,
+   DEFAULT_SORT,
+   changeWords,
+@@ -189,6 +191,15 @@ describe('words', () => {
+     });
+   });
+ 
++  it('maps the status code to the badge, and never guesses an unknown one', () => {
++    expect(activityStatus(Status.NotStarted)).toBe('notStarted');
++    expect(activityStatus(Status.Active)).toBe('inProgress');
++    expect(activityStatus(Status.Complete)).toBe('complete');
++    expect(activityStatus(Status.Unknown)).toBeNull();
++    expect(activityStatus(NONE)).toBeNull();
++    expect(activityStatus(99)).toBeNull();
++  });
++
+   it('gives the scrolling readout in rows', () => {
+     expect(scrollReadout(120_401, 350_412)).toBe('Row 120,401 of 350,412');
+   });
+diff --git a/apps/web/src/features/changes/model.ts b/apps/web/src/features/changes/model.ts
+index 9ff76a5..89d6c83 100644
+--- a/apps/web/src/features/changes/model.ts
++++ b/apps/web/src/features/changes/model.ts
+@@ -6,6 +6,8 @@ import {
+   type SortSpec,
+   type TextColumn,
+ } from '@slip/engine';
++import type { ActivityStatus } from '@slip/ui';
++import { Status } from '@slip/xer';
+ import { count, plural } from '../../shared/format.ts';
+ 
+ /** The kinds of change a planner can filter to. `all` is every activity with any change. */
+@@ -45,7 +47,7 @@ export function engineFilter(filter: GridFilter): FilterSpec {
+   return spec;
+ }
+ 
+-export type ColumnId = 'code' | 'name' | 'was' | 'now' | 'slip' | 'float' | 'changes';
++export type ColumnId = 'code' | 'name' | 'status' | 'was' | 'now' | 'slip' | 'float' | 'changes';
+ 
+ export interface Column {
+   id: ColumnId;
+@@ -58,6 +60,7 @@ export interface Column {
+ export const COLUMNS: Column[] = [
+   { id: 'code', label: 'Activity code', sortBy: 'code', numeric: false },
+   { id: 'name', label: 'Name', sortBy: 'name', numeric: false },
++  { id: 'status', label: 'Status', sortBy: 'status', numeric: false },
+   { id: 'was', label: 'Was', sortBy: 'previousFinish', numeric: false },
+   { id: 'now', label: 'Now', sortBy: 'finish', numeric: false },
+   { id: 'slip', label: 'Finish slip', sortBy: 'finishDeltaDays', numeric: true },
+@@ -97,6 +100,14 @@ export function changeWords(flags: number): string {
+     .join(', ');
+ }
+ 
++/** The engine's status code as the status badge takes it. Anything unrecognised is null, not a guess. */
++export function activityStatus(code: number): ActivityStatus | null {
++  if (code === Status.NotStarted) return 'notStarted';
++  if (code === Status.Active) return 'inProgress';
++  if (code === Status.Complete) return 'complete';
++  return null;
++}
++
+ export interface Position {
+   /** Rows on screen, 1-based, or 0 for both when the view is empty. */
+   first: number;
+diff --git a/apps/web/src/features/changes/useGridRows.ts b/apps/web/src/features/changes/useGridRows.ts
+index 4ddfbdb..d631e81 100644
+--- a/apps/web/src/features/changes/useGridRows.ts
++++ b/apps/web/src/features/changes/useGridRows.ts
+@@ -5,10 +5,12 @@
+  */
+ import { useCallback, useEffect, useRef, useState } from 'react';
+ import type { FilterSpec, SortSpec } from '@slip/engine';
++import type { ActivityStatus } from '@slip/ui';
+ import { NONE, Status, TaskType } from '@slip/xer';
+ import { engine } from '../../app/engine.ts';
+ import { EngineRequestError } from '../../workers/engineClient.ts';
+ import type { GanttRow } from './gantt/geometry.ts';
++import { activityStatus } from './model.ts';
+ import { fetchRange } from './virtual.ts';
+ 
+ export interface GridRow {
+@@ -16,6 +18,8 @@ export interface GridRow {
+   activity: number;
+   code: string;
+   name: string;
++  /** Progress status in update B, or null when the file did not give one Slip recognises. */
++  status: ActivityStatus | null;
+   /** Finish in update A and update B, minutes since the epoch, or NONE. */
+   was: number;
+   now: number;
+@@ -113,6 +117,7 @@ export function useGridRows(filter: FilterSpec, sort: SortSpec | null) {
+                 activity: result.indices[k]!,
+                 code: result.text.code?.[k] ?? '',
+                 name: result.text.name?.[k] ?? '',
++                status: activityStatus(state),
+                 was: result.numbers.previousFinish?.[k] ?? NONE,
+                 now: result.numbers.finish?.[k] ?? NONE,
+                 slipDays: slip === NONE ? null : slip / 100,
+diff --git a/docs/journal.md b/docs/journal.md
+index 44344fd..032650d 100644
+--- a/docs/journal.md
++++ b/docs/journal.md
+@@ -2,6 +2,28 @@
+ 
+ What was built, what Usman decided or designed, and what an agent generated. Newest first.
+ 
++## 15 November 2026: activity status in the changes grid
++
++**Done**
++
++- `StatusCell` in `packages/ui`: an activity's status in update B as a small neutral badge, a word ("Not started", "In progress", "Complete") and a circle that is empty, half filled or filled. A status the file did not give, or gave in a form Slip does not recognise, reads "Not known". Stories for each, a contract in its README and unit tests.
++- A Status column in the changes grid, after Name, sortable. The grid already fetched the status for the Gantt's progress, so no new data is asked of the engine.
++
++**Usman decided or designed**
++
++- That the grid should show status as a badge in its own column, using a reusable component (the task as given).
++
++**The agent (Claude) generated**
++
++- All the code, tests, stories, the README and the copy.
++- Choices made without asking: the name `StatusCell` (the spec's component list already has it), the column's place after Name and its 112px width, making it sortable, the words, "Not known" for an unrecognised status, and a neutral badge that tells the statuses apart by word and shape rather than colour.
++
++**Worth Usman's attention**
++
++- The `--status-notstarted/active/complete` tokens in the design-system spec still have no values (D16 does not set them), so the badge uses only neutral tokens. If status should carry colour, that is a visual identity decision to make, after which the badge can take it.
++- The column's place and width, and whether it should be sortable, are layout choices to confirm.
++- Not looked at in a browser: the in-app browser could not open the local Storybook. Checked by unit tests and the Storybook build only.
++
+ ## 14 November 2026: approving the assistant's changes
+ 
+ **Done**
+diff --git a/docs/spec/design-system.md b/docs/spec/design-system.md
+index af2f4c6..43b1f5d 100644
+--- a/docs/spec/design-system.md
++++ b/docs/spec/design-system.md
+@@ -27,7 +27,7 @@ Each component ships with: implementation, `*.stories.tsx` covering every state,
+ - **Agent blocks:** `AgentStep`, `AgentStepsGroup` ("Worked for Xs, N steps"), `AgentText`, `AgentTable`, `AgentChart`, `ProposedEditCard`, `AgentError`, `ScriptedBadge` ("Scripted answer, not AI")
+ - **Feedback:** `Skeleton`, `ProgressBar` (with rows / bytes), `EmptyState`, `ErrorState`, `Toast`, `Notice` (persistent warning, for example non-retained-logic files)
+ 
+-Built so far: `Button`, `ProgressBar`, `Notice`, `DeltaCell` (the slip cell from exploration 01: a signed number of working days and a bar on a fixed scale), `Skeleton`, `SegmentedControl`, `EntityChip`, `AgentSteps`, `AgentText`, `ScriptedBadge` and `ProposedEditCard`, each with stories, a contract in its README and a unit test. Screen stories live beside their feature in `apps/web` and are picked up by the same Storybook (`Screens/Import`, `Screens/Update summary`, `Screens/Changes grid`, `Screens/Slip trace`, `Screens/Health`, `Screens/Finish update`).
++Built so far: `Button`, `ProgressBar`, `Notice`, `DeltaCell` (the slip cell from exploration 01: a signed number of working days and a bar on a fixed scale), `Skeleton`, `SegmentedControl`, `EntityChip`, `AgentSteps`, `AgentText`, `ScriptedBadge`, `ProposedEditCard` and `StatusCell` (an activity's status as a neutral badge: a word and an empty, half or full circle; it uses no status colour, since those tokens have no values yet), each with stories, a contract in its README and a unit test. Screen stories live beside their feature in `apps/web` and are picked up by the same Storybook (`Screens/Import`, `Screens/Update summary`, `Screens/Changes grid`, `Screens/Slip trace`, `Screens/Health`, `Screens/Finish update`).
+ 
+ ## `packages/ui/AGENTS.md` (written in phase 4)
+ Guidance aimed at coding agents. For each component: when to use it, when not to, required props, density limits, and a correct and an incorrect example. Plus global rules: use tokens only, use existing components before creating new ones, every new view needs all four states, every number uses a numeric cell.
+diff --git a/packages/ui/src/components/StatusCell/README.md b/packages/ui/src/components/StatusCell/README.md
+new file mode 100644
+index 0000000..15439b4
+--- /dev/null
++++ b/packages/ui/src/components/StatusCell/README.md
+@@ -0,0 +1,27 @@
++# StatusCell
++
++## Contract
++
++- **Use for** an activity's progress status in one update: not started, in progress or complete. In a grid cell, the activity drawer or an agent table.
++- **Do not use for** a change between updates (use the change words or `DeltaCell`), a percentage complete (that is a number), or the status of a health check or an import.
++- **Props:** `status`: `'notStarted'`, `'inProgress'`, `'complete'`, or `null` when the file did not give one Slip recognises.
++- **Rules:**
++  - The word is always shown. The circle (empty, half filled, filled) repeats it as a shape; colour is never the signal.
++  - The badge is neutral. It does not use the slip scale, the critical colour or the accent: status is not slip, and complete is not good news on its own.
++  - `null` writes "Not known" in muted text, without a badge. It never guesses "Not started".
++  - The words are P6's three statuses in sentence case. Do not shorten them to fit a column; make the column fit "Not started".
++  - Map the engine's numeric status to the prop in the app, not in this component, so `packages/ui` does not depend on `packages/xer`.
++
++## Correct
++
++```tsx
++<StatusCell status="inProgress" /> // half-filled circle and "In progress"
++<StatusCell status={null} />       // "Not known"
++```
++
++## Incorrect
++
++```tsx
++<StatusCell status={row.status === 3 ? 'complete' : 'notStarted'} /> // guesses: unknown is not "not started"
++<span className={styles.green}>●</span>                              // a colour and a glyph with no word
++```
+diff --git a/packages/ui/src/components/StatusCell/StatusCell.module.css b/packages/ui/src/components/StatusCell/StatusCell.module.css
+new file mode 100644
+index 0000000..58fd719
+--- /dev/null
++++ b/packages/ui/src/components/StatusCell/StatusCell.module.css
+@@ -0,0 +1,43 @@
++.badge {
++  display: inline-flex;
++  align-items: center;
++  gap: var(--space-1);
++  max-width: 100%;
++  padding: var(--space-0) var(--space-1);
++  border: 1px solid var(--border-subtle);
++  border-radius: var(--radius-control);
++  background: var(--surface-1);
++  color: var(--text-secondary);
++  font-size: var(--text-xs);
++  line-height: var(--leading-xs);
++  font-weight: var(--weight-medium);
++  white-space: nowrap;
++  vertical-align: middle;
++}
++
++.glyph {
++  flex: none;
++  width: var(--space-2);
++  height: var(--space-2);
++  border: 1px solid var(--text-secondary);
++  border-radius: 50%;
++}
++
++.notStarted {
++  background: transparent;
++}
++
++.inProgress {
++  background: linear-gradient(90deg, var(--text-secondary) 50%, transparent 50%);
++}
++
++.complete {
++  background: var(--text-secondary);
++}
++
++.unknown {
++  font-size: var(--text-xs);
++  line-height: var(--leading-xs);
++  color: var(--text-muted);
++  white-space: nowrap;
++}
+diff --git a/packages/ui/src/components/StatusCell/StatusCell.stories.tsx b/packages/ui/src/components/StatusCell/StatusCell.stories.tsx
+new file mode 100644
+index 0000000..e15237e
+--- /dev/null
++++ b/packages/ui/src/components/StatusCell/StatusCell.stories.tsx
+@@ -0,0 +1,12 @@
++import type { Meta, StoryObj } from '@storybook/react-vite';
++import { StatusCell } from './StatusCell.tsx';
++
++const meta: Meta<typeof StatusCell> = { title: 'Components/StatusCell', component: StatusCell };
++export default meta;
++
++type Story = StoryObj<typeof StatusCell>;
++
++export const NotStarted: Story = { args: { status: 'notStarted' } };
++export const InProgress: Story = { args: { status: 'inProgress' } };
++export const Complete: Story = { args: { status: 'complete' } };
++export const NotKnown: Story = { args: { status: null } };
+diff --git a/packages/ui/src/components/StatusCell/StatusCell.tsx b/packages/ui/src/components/StatusCell/StatusCell.tsx
+new file mode 100644
+index 0000000..eef4504
+--- /dev/null
++++ b/packages/ui/src/components/StatusCell/StatusCell.tsx
+@@ -0,0 +1,34 @@
++import styles from './StatusCell.module.css';
++
++/** An activity's progress status, as P6 records it. */
++export type ActivityStatus = 'notStarted' | 'inProgress' | 'complete';
++
++export interface StatusCellProps {
++  /** The status, or null when the file did not give one Slip recognises. */
++  status: ActivityStatus | null;
++}
++
++const WORDS: Record<ActivityStatus, string> = {
++  notStarted: 'Not started',
++  inProgress: 'In progress',
++  complete: 'Complete',
++};
++
++/** The word for a status, as the badge writes it. */
++export function statusWord(status: ActivityStatus): string {
++  return WORDS[status];
++}
++
++/**
++ * An activity's status as a small badge: a word, and a circle that is empty, half filled or
++ * filled. The word and the shape carry the meaning, so it never depends on colour.
++ */
++export function StatusCell({ status }: StatusCellProps) {
++  if (status === null) return <span className={styles.unknown}>Not known</span>;
++  return (
++    <span className={styles.badge}>
++      <span className={`${styles.glyph} ${styles[status]}`} aria-hidden="true" />
++      {WORDS[status]}
++    </span>
++  );
++}
+diff --git a/packages/ui/src/index.ts b/packages/ui/src/index.ts
+index c743c7e..e48e4ce 100644
+--- a/packages/ui/src/index.ts
++++ b/packages/ui/src/index.ts
+@@ -9,6 +9,12 @@ export {
+   type DeltaCellProps,
+ } from './components/DeltaCell/DeltaCell.tsx';
+ export { Skeleton, type SkeletonProps } from './components/Skeleton/Skeleton.tsx';
++export {
++  StatusCell,
++  statusWord,
++  type ActivityStatus,
++  type StatusCellProps,
++} from './components/StatusCell/StatusCell.tsx';
+ export {
+   SegmentedControl,
+   type SegmentedControlProps,
+diff --git a/packages/ui/test/components.test.tsx b/packages/ui/test/components.test.tsx
+index 515efbe..4e517be 100644
+--- a/packages/ui/test/components.test.tsx
++++ b/packages/ui/test/components.test.tsx
+@@ -12,7 +12,9 @@ import {
+   ProposedEditCard,
+   SegmentedControl,
+   Skeleton,
++  StatusCell,
+   barLength,
++  statusWord,
+   formatDelta,
+ } from '../src/index.ts';
+ 
+@@ -62,6 +64,26 @@ describe('Notice', () => {
+   });
+ });
+ 
++describe('StatusCell', () => {
++  it('always writes the status as a word, with the circle hidden from screen readers', () => {
++    const html = renderToStaticMarkup(<StatusCell status="inProgress" />);
++    expect(html).toContain('In progress');
++    expect(html).toContain('aria-hidden="true"');
++    expect(renderToStaticMarkup(<StatusCell status="notStarted" />)).toContain('Not started');
++    expect(renderToStaticMarkup(<StatusCell status="complete" />)).toContain('Complete');
++  });
++
++  it('says the status is not known rather than guessing one', () => {
++    const html = renderToStaticMarkup(<StatusCell status={null} />);
++    expect(html).toContain('Not known');
++    expect(html).not.toContain('Not started');
++  });
++
++  it('gives the same word as the badge', () => {
++    expect(statusWord('complete')).toBe('Complete');
++  });
++});
++
+ describe('DeltaCell', () => {
+   it('writes a signed number of working days with a unit', () => {
+     expect(formatDelta(67)).toBe('+67d');

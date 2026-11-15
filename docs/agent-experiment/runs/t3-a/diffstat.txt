@@ -1,0 +1,15 @@
+ .../src/features/changes/ChangesGrid.stories.tsx   |  2 +
+ apps/web/src/features/changes/ChangesGrid.tsx      |  6 ++-
+ apps/web/src/features/changes/changes.module.css   |  6 ++-
+ apps/web/src/features/changes/changes.test.ts      | 11 ++++++
+ apps/web/src/features/changes/model.ts             | 13 ++++++-
+ apps/web/src/features/changes/useGridRows.ts       |  5 +++
+ docs/journal.md                                    | 22 +++++++++++
+ docs/spec/design-system.md                         |  2 +-
+ packages/ui/src/components/StatusCell/README.md    | 27 ++++++++++++++
+ .../components/StatusCell/StatusCell.module.css    | 43 ++++++++++++++++++++++
+ .../components/StatusCell/StatusCell.stories.tsx   | 12 ++++++
+ .../ui/src/components/StatusCell/StatusCell.tsx    | 34 +++++++++++++++++
+ packages/ui/src/index.ts                           |  6 +++
+ packages/ui/test/components.test.tsx               | 22 +++++++++++
+ 14 files changed, 206 insertions(+), 5 deletions(-)

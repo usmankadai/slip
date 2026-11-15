@@ -1,0 +1,316 @@
+diff --git a/apps/web/src/features/agent/ProposalView.tsx b/apps/web/src/features/agent/ProposalView.tsx
+index c4a2d95..f1d2489 100644
+--- a/apps/web/src/features/agent/ProposalView.tsx
++++ b/apps/web/src/features/agent/ProposalView.tsx
+@@ -1,10 +1,10 @@
+ import { useEffect, useState } from 'react';
+ import type { Proposal } from '@slip/agent/run';
+ import { ProposedEditCard, type ProposedEditCardProps } from '@slip/ui';
+-import { ConstraintType, NONE } from '@slip/xer';
++import { NONE } from '@slip/xer';
+ import { engine } from '../../app/engine.ts';
+ import type { EditsController } from '../../app/useEdits.ts';
+-import { longDate } from '../../shared/format.ts';
++import { CONSTRAINT_NAMES, longDate } from '../../shared/format.ts';
+ 
+ const FIELD_WORDS = {
+   originalDuration: 'Original duration',
+@@ -13,23 +13,10 @@ const FIELD_WORDS = {
+   constraintDate: 'Constraint date',
+ } as const;
+ 
+-const CONSTRAINT_WORDS: Record<number, string> = {
+-  [ConstraintType.None]: 'None',
+-  [ConstraintType.StartOn]: 'Start on',
+-  [ConstraintType.StartOnOrAfter]: 'Start on or after',
+-  [ConstraintType.StartOnOrBefore]: 'Start on or before',
+-  [ConstraintType.FinishOn]: 'Finish on',
+-  [ConstraintType.FinishOnOrAfter]: 'Finish on or after',
+-  [ConstraintType.FinishOnOrBefore]: 'Finish on or before',
+-  [ConstraintType.MandatoryStart]: 'Mandatory start',
+-  [ConstraintType.MandatoryFinish]: 'Mandatory finish',
+-  [ConstraintType.AsLateAsPossible]: 'As late as possible',
+-};
+-
+ function value(proposal: Proposal, which: 'from' | 'to', dayMinutes: number): string {
+   const raw = proposal[which];
+   if (proposal.field === 'constraintType') {
+-    const words = CONSTRAINT_WORDS[raw] ?? 'Unknown';
++    const words = CONSTRAINT_NAMES[raw] ?? 'Unknown';
+     const date =
+       which === 'to' && proposal.also && proposal.also.to !== NONE
+         ? ` ${longDate(proposal.also.to)}`
+diff --git a/apps/web/src/features/changes/ChangesGrid.stories.tsx b/apps/web/src/features/changes/ChangesGrid.stories.tsx
+index 4dfafce..005d737 100644
+--- a/apps/web/src/features/changes/ChangesGrid.stories.tsx
++++ b/apps/web/src/features/changes/ChangesGrid.stories.tsx
+@@ -2,6 +2,7 @@ import { useState } from 'react';
+ import type { Meta, StoryObj } from '@storybook/react-vite';
+ import { Change, type SortSpec } from '@slip/engine';
+ import { Button, type Density } from '@slip/ui';
++import { ConstraintType } from '@slip/xer';
+ import styles from './changes.module.css';
+ import { ChangesGrid } from './ChangesGrid.tsx';
+ import { Gantt } from './gantt/Gantt.tsx';
+@@ -29,6 +30,18 @@ const FLAGS = [
+   Change.Added,
+ ];
+ 
++const CONSTRAINTS = [
++  ConstraintType.None,
++  ConstraintType.StartOnOrAfter,
++  ConstraintType.None,
++  ConstraintType.FinishOnOrBefore,
++  ConstraintType.None,
++  ConstraintType.MandatoryFinish,
++  ConstraintType.None,
++  ConstraintType.AsLateAsPossible,
++  ConstraintType.None,
++];
++
+ /** Made-up rows, worked out from the row number so a million of them cost nothing. */
+ function fakeRow(position: number): GridRow {
+   const slip = SLIPS[position % SLIPS.length]!;
+@@ -41,6 +54,10 @@ function fakeRow(position: number): GridRow {
+     slipDays: slip,
+     float: ((position * 37) % 4000) - 400,
+     flags: slip === null ? Change.Added : FLAGS[position % FLAGS.length]!,
++    // Most activities have no constraint; a few have one with a date, and one has none to show.
++    constraintType: CONSTRAINTS[position % CONSTRAINTS.length]!,
++    constraintDate:
++      position % CONSTRAINTS.length === 0 ? -2147483648 : JUNE + (position % 120) * DAY,
+     gantt: {
+       start: JUNE + ((position % 200) + (slip ?? 0) - 30) * DAY,
+       finish: JUNE + ((position % 200) + (slip ?? 0)) * DAY,
+diff --git a/apps/web/src/features/changes/ChangesGrid.tsx b/apps/web/src/features/changes/ChangesGrid.tsx
+index 7ddb132..d54e05e 100644
+--- a/apps/web/src/features/changes/ChangesGrid.tsx
++++ b/apps/web/src/features/changes/ChangesGrid.tsx
+@@ -10,7 +10,7 @@ import {
+ import type { SortSpec } from '@slip/engine';
+ import { DeltaCell, ROW_HEIGHT, Skeleton, type Density } from '@slip/ui';
+ import { NONE } from '@slip/xer';
+-import { count, shortDate, workingDays } from '../../shared/format.ts';
++import { constraintText, count, shortDate, workingDays } from '../../shared/format.ts';
+ import styles from './changes.module.css';
+ import { COLUMNS, changeWords, scrollReadout, type Column } from './model.ts';
+ import type { GridRow } from './useGridRows.ts';
+@@ -79,9 +79,11 @@ function Cells({ row, position }: { row: GridRow | undefined; position: number }
+         <span role="gridcell" className={styles.cell} />
+         <span role="gridcell" className={styles.cell} />
+         <span role="gridcell" className={styles.cell} />
++        <span role="gridcell" className={styles.cell} />
+       </>
+     );
+   }
++  const constraint = constraintText(row.constraintType, row.constraintDate);
+   return (
+     <>
+       <span role="gridcell" className={`${styles.cell} ${styles.rowNumber}`}>
+@@ -105,6 +107,9 @@ function Cells({ row, position }: { row: GridRow | undefined; position: number }
+       <span role="gridcell" className={`${styles.cell} ${styles.numeric}`}>
+         {row.float === NONE ? '' : workingDays(row.float)}
+       </span>
++      <span role="gridcell" className={`${styles.cell} ${styles.words}`} title={constraint}>
++        {constraint}
++      </span>
+       <span role="gridcell" className={`${styles.cell} ${styles.words}`}>
+         {changeWords(row.flags)}
+       </span>
+diff --git a/apps/web/src/features/changes/changes.module.css b/apps/web/src/features/changes/changes.module.css
+index c00ca91..3247d50 100644
+--- a/apps/web/src/features/changes/changes.module.css
++++ b/apps/web/src/features/changes/changes.module.css
+@@ -120,10 +120,13 @@
+ 
+ .row {
+   display: grid;
+-  grid-template-columns: 72px 168px minmax(220px, 1fr) 104px 104px 168px 96px minmax(150px, 240px);
++  grid-template-columns: 72px 168px minmax(220px, 1fr) 104px 104px 168px 96px 216px minmax(
++      150px,
++      240px
++    );
+   align-items: center;
+   height: var(--row-height);
+-  min-width: 1100px;
++  min-width: 1316px;
+   border-bottom: 1px solid var(--border-subtle);
+   cursor: default;
+ }
+diff --git a/apps/web/src/features/changes/changes.test.ts b/apps/web/src/features/changes/changes.test.ts
+index 95f5552..8683771 100644
+--- a/apps/web/src/features/changes/changes.test.ts
++++ b/apps/web/src/features/changes/changes.test.ts
+@@ -1,5 +1,7 @@
+ import { describe, expect, it } from 'vitest';
+ import { Change } from '@slip/engine';
++import { ConstraintType, NONE, parseXerDate } from '@slip/xer';
++import { constraintText } from '../../shared/format.ts';
+ import {
+   COLUMNS,
+   DEFAULT_FILTER,
+@@ -189,6 +191,37 @@ describe('words', () => {
+     });
+   });
+ 
++  it('names a constraint with its date, and leaves an unconstrained activity blank', () => {
++    const june2 = parseXerDate('2027-06-02 08:00');
++    expect(constraintText(ConstraintType.StartOnOrAfter, june2)).toBe(
++      'Start on or after 2 Jun 2027',
++    );
++    expect(constraintText(ConstraintType.FinishOnOrBefore, june2)).toBe(
++      'Finish on or before 2 Jun 2027',
++    );
++    expect(constraintText(ConstraintType.MandatoryStart, june2)).toBe('Mandatory start 2 Jun 2027');
++    expect(constraintText(ConstraintType.None, NONE)).toBe('');
++    expect(constraintText(ConstraintType.None, june2)).toBe('');
++    expect(constraintText(NONE, NONE)).toBe('');
++  });
++
++  it('copes with a constraint that has no date or an unknown type', () => {
++    const june2 = parseXerDate('2027-06-02 08:00');
++    expect(constraintText(ConstraintType.AsLateAsPossible, NONE)).toBe('As late as possible');
++    expect(constraintText(ConstraintType.AsLateAsPossible, june2)).toBe('As late as possible');
++    expect(constraintText(ConstraintType.StartOn, NONE)).toBe('Start on');
++    expect(constraintText(ConstraintType.Unknown, june2)).toBe('Unknown constraint 2 Jun 2027');
++    expect(constraintText(42, NONE)).toBe('Unknown constraint');
++  });
++
++  it('sorts the constraint column by its date, earliest first', () => {
++    const constraint = COLUMNS.find((column) => column.id === 'constraint')!;
++    expect(nextSort(DEFAULT_SORT, constraint)).toEqual({
++      column: 'constraintDate',
++      direction: 'asc',
++    });
++  });
++
+   it('gives the scrolling readout in rows', () => {
+     expect(scrollReadout(120_401, 350_412)).toBe('Row 120,401 of 350,412');
+   });
+diff --git a/apps/web/src/features/changes/model.ts b/apps/web/src/features/changes/model.ts
+index 9ff76a5..a1ea715 100644
+--- a/apps/web/src/features/changes/model.ts
++++ b/apps/web/src/features/changes/model.ts
+@@ -45,7 +45,8 @@ export function engineFilter(filter: GridFilter): FilterSpec {
+   return spec;
+ }
+ 
+-export type ColumnId = 'code' | 'name' | 'was' | 'now' | 'slip' | 'float' | 'changes';
++export type ColumnId =
++  'code' | 'name' | 'was' | 'now' | 'slip' | 'float' | 'constraint' | 'changes';
+ 
+ export interface Column {
+   id: ColumnId;
+@@ -62,6 +63,8 @@ export const COLUMNS: Column[] = [
+   { id: 'now', label: 'Now', sortBy: 'finish', numeric: false },
+   { id: 'slip', label: 'Finish slip', sortBy: 'finishDeltaDays', numeric: true },
+   { id: 'float', label: 'Total float', sortBy: 'totalFloatDays', numeric: true },
++  // Update B's constraint. Sorts by its date, earliest first; activities without one go last.
++  { id: 'constraint', label: 'Constraint', sortBy: 'constraintDate', numeric: false },
+   { id: 'changes', label: 'What changed', sortBy: null, numeric: false },
+ ];
+ 
+diff --git a/apps/web/src/features/changes/useGridRows.ts b/apps/web/src/features/changes/useGridRows.ts
+index 4ddfbdb..06be39a 100644
+--- a/apps/web/src/features/changes/useGridRows.ts
++++ b/apps/web/src/features/changes/useGridRows.ts
+@@ -24,6 +24,9 @@ export interface GridRow {
+   /** Total float in hundredths of a working day, or NONE. */
+   float: number;
+   flags: number;
++  /** Constraint type in update B (ConstraintType), and its date in minutes since the epoch, or NONE. */
++  constraintType: number;
++  constraintDate: number;
+   /** What the Gantt draws for this activity. */
+   gantt: GanttRow;
+ }
+@@ -75,6 +78,8 @@ export function useGridRows(filter: FilterSpec, sort: SortSpec | null) {
+               'remainingDuration',
+               'status',
+               'type',
++              'constraintType',
++              'constraintDate',
+             ],
+             filter,
+             sort,
+@@ -118,6 +123,8 @@ export function useGridRows(filter: FilterSpec, sort: SortSpec | null) {
+                 slipDays: slip === NONE ? null : slip / 100,
+                 float: result.numbers.totalFloatDays?.[k] ?? NONE,
+                 flags: result.numbers.flags?.[k] ?? 0,
++                constraintType: value('constraintType'),
++                constraintDate: value('constraintDate'),
+               });
+             }
+             held.current = result.range;
+diff --git a/apps/web/src/shared/format.ts b/apps/web/src/shared/format.ts
+index 561b2f2..c9cd335 100644
+--- a/apps/web/src/shared/format.ts
++++ b/apps/web/src/shared/format.ts
+@@ -1,5 +1,5 @@
+ /** Words and numbers for the import screen. Dates are wall-clock integers (D13); no Date object is used. */
+-import { formatXerDate } from '@slip/xer';
++import { ConstraintType, NONE, formatXerDate } from '@slip/xer';
+ 
+ const MONTHS = [
+   'January',
+@@ -66,3 +66,28 @@ export function workingDays(hundredths: number): string {
+   if (days === 0) return '0d';
+   return `${days < 0 ? '−' : ''}${Math.abs(days).toLocaleString('en-GB', { maximumFractionDigits: 1 })}d`;
+ }
++
++/** A P6 constraint type in words, as a planner says it. */
++export const CONSTRAINT_NAMES: Record<number, string> = {
++  [ConstraintType.None]: 'None',
++  [ConstraintType.StartOn]: 'Start on',
++  [ConstraintType.StartOnOrAfter]: 'Start on or after',
++  [ConstraintType.StartOnOrBefore]: 'Start on or before',
++  [ConstraintType.FinishOn]: 'Finish on',
++  [ConstraintType.FinishOnOrAfter]: 'Finish on or after',
++  [ConstraintType.FinishOnOrBefore]: 'Finish on or before',
++  [ConstraintType.MandatoryStart]: 'Mandatory start',
++  [ConstraintType.MandatoryFinish]: 'Mandatory finish',
++  [ConstraintType.AsLateAsPossible]: 'As late as possible',
++};
++
++/**
++ * An activity's constraint for a grid cell: "Start on or after 2 Jun 2027", or "As late as
++ * possible", which has no date. '' when the activity has no constraint.
++ */
++export function constraintText(type: number, date: number): string {
++  if (type === ConstraintType.None || type === NONE) return '';
++  const words = CONSTRAINT_NAMES[type] ?? 'Unknown constraint';
++  const when = type === ConstraintType.AsLateAsPossible ? '' : shortDate(date);
++  return when ? `${words} ${when}` : words;
++}
+diff --git a/docs/journal.md b/docs/journal.md
+index 44344fd..1439329 100644
+--- a/docs/journal.md
++++ b/docs/journal.md
+@@ -2,6 +2,27 @@
+ 
+ What was built, what Usman decided or designed, and what an agent generated. Newest first.
+ 
++## 15 November 2026: a constraint column in the changes grid
++
++**Done**
++
++- The changes grid has a Constraint column after Total float: update B's constraint type in words and its date, for example "Start on or after 2 Jun 2027". It is blank when the activity has no constraint, and "As late as possible" has no date. It sorts by the constraint date, earliest first, with activities that have none last.
++- The constraint words now live in one place (`shared/format.ts`), used by the grid and the proposed edit card.
++
++**Usman decided or designed**
++
++- To add the column, with the wording and date format of the example.
++
++**The agent (Claude) generated**
++
++- All the code, tests and story data.
++- Choices made while building: where the column sits, its width (216px, which fits "Finish on or before 30 Sep 2027"), that it sorts by date, and "Unknown constraint" for a type the parser did not recognise.
++
++**Worth Usman's attention**
++
++- The grid is now 216px wider, so beside the Gantt more of it scrolls sideways.
++- Not looked at in a browser in this change; only checked by unit tests, typecheck and the Storybook build.
++
+ ## 14 November 2026: approving the assistant's changes
+ 
+ **Done**

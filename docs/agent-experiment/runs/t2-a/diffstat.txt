@@ -1,0 +1,12 @@
+ apps/web/src/App.tsx                               |  4 ++
+ apps/web/src/features/changes/ChangesScreen.tsx    | 33 +++++++++-
+ apps/web/src/features/summary/SummaryScreen.tsx    |  6 +-
+ .../src/features/summary/SummaryView.stories.tsx   | 42 +++++++++++++
+ apps/web/src/features/summary/SummaryView.tsx      | 73 +++++++++++++++++++++-
+ apps/web/src/features/summary/added.test.ts        | 63 +++++++++++++++++++
+ apps/web/src/features/summary/model.ts             | 29 +++++++++
+ apps/web/src/features/summary/summary.module.css   | 49 +++++++++++++++
+ apps/web/src/features/summary/useSummary.ts        | 30 +++++++++
+ docs/journal.md                                    | 23 +++++++
+ docs/spec/product.md                               |  1 +
+ 11 files changed, 350 insertions(+), 3 deletions(-)
