@@ -1,0 +1,477 @@
+diff --git a/apps/web/src/features/changes/ChangesGrid.stories.tsx b/apps/web/src/features/changes/ChangesGrid.stories.tsx
+index 4dfafce..a593b2f 100644
+--- a/apps/web/src/features/changes/ChangesGrid.stories.tsx
++++ b/apps/web/src/features/changes/ChangesGrid.stories.tsx
+@@ -1,7 +1,7 @@
+ import { useState } from 'react';
+ import type { Meta, StoryObj } from '@storybook/react-vite';
+ import { Change, type SortSpec } from '@slip/engine';
+-import { Button, type Density } from '@slip/ui';
++import { Button, type ActivityStatus, type Density } from '@slip/ui';
+ import styles from './changes.module.css';
+ import { ChangesGrid } from './ChangesGrid.tsx';
+ import { Gantt } from './gantt/Gantt.tsx';
+@@ -29,6 +29,14 @@ const FLAGS = [
+   Change.Added,
+ ];
+ 
++const STATUSES: (ActivityStatus | null)[] = [
++  'in-progress',
++  'not-started',
++  'complete',
++  'not-started',
++  null,
++];
++
+ /** Made-up rows, worked out from the row number so a million of them cost nothing. */
+ function fakeRow(position: number): GridRow {
+   const slip = SLIPS[position % SLIPS.length]!;
+@@ -41,6 +49,7 @@ function fakeRow(position: number): GridRow {
+     slipDays: slip,
+     float: ((position * 37) % 4000) - 400,
+     flags: slip === null ? Change.Added : FLAGS[position % FLAGS.length]!,
++    status: STATUSES[position % STATUSES.length]!,
+     gantt: {
+       start: JUNE + ((position % 200) + (slip ?? 0) - 30) * DAY,
+       finish: JUNE + ((position % 200) + (slip ?? 0)) * DAY,
+diff --git a/apps/web/src/features/changes/ChangesGrid.tsx b/apps/web/src/features/changes/ChangesGrid.tsx
+index 7ddb132..a49ddcd 100644
+--- a/apps/web/src/features/changes/ChangesGrid.tsx
++++ b/apps/web/src/features/changes/ChangesGrid.tsx
+@@ -8,7 +8,7 @@ import {
+   type ReactNode,
+ } from 'react';
+ import type { SortSpec } from '@slip/engine';
+-import { DeltaCell, ROW_HEIGHT, Skeleton, type Density } from '@slip/ui';
++import { DeltaCell, ROW_HEIGHT, Skeleton, StatusCell, type Density } from '@slip/ui';
+ import { NONE } from '@slip/xer';
+ import { count, shortDate, workingDays } from '../../shared/format.ts';
+ import styles from './changes.module.css';
+@@ -79,6 +79,7 @@ function Cells({ row, position }: { row: GridRow | undefined; position: number }
+         <span role="gridcell" className={styles.cell} />
+         <span role="gridcell" className={styles.cell} />
+         <span role="gridcell" className={styles.cell} />
++        <span role="gridcell" className={styles.cell} />
+       </>
+     );
+   }
+@@ -93,6 +94,9 @@ function Cells({ row, position }: { row: GridRow | undefined; position: number }
+       <span role="gridcell" className={styles.cell} title={row.name}>
+         {row.name}
+       </span>
++      <span role="gridcell" className={styles.cell}>
++        <StatusCell status={row.status} />
++      </span>
+       <span role="gridcell" className={`${styles.cell} ${styles.date}`}>
+         {shortDate(row.was)}
+       </span>
+diff --git a/apps/web/src/features/changes/changes.module.css b/apps/web/src/features/changes/changes.module.css
+index c00ca91..03a308f 100644
+--- a/apps/web/src/features/changes/changes.module.css
++++ b/apps/web/src/features/changes/changes.module.css
+@@ -120,10 +120,13 @@
+ 
+ .row {
+   display: grid;
+-  grid-template-columns: 72px 168px minmax(220px, 1fr) 104px 104px 168px 96px minmax(150px, 240px);
++  grid-template-columns: 72px 168px minmax(220px, 1fr) 120px 104px 104px 168px 96px minmax(
++      150px,
++      240px
++    );
+   align-items: center;
+   height: var(--row-height);
+-  min-width: 1100px;
++  min-width: 1220px;
+   border-bottom: 1px solid var(--border-subtle);
+   cursor: default;
+ }
+diff --git a/apps/web/src/features/changes/changes.test.ts b/apps/web/src/features/changes/changes.test.ts
+index 95f5552..1c59936 100644
+--- a/apps/web/src/features/changes/changes.test.ts
++++ b/apps/web/src/features/changes/changes.test.ts
+@@ -1,7 +1,9 @@
+ import { describe, expect, it } from 'vitest';
+ import { Change } from '@slip/engine';
++import { NONE, Status } from '@slip/xer';
+ import {
+   COLUMNS,
++  activityStatus,
+   DEFAULT_FILTER,
+   DEFAULT_SORT,
+   changeWords,
+@@ -164,6 +166,22 @@ describe('filter and sort', () => {
+   });
+ });
+ 
++describe('status', () => {
++  it('maps the engine status code to the status cell, and unknown to nothing', () => {
++    expect(activityStatus(Status.NotStarted)).toBe('not-started');
++    expect(activityStatus(Status.Active)).toBe('in-progress');
++    expect(activityStatus(Status.Complete)).toBe('complete');
++    expect(activityStatus(Status.Unknown)).toBeNull();
++    expect(activityStatus(NONE)).toBeNull();
++    expect(activityStatus(99)).toBeNull();
++  });
++
++  it('sorts by status, not started first', () => {
++    const status = COLUMNS.find((column) => column.id === 'status')!;
++    expect(nextSort(DEFAULT_SORT, status)).toEqual({ column: 'status', direction: 'asc' });
++  });
++});
++
+ describe('words', () => {
+   it('names the changes on an activity in a fixed order', () => {
+     expect(changeWords(Change.LogicChanged | Change.FinishMoved | Change.StartMoved)).toBe(
+diff --git a/apps/web/src/features/changes/model.ts b/apps/web/src/features/changes/model.ts
+index 9ff76a5..cc14eb7 100644
+--- a/apps/web/src/features/changes/model.ts
++++ b/apps/web/src/features/changes/model.ts
+@@ -6,6 +6,8 @@ import {
+   type SortSpec,
+   type TextColumn,
+ } from '@slip/engine';
++import type { ActivityStatus } from '@slip/ui';
++import { Status } from '@slip/xer';
+ import { count, plural } from '../../shared/format.ts';
+ 
+ /** The kinds of change a planner can filter to. `all` is every activity with any change. */
+@@ -45,7 +47,7 @@ export function engineFilter(filter: GridFilter): FilterSpec {
+   return spec;
+ }
+ 
+-export type ColumnId = 'code' | 'name' | 'was' | 'now' | 'slip' | 'float' | 'changes';
++export type ColumnId = 'code' | 'name' | 'status' | 'was' | 'now' | 'slip' | 'float' | 'changes';
+ 
+ export interface Column {
+   id: ColumnId;
+@@ -58,6 +60,7 @@ export interface Column {
+ export const COLUMNS: Column[] = [
+   { id: 'code', label: 'Activity code', sortBy: 'code', numeric: false },
+   { id: 'name', label: 'Name', sortBy: 'name', numeric: false },
++  { id: 'status', label: 'Status', sortBy: 'status', numeric: false },
+   { id: 'was', label: 'Was', sortBy: 'previousFinish', numeric: false },
+   { id: 'now', label: 'Now', sortBy: 'finish', numeric: false },
+   { id: 'slip', label: 'Finish slip', sortBy: 'finishDeltaDays', numeric: true },
+@@ -65,6 +68,14 @@ export const COLUMNS: Column[] = [
+   { id: 'changes', label: 'What changed', sortBy: null, numeric: false },
+ ];
+ 
++/** An activity's status code from the engine as the status cell takes it; null when unknown. */
++export function activityStatus(code: number): ActivityStatus | null {
++  if (code === Status.NotStarted) return 'not-started';
++  if (code === Status.Active) return 'in-progress';
++  if (code === Status.Complete) return 'complete';
++  return null;
++}
++
+ /** Largest finish slip first: the worst movers are what the planner came for. */
+ export const DEFAULT_SORT: SortSpec = { column: 'finishDeltaDays', direction: 'desc' };
+ 
+diff --git a/apps/web/src/features/changes/useGridRows.ts b/apps/web/src/features/changes/useGridRows.ts
+index 4ddfbdb..8c21365 100644
+--- a/apps/web/src/features/changes/useGridRows.ts
++++ b/apps/web/src/features/changes/useGridRows.ts
+@@ -8,7 +8,9 @@ import type { FilterSpec, SortSpec } from '@slip/engine';
+ import { NONE, Status, TaskType } from '@slip/xer';
+ import { engine } from '../../app/engine.ts';
+ import { EngineRequestError } from '../../workers/engineClient.ts';
++import type { ActivityStatus } from '@slip/ui';
+ import type { GanttRow } from './gantt/geometry.ts';
++import { activityStatus } from './model.ts';
+ import { fetchRange } from './virtual.ts';
+ 
+ export interface GridRow {
+@@ -24,6 +26,8 @@ export interface GridRow {
+   /** Total float in hundredths of a working day, or NONE. */
+   float: number;
+   flags: number;
++  /** Status in update B, or null when the file does not say. */
++  status: ActivityStatus | null;
+   /** What the Gantt draws for this activity. */
+   gantt: GanttRow;
+ }
+@@ -118,6 +122,7 @@ export function useGridRows(filter: FilterSpec, sort: SortSpec | null) {
+                 slipDays: slip === NONE ? null : slip / 100,
+                 float: result.numbers.totalFloatDays?.[k] ?? NONE,
+                 flags: result.numbers.flags?.[k] ?? 0,
++                status: activityStatus(state),
+               });
+             }
+             held.current = result.range;
+diff --git a/docs/journal.md b/docs/journal.md
+index 6ceef5c..2024349 100644
+--- a/docs/journal.md
++++ b/docs/journal.md
+@@ -2,6 +2,28 @@
+ 
+ What was built, what Usman decided or designed, and what an agent generated. Newest first.
+ 
++## 15 November 2026: activity status in the changes grid
++
++**Done**
++
++- `StatusCell` in `packages/ui`: an activity's status as a small neutral badge, the word ("Not started", "In progress", "Complete") and a circle that is empty, half or full. Stories, a contract in its README, a unit test, and a line in `AGENTS.md`.
++- A Status column in the changes grid, after Name, showing each activity's status in update B. It sorts by status. An activity whose file does not give a status shows an empty cell.
++
++**Usman decided or designed**
++
++- To show update B's status in the changes grid as a badge in its own column, through a reusable component.
++
++**The agent (Claude) generated**
++
++- The component, its look and wording, the column's place and width, and the tests.
++- Choices made without asking: the badge uses no colour, because the `--status-*` colour values are still unchosen (they are a D16 decision), and shape plus word already carry the meaning; the column sits after Name; the grid's minimum width grows from 1,100px to 1,220px to fit it.
++
++**Worth Usman's attention**
++
++- The column's position, and whether status should carry colour once the status tokens are chosen.
++- An unknown status renders as an empty cell, not a word.
++- In comfortable density at 1,300px some Was and Now dates are cut off; that was already so, since those columns are fixed and the new column takes its width from Name.
++
+ ## 15 November 2026: the design-system checks
+ 
+ **Done**
+diff --git a/docs/spec/design-system.md b/docs/spec/design-system.md
+index f738082..23f60c9 100644
+--- a/docs/spec/design-system.md
++++ b/docs/spec/design-system.md
+@@ -27,7 +27,7 @@ Each component ships with: implementation, `*.stories.tsx` covering every state,
+ - **Agent blocks:** `AgentStep`, `AgentStepsGroup` ("Worked for Xs, N steps"), `AgentText`, `AgentTable`, `AgentChart`, `ProposedEditCard`, `AgentError`, `ScriptedBadge` ("Scripted answer, not AI")
+ - **Feedback:** `Skeleton`, `ProgressBar` (with rows / bytes), `EmptyState`, `ErrorState`, `Toast`, `Notice` (persistent warning, for example non-retained-logic files)
+ 
+-Built so far: `Button`, `ProgressBar`, `Notice`, `DeltaCell` (the slip cell from exploration 01: a signed number of working days and a bar on a fixed scale), `Skeleton`, `SegmentedControl`, `EntityChip`, `AgentSteps`, `AgentText`, `ScriptedBadge` and `ProposedEditCard`, each with stories, a contract in its README and a unit test. Screen stories live beside their feature in `apps/web` and are picked up by the same Storybook (`Screens/Import`, `Screens/Update summary`, `Screens/Changes grid`, `Screens/Slip trace`, `Screens/Health`, `Screens/Finish update`).
++Built so far: `Button`, `ProgressBar`, `Notice`, `DeltaCell` (the slip cell from exploration 01: a signed number of working days and a bar on a fixed scale), `Skeleton`, `SegmentedControl`, `EntityChip`, `AgentSteps`, `AgentText`, `ScriptedBadge`, `ProposedEditCard` and `StatusCell` (an activity's status in one update as a small neutral badge: a word and a circle that is empty, half or full; it uses no colour, because the `--status-*` colour values are not chosen yet), each with stories, a contract in its README and a unit test. Screen stories live beside their feature in `apps/web` and are picked up by the same Storybook (`Screens/Import`, `Screens/Update summary`, `Screens/Changes grid`, `Screens/Slip trace`, `Screens/Health`, `Screens/Finish update`).
+ 
+ ## `packages/ui/AGENTS.md` (written in phase 4)
+ Guidance aimed at coding agents. For each component: when to use it, when not to, required props, density limits, and a correct and an incorrect example. Plus global rules: use tokens only, use existing components before creating new ones, every new view needs all four states, every number uses a numeric cell.
+diff --git a/packages/ui/AGENTS.md b/packages/ui/AGENTS.md
+index 6e28bb2..4d03402 100644
+--- a/packages/ui/AGENTS.md
++++ b/packages/ui/AGENTS.md
+@@ -30,19 +30,20 @@ Widths, heights and positions in pixels are allowed: they are layout, often comp
+ 
+ Each has a contract in its README. The one-line version:
+ 
+-| Component          | Use for                                                                                                                            | Not for                              |
+-| ------------------ | ---------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------ |
+-| `Button`           | An action. `primary` for the one main action on a screen, `quiet` for secondary ones                                               | Navigation; a choice among options   |
+-| `SegmentedControl` | Choosing one of two to eight options that are all visible: density, kind of change                                                 | An action; several on/off switches   |
+-| `Notice`           | A message that stays until the situation changes: a check, a warning, a question. `attention` is a heavier left edge, not a colour | Something that disappears on its own |
+-| `ProgressBar`      | A job the planner waits on, with what is happening and its units                                                                   | A value in the data                  |
+-| `Skeleton`         | Holding the shape of a loading panel, inside a container that says in words what is loading                                        | Anything under 300ms; alone          |
+-| `DeltaCell`        | How far a date moved, in working days: number and bar on a fixed scale                                                             | Durations, float, counts             |
+-| `EntityChip`       | One piece of evidence beside a claim; opens what it names                                                                          | Data values; decoration              |
+-| `AgentSteps`       | The assistant's working, folded into one line                                                                                      | Progress of a file read              |
+-| `AgentText`        | The text of an assistant's answer, with checked citations                                                                          | Narrative text; the planner's words  |
+-| `ScriptedBadge`    | Every scripted answer                                                                                                              | Live answers                         |
+-| `ProposedEditCard` | A change the assistant proposed, before and after, for approval                                                                    | Changes made without asking          |
++| Component          | Use for                                                                                                                            | Not for                                |
++| ------------------ | ---------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------- |
++| `Button`           | An action. `primary` for the one main action on a screen, `quiet` for secondary ones                                               | Navigation; a choice among options     |
++| `SegmentedControl` | Choosing one of two to eight options that are all visible: density, kind of change                                                 | An action; several on/off switches     |
++| `Notice`           | A message that stays until the situation changes: a check, a warning, a question. `attention` is a heavier left edge, not a colour | Something that disappears on its own   |
++| `ProgressBar`      | A job the planner waits on, with what is happening and its units                                                                   | A value in the data                    |
++| `Skeleton`         | Holding the shape of a loading panel, inside a container that says in words what is loading                                        | Anything under 300ms; alone            |
++| `DeltaCell`        | How far a date moved, in working days: number and bar on a fixed scale                                                             | Durations, float, counts               |
++| `StatusCell`       | An activity's status in one update: not started, in progress, complete. A word and a circle that fills                             | A change between updates; pass or fail |
++| `EntityChip`       | One piece of evidence beside a claim; opens what it names                                                                          | Data values; decoration                |
++| `AgentSteps`       | The assistant's working, folded into one line                                                                                      | Progress of a file read                |
++| `AgentText`        | The text of an assistant's answer, with checked citations                                                                          | Narrative text; the planner's words    |
++| `ScriptedBadge`    | Every scripted answer                                                                                                              | Live answers                           |
++| `ProposedEditCard` | A change the assistant proposed, before and after, for approval                                                                    | Changes made without asking            |
+ 
+ ## Density
+ 
+diff --git a/packages/ui/src/components/StatusCell/README.md b/packages/ui/src/components/StatusCell/README.md
+new file mode 100644
+index 0000000..9e5db80
+--- /dev/null
++++ b/packages/ui/src/components/StatusCell/README.md
+@@ -0,0 +1,24 @@
++# StatusCell
++
++## Contract
++
++- **Use for** an activity's progress status in one update: not started, in progress or complete.
++- **Do not use for** a change between updates (use the words in the "What changed" column), a health check's pass or fail, or percent complete.
++- **Props:** `status` (`not-started`, `in-progress`, `complete`, or `null` when the update does not say, which renders an empty cell).
++- **Rules:**
++  - The word is always shown. The circle (empty, half, full) repeats it as a shape, so the status never rests on colour.
++  - The badge is neutral: text colours and a subtle border only. It never carries slip colours, which mean late and early, or the accent, which means selection.
++  - The words are fixed and in sentence case. Do not abbreviate them to fit a narrower column; widen the column.
++  - Its size does not change with density; the row around it does.
++
++## Correct
++
++```tsx
++<StatusCell status={row.status} />
++```
++
++## Incorrect
++
++```tsx
++<span className={styles.green}>●</span> // colour alone and no word
++```
+diff --git a/packages/ui/src/components/StatusCell/StatusCell.module.css b/packages/ui/src/components/StatusCell/StatusCell.module.css
+new file mode 100644
+index 0000000..efe1643
+--- /dev/null
++++ b/packages/ui/src/components/StatusCell/StatusCell.module.css
+@@ -0,0 +1,34 @@
++.badge {
++  display: inline-flex;
++  align-items: center;
++  gap: var(--space-1);
++  max-width: 100%;
++  padding: var(--space-0) var(--space-1);
++  border: 1px solid var(--border-subtle);
++  border-radius: var(--radius-control);
++  font-size: var(--text-xs);
++  line-height: var(--leading-xs);
++  color: var(--text-secondary);
++  white-space: nowrap;
++  vertical-align: middle;
++}
++
++.glyph {
++  flex: none;
++  width: 10px;
++  height: 10px;
++}
++
++.ring {
++  fill: none;
++  stroke: currentColor;
++  stroke-width: 1.5;
++}
++
++.fill {
++  fill: currentColor;
++}
++
++.empty {
++  display: inline-block;
++}
+diff --git a/packages/ui/src/components/StatusCell/StatusCell.stories.tsx b/packages/ui/src/components/StatusCell/StatusCell.stories.tsx
+new file mode 100644
+index 0000000..72f967b
+--- /dev/null
++++ b/packages/ui/src/components/StatusCell/StatusCell.stories.tsx
+@@ -0,0 +1,12 @@
++import type { Meta, StoryObj } from '@storybook/react-vite';
++import { StatusCell } from './StatusCell.tsx';
++
++const meta: Meta<typeof StatusCell> = { title: 'Components/StatusCell', component: StatusCell };
++export default meta;
++
++type Story = StoryObj<typeof StatusCell>;
++
++export const NotStarted: Story = { args: { status: 'not-started' } };
++export const InProgress: Story = { args: { status: 'in-progress' } };
++export const Complete: Story = { args: { status: 'complete' } };
++export const NotRecorded: Story = { args: { status: null } };
+diff --git a/packages/ui/src/components/StatusCell/StatusCell.tsx b/packages/ui/src/components/StatusCell/StatusCell.tsx
+new file mode 100644
+index 0000000..eb05529
+--- /dev/null
++++ b/packages/ui/src/components/StatusCell/StatusCell.tsx
+@@ -0,0 +1,44 @@
++import styles from './StatusCell.module.css';
++
++/** An activity's progress status in one update. */
++export type ActivityStatus = 'not-started' | 'in-progress' | 'complete';
++
++export interface StatusCellProps {
++  /** The status, or null when the update does not say. */
++  status: ActivityStatus | null;
++}
++
++export const STATUS_WORDS: Record<ActivityStatus, string> = {
++  'not-started': 'Not started',
++  'in-progress': 'In progress',
++  complete: 'Complete',
++};
++
++/** A circle that fills as the activity progresses: empty, half, full. Drawn in the text colour. */
++function Glyph({ status }: { status: ActivityStatus }) {
++  return (
++    <svg className={styles.glyph} viewBox="0 0 10 10" aria-hidden="true" focusable="false">
++      <circle className={styles.ring} cx="5" cy="5" r="4.25" />
++      {status === 'in-progress' ? (
++        <path className={styles.fill} d="M5 0.75 A4.25 4.25 0 0 0 5 9.25 Z" />
++      ) : null}
++      {status === 'complete' ? <circle className={styles.fill} cx="5" cy="5" r="4.25" /> : null}
++    </svg>
++  );
++}
++
++/**
++ * An activity's status as a small neutral badge: a word, and a circle that is empty, half
++ * or full, so it reads without colour and can be scanned without reading the word.
++ */
++export function StatusCell({ status }: StatusCellProps) {
++  if (status === null || !Object.hasOwn(STATUS_WORDS, status)) {
++    return <span className={styles.empty} />;
++  }
++  return (
++    <span className={styles.badge} data-status={status}>
++      <Glyph status={status} />
++      {STATUS_WORDS[status]}
++    </span>
++  );
++}
+diff --git a/packages/ui/src/index.ts b/packages/ui/src/index.ts
+index c743c7e..0816c43 100644
+--- a/packages/ui/src/index.ts
++++ b/packages/ui/src/index.ts
+@@ -32,3 +32,9 @@ export {
+   type MilestoneEffect,
+   type ProposedEditCardProps,
+ } from './components/ProposedEditCard/ProposedEditCard.tsx';
++export {
++  StatusCell,
++  STATUS_WORDS,
++  type ActivityStatus,
++  type StatusCellProps,
++} from './components/StatusCell/StatusCell.tsx';
+diff --git a/packages/ui/test/components.test.tsx b/packages/ui/test/components.test.tsx
+index 515efbe..32e99f8 100644
+--- a/packages/ui/test/components.test.tsx
++++ b/packages/ui/test/components.test.tsx
+@@ -12,6 +12,7 @@ import {
+   ProposedEditCard,
+   SegmentedControl,
+   Skeleton,
++  StatusCell,
+   barLength,
+   formatDelta,
+ } from '../src/index.ts';
+@@ -205,6 +206,28 @@ describe('ScriptedBadge', () => {
+   });
+ });
+ 
++describe('StatusCell', () => {
++  it('always shows the word, with a shape that repeats it', () => {
++    const notStarted = renderToStaticMarkup(<StatusCell status="not-started" />);
++    const inProgress = renderToStaticMarkup(<StatusCell status="in-progress" />);
++    const complete = renderToStaticMarkup(<StatusCell status="complete" />);
++    expect(notStarted).toContain('Not started');
++    expect(inProgress).toContain('In progress');
++    expect(complete).toContain('Complete');
++    // Empty ring, half filled, filled: three different shapes.
++    expect(
++      new Set([notStarted, inProgress, complete].map((html) => html.split('<svg')[1])).size,
++    ).toBe(3);
++    expect(notStarted).toContain('aria-hidden="true"');
++  });
++
++  it('is empty when the update does not say', () => {
++    expect(renderToStaticMarkup(<StatusCell status={null} />)).not.toMatch(
++      /started|progress|Complete/,
++    );
++  });
++});
++
+ describe('ProposedEditCard', () => {
+   const props = {
+     field: 'Original duration',

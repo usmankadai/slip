@@ -1,0 +1,526 @@
+diff --git a/apps/web/src/App.tsx b/apps/web/src/App.tsx
+index d3b05b4..16c93d4 100644
+--- a/apps/web/src/App.tsx
++++ b/apps/web/src/App.tsx
+@@ -34,6 +34,8 @@ export function App() {
+     kind: ChangeKind | null;
+     check?: { id: number; name: string };
+     text?: string;
++    /** An activity of update B, by index, to select when the screen opens. */
++    activity?: number;
+   } | null>(null);
+   /** True while the Finish update screen is showing, or waiting behind the changes screen. */
+   const [narrative, setNarrative] = useState(false);
+@@ -189,6 +191,7 @@ export function App() {
+             initialKind={changes.kind}
+             check={changes.check}
+             initialText={changes.text}
++            initialActivity={changes.activity}
+             backLabel={narrative ? 'Finish update' : health ? 'health' : 'summary'}
+             onBack={() => setChanges(null)}
+             onTrace={setTrace}
+@@ -235,6 +238,7 @@ export function App() {
+             setPair(null);
+           }}
+           onChanges={(kind) => setChanges({ kind })}
++          onAdded={(activity) => setChanges({ kind: 'added', activity })}
+           onHealth={() => setHealth(true)}
+           onNarrative={() => setNarrative(true)}
+           onAudit={() => setAuditOpen(true)}
+diff --git a/apps/web/src/features/changes/ChangesScreen.tsx b/apps/web/src/features/changes/ChangesScreen.tsx
+index 6612360..9b5ce07 100644
+--- a/apps/web/src/features/changes/ChangesScreen.tsx
++++ b/apps/web/src/features/changes/ChangesScreen.tsx
+@@ -57,6 +57,7 @@ export function ChangesScreen({
+   pair,
+   initialKind,
+   initialText = '',
++  initialActivity,
+   check,
+   backLabel,
+   onBack,
+@@ -69,6 +70,8 @@ export function ChangesScreen({
+   check?: { id: number; name: string };
+   /** Text to find when the screen opens, such as an activity code from the narrative's evidence. */
+   initialText?: string;
++  /** An activity of update B, by index, to select and scroll to when the screen opens. */
++  initialActivity?: number;
+   /** Where Back leads: "summary" or "health". */
+   backLabel: string;
+   onBack: () => void;
+@@ -101,7 +104,7 @@ export function ChangesScreen({
+   /** True once the axis has been fitted to the first rows of a view. */
+   const fitted = useRef(false);
+   /** The selected activity, kept so the planner's place survives a new filter or sort. */
+-  const selectedActivity = useRef<number | null>(null);
++  const selectedActivity = useRef<number | null>(initialActivity ?? null);
+ 
+   const spec = useMemo(() => engineFilter(filter), [filter]);
+   const { status, total, unfiltered, error, rowAt, need, retry } = useGridRows(spec, sort);
+@@ -134,13 +137,13 @@ export function ChangesScreen({
+   }, [selected]);
+ 
+   // After a new filter or sort, find the selected activity again and bring it back into view.
++  // On the first view, that is the activity the screen was asked to open on, if any.
+   const viewKey = JSON.stringify([spec, sort]);
+   const firstView = useRef(true);
+   useEffect(() => {
+-    if (firstView.current) {
+-      firstView.current = false;
+-      return;
+-    }
++    const first = firstView.current;
++    firstView.current = false;
++    if (first && initialActivity === undefined) return;
+     const activity = selectedActivity.current;
+     setSelectedRow(null);
+     setLostSelection(false);
+diff --git a/apps/web/src/features/summary/SummaryScreen.tsx b/apps/web/src/features/summary/SummaryScreen.tsx
+index d85ee04..df5c08a 100644
+--- a/apps/web/src/features/summary/SummaryScreen.tsx
++++ b/apps/web/src/features/summary/SummaryScreen.tsx
+@@ -14,6 +14,7 @@ export function SummaryScreen({
+   pair,
+   onBack,
+   onChanges,
++  onAdded,
+   onTrace,
+   onHealth,
+   onNarrative,
+@@ -25,6 +26,8 @@ export function SummaryScreen({
+   pair: ComparedPair;
+   onBack: () => void;
+   onChanges: (kind: ChangeKind) => void;
++  /** Opens the changes grid on added activities with one of them, by index in update B, selected. */
++  onAdded: (activity: number) => void;
+   onTrace: (target: TraceTarget) => void;
+   onHealth: () => void;
+   onNarrative: () => void;
+@@ -56,6 +59,7 @@ export function SummaryScreen({
+       onRetry={retry}
+       onBack={onBack}
+       onChanges={onChanges}
++      onAdded={onAdded}
+       onTrace={onTrace}
+       onHealth={onHealth}
+       onNarrative={onNarrative}
+diff --git a/apps/web/src/features/summary/SummaryView.stories.tsx b/apps/web/src/features/summary/SummaryView.stories.tsx
+index 487ec10..4d27887 100644
+--- a/apps/web/src/features/summary/SummaryView.stories.tsx
++++ b/apps/web/src/features/summary/SummaryView.stories.tsx
+@@ -2,6 +2,7 @@ import type { Meta, StoryObj } from '@storybook/react-vite';
+ import {
+   LOADING_STATE,
+   milestoneList,
++  type AddedRow,
+   type ChangeCounts,
+   type HealthDelta,
+   type MilestoneRow,
+@@ -43,11 +44,25 @@ const HEALTH: HealthDelta = {
+   worst: 'Hard constraints, 12 more than in update A',
+ };
+ 
++const ADDED: AddedRow[] = [
++  { code: 'S3-TW-0410', name: 'Temporary works design check, section 3 retaining wall' },
++  { code: 'S3-TW-0420', name: 'Install temporary propping' },
++  { code: 'S5-UTL-118', name: 'Divert 11kV cable at chainage 4+250' },
++  { code: 'S5-UTL-119', name: 'Utility diversion sign-off' },
++  { code: 'S2-DR-0071', name: 'Additional drainage survey' },
++  { code: 'S2-DR-0072', name: 'Replace culvert C-14' },
++  { code: 'S4-SIG-302', name: 'Signalling interface workshop' },
++  { code: 'S4-SIG-303', name: 'Revised signalling design submission' },
++  { code: 'S1-EN-0950', name: 'Ecology watching brief' },
++  { code: 'MS-S3-TW', name: 'Temporary works complete, section 3' },
++].map((row, i) => ({ ...row, activity: 120_000 + i * 37, finish: at(32 + i * 9) }));
++
+ const ready = <T,>(value: T) => ({ status: 'ready' as const, value });
+ const POPULATED: SummaryState = {
+   milestones: ready(milestoneList(later, earlier, 5, 42)),
+   changes: ready(COUNTS),
+   health: ready(HEALTH),
++  added: ready({ rows: ADDED, total: 412 }),
+   latestFinish: '',
+   recalculation: '',
+ };
+@@ -66,6 +81,7 @@ const meta: Meta<typeof SummaryView> = {
+     onRetry: noop,
+     onBack: noop,
+     onChanges: noop,
++    onAdded: noop,
+     onTrace: noop,
+     onHealth: noop,
+     onNarrative: noop,
+@@ -129,6 +145,7 @@ export const Error: Story = {
+           'There was not enough memory to compare the two updates. Closing other tabs may help.',
+       },
+       health: { status: 'error', message: 'Something went wrong while comparing the two updates.' },
++      added: { status: 'error', message: 'Something went wrong while comparing the two updates.' },
+     },
+   },
+ };
+@@ -172,3 +189,23 @@ export const CarriedFromImport: Story = {
+ export const WithApprovedChanges: Story = {
+   args: { edits: { count: 1, onUndoAll: noop } },
+ };
++
++export const FewAdded: Story = {
++  args: {
++    state: {
++      ...POPULATED,
++      changes: ready({ ...COUNTS, added: 3 }),
++      added: ready({ rows: ADDED.slice(0, 3), total: 3 }),
++    },
++  },
++};
++
++export const NothingAdded: Story = {
++  args: {
++    state: {
++      ...POPULATED,
++      changes: ready({ ...COUNTS, added: 0 }),
++      added: ready({ rows: [], total: 0 }),
++    },
++  },
++};
+diff --git a/apps/web/src/features/summary/SummaryView.tsx b/apps/web/src/features/summary/SummaryView.tsx
+index 944789b..4b7110d 100644
+--- a/apps/web/src/features/summary/SummaryView.tsx
++++ b/apps/web/src/features/summary/SummaryView.tsx
+@@ -1,13 +1,16 @@
+ import { Button, DeltaCell, Notice, Skeleton } from '@slip/ui';
++import { NONE } from '@slip/xer';
+ import { count, longDate, plural } from '../../shared/format.ts';
+ import type { ChangeKind } from '../changes/model.ts';
+ import type { TraceTarget } from '../trace/TraceView.tsx';
+ import {
++  addedFoot,
+   changeLines,
+   criticalSentence,
+   healthSentence,
+   milestoneHeading,
+   nothingChanged,
++  type AddedList,
+   type ChangeCounts,
+   type Loadable,
+   type MilestoneList,
+@@ -27,6 +30,8 @@ export interface SummaryViewProps {
+   onBack: () => void;
+   /** Opens the changes grid on a kind of change. */
+   onChanges: (kind: ChangeKind) => void;
++  /** Opens the changes grid on added activities, with this one (its index in update B) selected. */
++  onAdded: (activity: number) => void;
+   /** Opens the slip trace for a milestone. */
+   onTrace: (target: TraceTarget) => void;
+   /** Opens the health comparison. */
+@@ -176,6 +181,51 @@ function Milestones({
+   );
+ }
+ 
++function AddedActivities({
++  list,
++  onAdded,
++}: {
++  list: AddedList;
++  onAdded: (activity: number) => void;
++}) {
++  return (
++    <>
++      {list.rows.length > 0 ? (
++        <table className={styles.table}>
++          <thead>
++            <tr>
++              <th scope="col">Activity</th>
++              <th scope="col" className={styles.finish}>
++                Finish
++              </th>
++            </tr>
++          </thead>
++          <tbody>
++            {list.rows.map((row) => (
++              <tr key={row.activity}>
++                <th scope="row">
++                  <button
++                    type="button"
++                    className={styles.lineLink}
++                    onClick={() => onAdded(row.activity)}
++                  >
++                    <span className={styles.name}>{row.name || row.code}</span>
++                  </button>{' '}
++                  <span className={styles.code}>{row.code}</span>
++                </th>
++                <td className={styles.finish}>
++                  {row.finish === NONE ? 'No finish' : longDate(row.finish)}
++                </td>
++              </tr>
++            ))}
++          </tbody>
++        </table>
++      ) : null}
++      <p className={list.rows.length > 0 ? styles.quiet : styles.say}>{addedFoot(list)}</p>
++    </>
++  );
++}
++
+ function RailBox<T>({
+   title,
+   busy,
+@@ -216,6 +266,7 @@ export function SummaryView({
+   onRetry,
+   onBack,
+   onChanges,
++  onAdded,
+   onTrace,
+   onHealth,
+   onNarrative,
+@@ -309,6 +360,13 @@ export function SummaryView({
+                 </>
+               )}
+             </RailBox>
++            <RailBox
++              title="Added in update B"
++              busy="Finding the added activities"
++              part={state.added}
++            >
++              {(value) => <AddedActivities list={value} onAdded={onAdded} />}
++            </RailBox>
+             <RailBox title="Health" busy="Running 14 checks on each update" part={state.health}>
+               {(value) => (
+                 <>
+diff --git a/apps/web/src/features/summary/model.test.ts b/apps/web/src/features/summary/model.test.ts
+index c291ecf..ebd4fbb 100644
+--- a/apps/web/src/features/summary/model.test.ts
++++ b/apps/web/src/features/summary/model.test.ts
+@@ -3,7 +3,9 @@ import type { HealthSummary } from '@slip/engine';
+ import type { SlotFacts } from '../import/types.ts';
+ import { buildReport } from '../import/warnings.ts';
+ import {
++  ADDED_ROWS,
+   MILESTONE_ROWS,
++  addedFoot,
+   carriedNotices,
+   changeLines,
+   criticalSentence,
+@@ -223,3 +225,25 @@ describe('notices', () => {
+     expect(recalculationNotice(12)).toContain('12 activities');
+   });
+ });
++
++describe('addedFoot', () => {
++  const added = (n: number) =>
++    Array.from({ length: n }, (_, i) => ({ activity: i, code: `N${i}`, name: '', finish: 0 }));
++
++  it('says when nothing was added', () => {
++    expect(addedFoot({ rows: [], total: 0 })).toBe('No activity was added since update A.');
++  });
++
++  it('gives the total when every added activity is listed', () => {
++    expect(addedFoot({ rows: added(1), total: 1 })).toBe('1 activity added since update A.');
++    expect(addedFoot({ rows: added(ADDED_ROWS), total: ADDED_ROWS })).toBe(
++      '10 activities added since update A.',
++    );
++  });
++
++  it('says how many are shown of the total when the list is cut', () => {
++    expect(addedFoot({ rows: added(ADDED_ROWS), total: 1_412 })).toBe(
++      'Showing the 10 that finish first of 1,412.',
++    );
++  });
++});
+diff --git a/apps/web/src/features/summary/model.ts b/apps/web/src/features/summary/model.ts
+index 014ca58..b1a9eb3 100644
+--- a/apps/web/src/features/summary/model.ts
++++ b/apps/web/src/features/summary/model.ts
+@@ -189,6 +189,34 @@ export function recalculationNotice(differsFromFile: number): string {
+     : '';
+ }
+ 
++/** How many added activities the summary lists. The full list belongs in the changes view. */
++export const ADDED_ROWS = 10;
++
++export interface AddedRow {
++  /** The activity's index in update B, to open it in the changes grid. */
++  activity: number;
++  code: string;
++  name: string;
++  /** Finish in update B, minutes since the epoch, or NONE when it has none. */
++  finish: number;
++}
++
++export interface AddedList {
++  /** At most ADDED_ROWS of them, earliest finish first. */
++  rows: AddedRow[];
++  /** Every activity added in update B. */
++  total: number;
++}
++
++/** The line under the list of added activities: how many there are, and how many are shown. */
++export function addedFoot(list: AddedList): string {
++  if (list.total === 0) return 'No activity was added since update A.';
++  if (list.total > list.rows.length) {
++    return `Showing the ${count(list.rows.length)} that finish first of ${count(list.total)}.`;
++  }
++  return `${plural(list.total, 'activity', 'activities')} added since update A.`;
++}
++
+ /** A part of the screen that loads, and can fail, on its own. */
+ export type Loadable<T> =
+   { status: 'loading' } | { status: 'error'; message: string } | { status: 'ready'; value: T };
+@@ -197,6 +225,7 @@ export interface SummaryState {
+   milestones: Loadable<MilestoneList>;
+   changes: Loadable<ChangeCounts>;
+   health: Loadable<HealthDelta>;
++  added: Loadable<AddedList>;
+   /** Sentence for a schedule with no milestones: where the latest finish went. '' until known. */
+   latestFinish: string;
+   /** '' when Slip's recalculated dates agree with the file, or while that is not yet known. */
+@@ -207,6 +236,7 @@ export const LOADING_STATE: SummaryState = {
+   milestones: { status: 'loading' },
+   changes: { status: 'loading' },
+   health: { status: 'loading' },
++  added: { status: 'loading' },
+   latestFinish: '',
+   recalculation: '',
+ };
+diff --git a/apps/web/src/features/summary/summary.module.css b/apps/web/src/features/summary/summary.module.css
+index 1fd563a..9863f80 100644
+--- a/apps/web/src/features/summary/summary.module.css
++++ b/apps/web/src/features/summary/summary.module.css
+@@ -33,6 +33,7 @@
+   background: none;
+   color: inherit;
+   font: inherit;
++  text-align: left;
+   text-decoration: underline;
+   cursor: pointer;
+ }
+@@ -171,6 +172,14 @@
+   color: var(--text-secondary);
+ }
+ 
++/* Not .date: the added activities keep their finish date in a narrow window. */
++.table .finish {
++  text-align: right;
++  white-space: nowrap;
++  font-variant-numeric: tabular-nums;
++  color: var(--text-secondary);
++}
++
+ .traceCell {
+   text-align: right;
+   white-space: nowrap;
+diff --git a/apps/web/src/features/summary/useSummary.ts b/apps/web/src/features/summary/useSummary.ts
+index a4d0a3b..fe98fb2 100644
+--- a/apps/web/src/features/summary/useSummary.ts
++++ b/apps/web/src/features/summary/useSummary.ts
+@@ -10,11 +10,13 @@ import { engine } from '../../app/engine.ts';
+ import { EngineRequestError } from '../../workers/engineClient.ts';
+ import { longDate } from '../../shared/format.ts';
+ import {
++  ADDED_ROWS,
+   LOADING_STATE,
+   MILESTONE_ROWS,
+   healthDelta,
+   milestoneList,
+   recalculationNotice,
++  type AddedList,
+   type MilestoneRow,
+   type SummaryState,
+   type ChangeCounts,
+@@ -89,6 +91,28 @@ export async function fetchMilestoneList(): Promise<MilestoneList> {
+   return milestoneList(later.rows, earlier.rows, later.total, total);
+ }
+ 
++/** The activities added in update B that finish first, and how many were added in all. */
++export async function fetchAddedList(): Promise<AddedList> {
++  const result = await engine().request({
++    type: 'rows',
++    slot: 'b',
++    range: [0, ADDED_ROWS],
++    columns: ['code', 'name', 'finish'],
++    filter: { flagsAny: Change.Added },
++    sort: { column: 'finish', direction: 'asc' },
++  });
++  const rows = [];
++  for (let k = 0; k < result.indices.length; k++) {
++    rows.push({
++      activity: result.indices[k]!,
++      code: result.text.code?.[k] ?? '',
++      name: result.text.name?.[k] ?? '',
++      finish: result.numbers.finish?.[k] ?? NONE,
++    });
++  }
++  return { rows, total: result.total };
++}
++
+ /** The change counts the summary shows. */
+ export async function fetchChangeCounts(): Promise<ChangeCounts> {
+   const [diff, datesMoved] = await Promise.all([
+@@ -176,6 +200,11 @@ export function useSummary() {
+       (error: unknown) => set({ health: { status: 'error', message: message(error) } }),
+     );
+ 
++    fetchAddedList().then(
++      (value) => set({ added: { status: 'ready', value } }),
++      (error: unknown) => set({ added: { status: 'error', message: message(error) } }),
++    );
++
+     // Last, because it is the slowest and only feeds a note. A preview keeps the file's dates in use.
+     engine()
+       .request({ type: 'cpm', slot: 'b', preview: true })
+diff --git a/docs/design/flows/summary-states.html b/docs/design/flows/summary-states.html
+index b3298c9..896dbd8 100644
+--- a/docs/design/flows/summary-states.html
++++ b/docs/design/flows/summary-states.html
+@@ -81,6 +81,7 @@
+           <dt>Each row</dt><dd>Name and code, the finish in each update, the slip in working days as number and bar (exploration 01, option B, same fixed scale as the grid), and Trace. The whole row opens the trace; Trace is there so that is discoverable.</dd>
+           <dt>Order</dt><dd>Later first, by size; then earlier, by size. An early move is good news and should not sit above a late one of the same size.</dd>
+           <dt>The rail</dt><dd>Three ways into other screens. Each line of "What changed" opens the changes view with that filter. Counts overlap (an activity can move and change duration), so there is no total; the line under the list gives the scale.</dd>
++          <dt>Added in update B</dt><dd>Added 15 November 2026, after this page was drawn and not sketched here. A fourth rail box, between "What changed" and Health: up to 10 added activities, earliest finish first, each with name, code and finish, and the total added. Each name opens the changes view on added activities with that one selected.</dd>
+         </dl>
+       </div>
+ 
+diff --git a/docs/journal.md b/docs/journal.md
+index 6ceef5c..7804605 100644
+--- a/docs/journal.md
++++ b/docs/journal.md
+@@ -2,6 +2,28 @@
+ 
+ What was built, what Usman decided or designed, and what an agent generated. Newest first.
+ 
++## 15 November 2026: added activities on the summary
++
++**Done**
++
++- A box in the summary's rail, "Added in update B", between "What changed" and Health: up to 10 activities added since update A, earliest finish first, each with name, code and finish date, and a line with the total added. It loads, fails and empties on its own like the other rail boxes.
++- Each name opens the changes view on added activities with that activity selected and scrolled into view. The changes screen takes an activity index to open on and finds its row with the engine's `locate`, the same way it keeps the planner's place after a filter changes.
++- Stories for a short list and for nothing added; the populated, loading and error stories cover the new box. Unit tests for the line under the list.
++
++**Usman decided or designed**
++
++- That the summary should list added activities: code, name and finish for at most 10, the total, and a way into the changes grid for each. This came as a task; no layout or exploration was drawn for it.
++
++**The agent (Claude) generated**
++
++- All the code, tests, stories and copy.
++- Choices made without asking: which 10 are shown (earliest finish first; activities with no finish last), where the box sits in the rail, the title "Added in update B", that a name opens the grid filtered to added activities rather than searching for the code, and that the finish stays visible in a narrow window.
++
++**Worth Usman's attention**
++
++- The rail now has four boxes; the design spec warns the summary must not become a dashboard of equal-weight tiles. The low-fidelity flow was not redrawn, only annotated.
++- The choice of which 10 to show is a product call: earliest finish, latest finish, or those on the critical path would each tell a different story.
++
+ ## 15 November 2026: the design-system checks
+ 
+ **Done**
+diff --git a/docs/spec/product.md b/docs/spec/product.md
+index 6dc4f45..e8f1afa 100644
+--- a/docs/spec/product.md
++++ b/docs/spec/product.md
+@@ -10,6 +10,7 @@ Part of the Slip spec. Start at [CLAUDE.md](../../CLAUDE.md).
+    - Critical path before and after: activities that joined or left it
+    - Counts of changed activities by category (dates, durations, logic, constraints, progress, added, removed)
+    - Health score delta (DCMA checks, see [workers and engine](engine.md))
++   - Activities added in update B: up to 10, earliest finish first, with code, name and finish, and the total added. Each opens the changes view on added activities with that one selected.
+ 3. **Changes view**: a windowed grid plus Gantt, filtered to changed activities by default. Baseline ghost bars show the previous update's dates.
+ 4. **Slip trace**: pick a milestone that moved and walk back along the driving path to the activities that caused the slip. Show it as a ranked list (largest contributors first) and a small focused network view.
+ 5. **Health comparison**: DCMA 14-point checks run on both updates, shown as a delta ("12 new hard constraints this update"). Every failed check clicks through to the activities causing it.

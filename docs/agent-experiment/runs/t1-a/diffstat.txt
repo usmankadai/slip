@@ -1,0 +1,10 @@
+ apps/web/src/features/agent/ProposalView.tsx       | 19 ++-----------
+ .../src/features/changes/ChangesGrid.stories.tsx   | 17 +++++++++++
+ apps/web/src/features/changes/ChangesGrid.tsx      |  7 ++++-
+ apps/web/src/features/changes/changes.module.css   |  7 +++--
+ apps/web/src/features/changes/changes.test.ts      | 33 ++++++++++++++++++++++
+ apps/web/src/features/changes/model.ts             |  5 +++-
+ apps/web/src/features/changes/useGridRows.ts       |  7 +++++
+ apps/web/src/shared/format.ts                      | 27 +++++++++++++++++-
+ docs/journal.md                                    | 21 ++++++++++++++
+ 9 files changed, 122 insertions(+), 21 deletions(-)

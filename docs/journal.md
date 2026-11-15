@@ -2,6 +2,26 @@
 
 What was built, what Usman decided or designed, and what an agent generated. Newest first.
 
+## 15 November 2026: the agent comparison experiment
+
+**Done**
+
+- Three UI tasks (a constraint column, an added-activities box on the summary, a status badge) each given to six separate agents: three starting from main before the design-system checks, three from main with them. Every output scored by the same full set of checks. Write-up, patches, screenshots and the scoring scripts in `docs/agent-experiment/`.
+- Result: no new raw colours, raw spacing, missing states, type errors or test failures in either condition. The one difference: a run without the checks added two stories that fail axe through an existing fault, and could not know. One run with the rules added its new component to `AGENTS.md`.
+
+**Usman decided or designed**
+
+- The experiment itself, in the original spec, and to run it now.
+
+**The agent (Claude) generated**
+
+- The three tasks, the prompt, the choice of starting commits, the scoring scripts, all six outputs (by separate agents) and the write-up. None of the six outputs is merged; they are kept as local branches.
+
+**Worth Usman's attention**
+
+- The result is weak evidence that the rules change behaviour, and honest evidence that the checks catch inherited faults. One run per condition is too few; a harder task with no pattern to copy would test the rules better.
+- The six outputs raise real product questions (an added-activities box on the summary, a constraint column, a status column) that are not decided.
+
 ## 15 November 2026: the design-system checks
 
 **Done**
