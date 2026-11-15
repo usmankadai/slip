@@ -93,3 +93,12 @@ The client keeps the set of task codes that appeared in tool results for the cur
 - **After a change is approved**, every screen reads the edited schedule and uses Slip's recalculated dates for update B; the summary says so in a notice with Undo. A preview of a proposal changes nothing, including which dates are used.
 - **Not built:** the live connection, undoing an approved change from the activity log, the narrative rewriting itself after a change, conversations kept across reloads, the `#` mention picker, tables and charts in answers, the first-use notice, and "Show a scripted answer instead" after a live failure.
 
+
+## Live on the public site (15 November 2026)
+
+- The server runs as a Vercel Function under `/api` on the app's own origin, and the panel is live when `GET /api/health` says so ([D26](../decisions/D26-live-assistant-on-vercel.md)).
+- Before the first live question in a tab, the question is held behind a notice that says what will be sent, with Send it, Use scripted answers, and Where your data goes.
+- When live answers are switched off or the daily cap is reached, the panel says so in the server's words, uses scripted answers for the rest of the page, and offers "Show a scripted answer instead" on a failed suggested question.
+- Text written before a tool call is shown while it streams and then left out of the answer.
+- Answers are drawn from an allow-list (paragraphs, lists, tables, bold) by `answerBlocks` and `AgentText`, never as HTML.
+- Not built: the setting "Send activity names to the agent", conversations kept across reloads, the `#` mention picker, charts in answers, and right-aligned numbers in the model's tables.

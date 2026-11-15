@@ -23,6 +23,7 @@ export {
 } from './components/AgentSteps/AgentSteps.tsx';
 export {
   AgentText,
+  type AgentTextBlock,
   type AgentTextPart,
   type AgentTextProps,
 } from './components/AgentText/AgentText.tsx';

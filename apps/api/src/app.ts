@@ -21,10 +21,13 @@ const CORS_HEADERS = {
 export function createApp(deps: AppDeps): Hono {
   const app = new Hono();
 
-  // Browsers send Origin on cross-origin and on every POST. Only our own app may call this API.
+  // Browsers send Origin on cross-origin and on every POST. Only our own app may call this API:
+  // the configured origin, or the origin this server itself is served from (on Vercel the app and
+  // the API share one, including on every preview deployment).
   app.use('*', async (c, next) => {
     const origin = c.req.header('origin');
-    if (origin !== undefined && origin !== deps.appOrigin) {
+    const own = new URL(c.req.url).origin;
+    if (origin !== undefined && origin !== deps.appOrigin && origin !== own) {
       return c.json({ code: 'origin', message: 'This origin may not use the assistant.' }, 403);
     }
     if (c.req.method === 'OPTIONS') {

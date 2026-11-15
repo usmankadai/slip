@@ -36,7 +36,9 @@ export type AgentErrorCode =
   /** The stream broke, or the answer was cut off, after it had started. */
   | 'interrupted'
   /** The model declined to answer. */
-  | 'refused';
+  | 'refused'
+  /** Live answers are switched off, or used up for today. Scripted answers still work. */
+  | 'off';
 
 /** JSON error bodies, for requests refused before any stream starts. */
 export type AgentRefusalCode =

@@ -50,7 +50,43 @@ export async function* readEvents(body: ReadableStream<Uint8Array>): AsyncIterab
   }
 }
 
-/** The live assistant, through the agent server on this origin. Not deployed yet. */
+/**
+ * What a refusal before any stream started means for the planner. The server's own words are
+ * used: it writes them, and they never contain schedule content.
+ */
+async function refusal(response: Response): Promise<Extract<AgentEvent, { type: 'error' }>> {
+  let body: { code?: unknown; message?: unknown } = {};
+  try {
+    body = (await response.json()) as typeof body;
+  } catch {
+    // Not JSON: fall back to the status.
+  }
+  const said = typeof body.message === 'string' ? body.message.slice(0, 300) : '';
+  if (body.code === 'daily-cap' || body.code === 'not-configured') {
+    return {
+      type: 'error',
+      code: 'off',
+      message: said || 'Live answers are not available now. Scripted answers are.',
+      retryable: false,
+    };
+  }
+  if (response.status === 429) {
+    return {
+      type: 'error',
+      code: 'unavailable',
+      message: said || 'The assistant is busy or has reached its limit for now.',
+      retryable: true,
+    };
+  }
+  return {
+    type: 'error',
+    code: 'rejected',
+    message: 'The assistant would not take the question.',
+    retryable: false,
+  };
+}
+
+/** The live assistant, through the agent server on this origin. */
 export function liveTransport(
   fetchImpl: typeof fetch = fetch,
   url = '/api/agent/chat',
@@ -80,15 +116,7 @@ export function liveTransport(
         !response.body ||
         !response.headers.get('content-type')?.startsWith('text/event-stream')
       ) {
-        yield {
-          type: 'error',
-          code: response.status === 429 ? 'unavailable' : 'rejected',
-          message:
-            response.status === 429
-              ? 'The assistant is busy or has reached its limit for now.'
-              : 'The assistant would not take the question.',
-          retryable: response.status === 429,
-        };
+        yield await refusal(response);
         return;
       }
       yield* readEvents(response.body);

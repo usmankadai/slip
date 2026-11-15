@@ -5,6 +5,9 @@
 
 export type AssistantMode = 'scripted' | 'live';
 
+/** Dispatch this event on window to open "Where your data goes" from anywhere in the app. */
+export const OPEN_DATA_FLOW = 'slip:open-data-flow';
+
 export interface Flow {
   data: string;
   stays: string;

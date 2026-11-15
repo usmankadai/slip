@@ -1,7 +1,8 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Dialog } from '@slip/ui';
 import { WhereDataGoes } from '../features/dataflow/WhereDataGoes.tsx';
-import { ASSISTANT_MODE } from '../features/agent/mode.ts';
+import { OPEN_DATA_FLOW } from '../features/dataflow/flows.ts';
+import { useAssistantMode } from '../features/agent/mode.ts';
 import styles from './Footer.module.css';
 import { buildLink, footerLinks, type BuildInfo } from './footerLinks.ts';
 
@@ -17,6 +18,13 @@ const BUILD: BuildInfo = {
 export function Footer() {
   const build = buildLink(BUILD);
   const [dataFlow, setDataFlow] = useState(false);
+  const mode = useAssistantMode();
+  // Other parts of the app, such as the notice before the first live question, open it too.
+  useEffect(() => {
+    const open = () => setDataFlow(true);
+    addEventListener(OPEN_DATA_FLOW, open);
+    return () => removeEventListener(OPEN_DATA_FLOW, open);
+  }, []);
   return (
     <footer className={styles.footer}>
       <nav aria-label="About Slip" className={styles.links}>
@@ -37,7 +45,7 @@ export function Footer() {
         <span className={styles.build}>Local build</span>
       )}
       <Dialog open={dataFlow} onClose={() => setDataFlow(false)} title="Where your data goes">
-        <WhereDataGoes mode={ASSISTANT_MODE} />
+        <WhereDataGoes mode={mode} />
       </Dialog>
     </footer>
   );

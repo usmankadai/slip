@@ -20,12 +20,12 @@ Two Vercel projects from the one repository, both building from `main`:
 | The app, https://slip.usmankadai.dev | `./` | Other | `apps/web/dist`, under the security headers | `vercel.json` |
 | Storybook, https://slip-design-system.usmankadai.dev | `packages/ui` | Other | `packages/ui/storybook-static` | `packages/ui/vercel.json` ([D21](../decisions/D21-storybook-on-its-own-deployment.md)) |
 
-- Neither project has secrets or needs any environment variable. The footer links to the Storybook address above; `VITE_STORYBOOK_URL` overrides it for a build that should point elsewhere.
+- The Storybook project has no secrets. The app's only secrets are the agent's, set on Vercel, never in the repository. The footer links to the Storybook address above; `VITE_STORYBOOK_URL` overrides it for a build that should point elsewhere.
 - Checked on 11 November 2026 on the live app: a sample pair imports and compares, the saved-copy cache is written, fonts load, the security headers are served and the console is clean. Storybook loads with every story.
 - The footer shows the commit the build was made from (Vercel's `VERCEL_GIT_COMMIT_SHA`) and links to the repository, `docs/perf.md` and the journal. It will link to the case study when there is one.
-- The agent server (`apps/api`) is not deployed. When the agent panel exists it joins the app's project under `/api`, so the browser still talks only to its own origin.
+- The agent server (`apps/api`) runs in the app's project as one function, `api/[...path].ts`, under `/api`, so the browser talks only to its own origin ([D26](../decisions/D26-live-assistant-on-vercel.md)). `GET /api/health` returns the commit and whether live mode and shared limits are configured, as booleans. Live mode needs `AGENT_MODE=live`, `ANTHROPIC_API_KEY`, `ANTHROPIC_MODEL`, `AGENT_EFFORT`, `APP_ORIGIN`, `AGENT_DAILY_CALL_CAP` and the two Upstash variables set on Vercel; without them the site is scripted.
 - Do not enable Vercel Speed Insights or Analytics on the app: they add a third-party script that the Content Security Policy blocks, and they send visitor data to Vercel.
-- Not done: `GET /health`, branch protection, and a check of each preview deploy under the production headers.
+- Not done: branch protection, and a check of each preview deploy under the production headers.
 
 ## CI (GitHub Actions; adapt switchboard's workflow)
 Every job runs without secrets. A newer push cancels the older run. Jobs:

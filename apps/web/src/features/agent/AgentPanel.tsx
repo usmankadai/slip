@@ -1,7 +1,8 @@
 import { useEffect, useRef, useState, type FormEvent } from 'react';
-import { splitCitations } from '@slip/agent';
+import { answerBlocks, partsOf } from '@slip/agent';
 import { AgentSteps, AgentText, Button, Notice, ScriptedBadge } from '@slip/ui';
 import type { EditsController } from '../../app/useEdits.ts';
+import { OPEN_DATA_FLOW } from '../dataflow/flows.ts';
 import type { Answer } from './loop.ts';
 import { Proposal, type ProposalState } from './Proposal.tsx';
 import type { SuggestedQuestion } from './scripted.ts';
@@ -21,7 +22,18 @@ export interface AgentPanelProps {
   /** The planner's decision on each proposal, by answer and proposal number. */
   decisions: Record<string, ProposalState>;
   onDecision: (key: string, state: ProposalState) => void;
+  /** A question held until the planner has read the notice before the first live question. */
+  waiting?: string | null;
+  onAcceptNotice?: () => void;
+  onDeclineNotice?: () => void;
+  /** Answers a suggested question from its script, after a live answer failed. */
+  onAskScripted?: (question: string) => void;
+  /** Questions that have a scripted answer. */
+  scriptable?: readonly string[];
 }
+
+/** Opens "Where your data goes", which lives in the footer. */
+const showDataFlow = () => dispatchEvent(new Event(OPEN_DATA_FLOW));
 
 function AnswerView({
   answer,
@@ -30,7 +42,9 @@ function AnswerView({
   edits,
   decisions,
   onDecision,
+  onAskScripted,
 }: {
+  onAskScripted: (() => void) | null;
   answer: Answer;
   index: number;
   onOpenActivity: (code: string) => void;
@@ -38,8 +52,8 @@ function AnswerView({
   decisions: Record<string, ProposalState>;
   onDecision: (key: string, state: ProposalState) => void;
 }) {
-  const parts = splitCitations(answer.text, new Set(answer.known));
-  const unverified = parts.filter((part) => part.kind === 'unverified').length;
+  const blocks = answerBlocks(answer.text, new Set(answer.known));
+  const unverified = partsOf(blocks).filter((part) => part.kind === 'unverified').length;
   return (
     <li className={styles.turn}>
       <p className={styles.question}>{answer.question}</p>
@@ -49,12 +63,23 @@ function AnswerView({
           working={answer.status === 'working'}
           seconds={answer.elapsedMs / 1000}
         />
-        {answer.text ? <AgentText parts={parts} onOpen={onOpenActivity} /> : null}
+        {answer.text ? <AgentText blocks={blocks} onOpen={onOpenActivity} /> : null}
         {answer.status === 'working' && !answer.text ? (
           <p className={styles.quiet}>Looking at the schedule</p>
         ) : null}
         {answer.status === 'error' ? (
-          <Notice tone="attention">{answer.error || 'The assistant could not answer.'}</Notice>
+          <Notice
+            tone="attention"
+            action={
+              onAskScripted ? (
+                <Button variant="quiet" onClick={onAskScripted}>
+                  Show a scripted answer instead
+                </Button>
+              ) : undefined
+            }
+          >
+            {answer.error || 'The assistant could not answer.'}
+          </Notice>
         ) : null}
         {answer.status === 'stopped' ? <p className={styles.quiet}>Stopped.</p> : null}
         {unverified > 0 && answer.status === 'done' ? (
@@ -98,6 +123,11 @@ export function AgentPanel({
   edits,
   decisions,
   onDecision,
+  waiting = null,
+  onAcceptNotice,
+  onDeclineNotice,
+  onAskScripted,
+  scriptable = [],
 }: AgentPanelProps) {
   const [draft, setDraft] = useState('');
   const end = useRef<HTMLDivElement>(null);
@@ -136,7 +166,12 @@ export function AgentPanel({
                 On this site it is scripted: it answers the suggested questions below from your
                 loaded schedule, but the wording is fixed and it cannot read other questions.
               </p>
-            ) : null}
+            ) : (
+              <p className={styles.quiet}>
+                Answers are written live by Claude. Your question and the rows it looks up are sent
+                to Anthropic to answer it; your files are not uploaded.
+              </p>
+            )}
           </div>
         ) : (
           <ol className={styles.turns}>
@@ -149,6 +184,14 @@ export function AgentPanel({
                 edits={edits}
                 decisions={decisions}
                 onDecision={onDecision}
+                onAskScripted={
+                  onAskScripted &&
+                  !answer.scripted &&
+                  !working &&
+                  scriptable.includes(answer.question)
+                    ? () => onAskScripted(answer.question)
+                    : null
+                }
               />
             ))}
           </ol>
@@ -156,6 +199,29 @@ export function AgentPanel({
         <div ref={end} />
       </div>
       <div className={styles.foot}>
+        {waiting !== null ? (
+          <Notice
+            tone="attention"
+            title="Before your first live question"
+            action={
+              <>
+                <Button variant="primary" onClick={onAcceptNotice}>
+                  Send it
+                </Button>
+                <Button variant="quiet" onClick={onDeclineNotice}>
+                  Use scripted answers
+                </Button>
+                <Button variant="quiet" onClick={showDataFlow}>
+                  Where your data goes
+                </Button>
+              </>
+            }
+          >
+            Your question and the rows the assistant asks for to answer it, including activity
+            codes, names and dates, will be sent through Slip&apos;s server to Anthropic. Your files
+            are not uploaded.
+          </Notice>
+        ) : null}
         <div className={styles.suggested} aria-label="Suggested questions">
           {suggested.map((question) => (
             <button

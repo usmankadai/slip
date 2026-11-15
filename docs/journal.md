@@ -2,6 +2,43 @@
 
 What was built, what Usman decided or designed, and what an agent generated. Newest first.
 
+## 15 November 2026: the live assistant
+
+**Done**
+
+- The agent server deploys with the app as one Vercel Function under `/api`, so the browser still talks only to its own origin.
+- The panel is live when the server says so.
+- The first live question in a tab is held behind a notice that says what will be sent, with links to scripted answers and "Where your data goes".
+- When live answers are switched off or used up for today, the panel says so and falls back to scripted answers.
+- Answers draw paragraphs, lists, tables and bold from an allow-list, never as HTML.
+- Text the model writes before a tool call no longer runs into the answer.
+- The model call was checked against the current Anthropic guidance for `claude-opus-5-5` and needed no change.
+- Three paid questions through the app, on a local server:
+  - answered in 7 to 9 seconds
+  - each cited only codes the tools returned
+  - every call after the first read the cached prompt
+- The first one named the same four drivers the generator planted.
+- New tests: the answer parser (7), refusals and the mode check (3), dropping working text (1), the same-origin check (1), drawing lists and tables (1).
+
+**Usman decided or designed**
+
+- Live on the public site, with limits.
+- Upstash Redis for the limits.
+- He sets the key and the other server settings on Vercel himself.
+- A few paid test questions.
+
+**The agent (Claude) generated**
+
+- All the code, tests, D26 and the wording of the notice, which follows exploration 09.
+- The daily cap suggestion of 300 model calls.
+- The choice to drop pre-tool text from answers.
+
+**Worth Usman's attention**
+
+- Live mode on production needs the Vercel environment variables listed in D26, and an Upstash database. Until then the site stays scripted.
+- Set a spending limit on the key in the Anthropic console.
+- Numbers in the model's tables are left-aligned. The rule is right-aligned, but the model writes the tables.
+
 ## 15 November 2026: a screenshot of every story
 
 **Done**
