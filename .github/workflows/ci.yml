@@ -2,7 +2,7 @@
 # blocks the change. Every job works without secrets.
 #
 # More jobs arrive with the features they check (see docs/spec/deployment.md):
-# end-to-end with axe, visual tests, eval replay.
+# end-to-end with axe, eval replay.
 name: CI
 
 on:
@@ -69,6 +69,46 @@ jobs:
       - run: pnpm build:storybook
       # Fails on any serious or critical axe violation in any story.
       - run: pnpm a11y
+
+  visual:
+    name: Screenshots of every story
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    # The official Playwright image, so fonts and anti-aliasing match `pnpm visual` locally.
+    container:
+      image: mcr.microsoft.com/playwright:v1.65.0-noble
+      options: --ipc=host
+    steps:
+      - uses: actions/checkout@v5
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 24
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm build:storybook
+      # A story with no baseline gets one written; any difference from a committed one fails.
+      - run: pnpm --filter @slip/visual exec playwright test --update-snapshots=missing
+      - name: Fail if a baseline had to be written
+        run: |
+          git config --global --add safe.directory "$GITHUB_WORKSPACE"
+          written=$(git status --porcelain --untracked-files=all tools/visual/baselines | wc -l)
+          if [ "$written" -gt 0 ]; then
+            echo "::error::$written baselines were missing and have been written. Download the visual-baselines artifact, check the images and commit them."
+            exit 1
+          fi
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: visual-baselines
+          path: tools/visual/baselines
+          retention-days: 7
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: visual-differences
+          path: tools/visual/test-results
+          retention-days: 7
 
   perf:
     name: Performance budgets (100K subset)
