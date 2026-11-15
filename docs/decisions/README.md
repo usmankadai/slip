@@ -26,3 +26,4 @@ Part of the Slip spec. Start at [CLAUDE.md](../../CLAUDE.md).
 - **D21: Storybook is deployed as its own project.** The app's Content Security Policy stays strict and has no exception for documentation. See [D21](D21-storybook-on-its-own-deployment.md).
 - **D22: Scripted answers come from an in-browser transport, not MSW.** Same events, same loop, same real tools; no service worker. See [D22](D22-scripted-agent-without-msw.md).
 - **D23: How the design-system rules are enforced.** Lint rules for code, tests for CSS and for screen states, axe on every story. See [D23](D23-how-design-system-rules-are-enforced.md).
+- **D24: What goes in the address bar.** Updates by hash, open screens and codes only, never typed search; screens are history steps. See [D24](D24-url-state.md).

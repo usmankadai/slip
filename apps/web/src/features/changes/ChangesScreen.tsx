@@ -61,6 +61,7 @@ export function ChangesScreen({
   backLabel,
   onBack,
   onTrace,
+  onFilter,
 }: {
   pair: { a: SlotFacts; b: SlotFacts };
   /** The kind of change to open on, or null for every activity. */
@@ -74,6 +75,11 @@ export function ChangesScreen({
   onBack: () => void;
   /** Opens the slip trace for the selected activity. */
   onTrace: (target: TraceTarget) => void;
+  /**
+   * Told when the planner changes what the grid shows, so the address bar can follow: the kind
+   * of change, and whether the health check and the code it opened on still apply.
+   */
+  onFilter?: (view: { kind: ChangeKind | null; check: boolean; code: boolean }) => void;
 }) {
   const [filter, setFilter] = useState<GridFilter>({
     kind: initialKind,
@@ -105,6 +111,25 @@ export function ChangesScreen({
 
   const spec = useMemo(() => engineFilter(filter), [filter]);
   const { status, total, unfiltered, error, rowAt, need, retry } = useGridRows(spec, sort);
+
+  // The address bar follows the filter. Only the kind is reported, never the typed text.
+  const reportFilter = useRef(onFilter);
+  reportFilter.current = onFilter;
+  const opening = useRef({
+    kind: initialKind,
+    text: initialText.slice(0, 200),
+    check: check !== undefined,
+  });
+  useEffect(() => {
+    const was = opening.current;
+    const hasCheck = filter.healthCheck !== undefined;
+    if (filter.kind === was.kind && filter.text === was.text && hasCheck === was.check) return;
+    reportFilter.current?.({
+      kind: filter.kind,
+      check: hasCheck,
+      code: filter.text !== '' && filter.text === was.text,
+    });
+  }, [filter.kind, filter.text, filter.healthCheck]);
 
   // Typing does not ask the engine on every key.
   useEffect(() => {
