@@ -2,6 +2,29 @@
 
 What was built, what Usman decided or designed, and what an agent generated. Newest first.
 
+## 16 November 2026: the README
+
+**Done**
+
+- The README rewritten for a reviewer. It covers:
+  - what Slip is and links to the app, Storybook and the journal
+  - a seven-step tour with screenshots from the live site
+  - the published performance numbers
+  - where data goes, with the live-mode qualification
+  - known limits and how it is built
+  - the design system for coding agents
+  - how to run and deploy it
+  - who did what
+- The screenshots were taken from https://slip.usmankadai.dev with the 1,000 activity pair. The assistant's answer cost one paid question, the sixth of the few approved.
+
+**Usman decided or designed**
+
+- To rewrite the README next.
+
+**The agent (Claude) generated**
+
+- All of the README's wording, its order and the choice of screenshots. The "Who did what" section is Claude's summary of the journal and should be checked by Usman before the case study quotes it.
+
 ## 15 November 2026: dates in the assistant's answers
 
 **Done**
