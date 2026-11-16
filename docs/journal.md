@@ -2,6 +2,24 @@
 
 What was built, what Usman decided or designed, and what an agent generated. Newest first.
 
+## 16 November 2026: options for the mention picker
+
+**Done**
+
+- Exploration 12: three options for the `#` mention picker in the assistant's input. A list at the caret that writes the code into the question; a list at the caret that makes a chip; or a tray above the input with the grid's selection, a search and the milestones, whose choices are attached to the question. Each is drawn while typing, with no match, at 350,000 activities, and after choosing, with what the model receives.
+
+**Usman decided or designed**
+
+- To do the mention picker next.
+
+**The agent (Claude) generated**
+
+- The three options, the sample matches and the write-up.
+
+**Worth Usman's attention**
+
+- Which option, and whether WBS mentions are needed in the first version.
+
 ## 16 November 2026: the README
 
 **Done**

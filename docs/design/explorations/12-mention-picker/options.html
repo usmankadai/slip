@@ -1,0 +1,156 @@
+<!doctype html>
+<html lang="en-GB">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Mention picker: options</title>
+    <style>
+      /* A record of what was looked at. The product reads these values from packages/ui/src/tokens.css. */
+      :root {
+        --s0: #fbfaf7; --s1: #f4f2ec; --s2: #ebe8e0;
+        --t1: #1c1b18; --t2: #55524a; --t3: #6c685d;
+        --b1: #e2ded3; --b2: #898477; --accent: #5b3fd6; --late: #b8321f; --late-text: #8f2a12; --early-text: #174a91;
+      }
+      * { box-sizing: border-box; }
+      body { margin: 0; background: var(--s0); color: var(--t1); font: 13px/20px Inter, system-ui, -apple-system, 'Segoe UI', sans-serif; font-variant-numeric: tabular-nums; }
+      header, main { max-width: 1320px; margin: 0 auto; padding: 0 24px; }
+      header { padding-top: 24px; }
+      main { padding-bottom: 64px; display: grid; grid-template-columns: repeat(3, 420px); gap: 24px; align-items: start; }
+      h1 { font-size: 20px; line-height: 28px; margin: 0 0 4px; }
+      h2 { font-size: 15px; line-height: 22px; margin: 24px 0 4px; }
+      p { margin: 0 0 8px; color: var(--t2); max-width: 900px; }
+      .controls { position: sticky; top: 0; z-index: 2; background: var(--s0); border-bottom: 1px solid var(--b1); padding: 8px 0; margin: 16px 0 0; display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+      .controls button { font: inherit; padding: 2px 10px; border: 1px solid var(--b2); border-radius: 4px; background: var(--s0); color: var(--t1); cursor: pointer; }
+      .controls button[aria-pressed='true'] { background: var(--t1); color: var(--s0); border-color: var(--t1); }
+      .notes { font-size: 12px; line-height: 16px; margin: 0 0 8px; }
+      .notes dt { font-weight: 600; margin-top: 6px; }
+      .notes dd { margin: 0; color: var(--t2); }
+      code, .mono { font: 11px/16px 'JetBrains Mono', ui-monospace, monospace; }
+
+      .panel { width: 420px; height: 560px; border: 1px solid var(--b2); border-radius: 6px; background: var(--s0); display: grid; grid-template-rows: auto 1fr auto; position: relative; overflow: hidden; }
+      .phead { display: flex; justify-content: space-between; padding: 10px 16px; border-bottom: 1px solid var(--b1); font-weight: 600; }
+      .phead span:last-child { font-weight: 400; color: var(--t2); text-decoration: underline; font-size: 12px; }
+      .thread { padding: 12px 16px; color: var(--t2); font-size: 12px; }
+      .foot { border-top: 1px solid var(--b1); padding: 12px 16px; display: grid; gap: 8px; position: relative; }
+      .row { display: flex; gap: 8px; align-items: flex-end; }
+      .input { flex: 1; min-height: 56px; padding: 4px 8px; border: 1px solid var(--accent); box-shadow: 0 0 0 1px var(--accent); border-radius: 4px; background: var(--s0); font-size: 13px; line-height: 20px; }
+      .caret { display: inline-block; width: 1px; height: 15px; background: var(--t1); vertical-align: text-bottom; }
+      .hash { color: var(--t2); }
+      .btn { font: inherit; font-size: 12px; padding: 3px 10px; border-radius: 4px; border: 1px solid var(--accent); background: var(--accent); color: #fff; }
+      .chip { display: inline-flex; align-items: center; gap: 4px; padding: 0 6px; border: 1px solid var(--t2); border-radius: 4px; font: 11px/18px 'JetBrains Mono', ui-monospace, monospace; background: var(--s0); vertical-align: baseline; }
+      .chip .x { font-family: Inter, sans-serif; color: var(--t3); }
+      .attached { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; font-size: 11px; color: var(--t3); }
+
+      .pop { position: absolute; left: 16px; right: 16px; bottom: 100%; margin-bottom: -4px; background: var(--s0); border: 1px solid var(--b2); border-radius: 6px; box-shadow: 0 4px 16px rgb(28 27 24 / 14%); overflow: hidden; }
+      .pop .cap { padding: 6px 10px; font-size: 11px; color: var(--t3); border-bottom: 1px solid var(--b1); display: flex; justify-content: space-between; }
+      .opt { display: grid; grid-template-columns: 1fr auto; gap: 0 8px; padding: 5px 10px; border-bottom: 1px solid var(--b1); font-size: 12px; line-height: 16px; }
+      .opt:last-child { border-bottom: 0; }
+      .opt .name { overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+      .opt .code { grid-column: 1; color: var(--t2); font: 11px/16px 'JetBrains Mono', ui-monospace, monospace; }
+      .opt .slip { grid-row: 1 / 3; grid-column: 2; align-self: center; font-weight: 600; }
+      .slip.late { color: var(--late-text); }
+      .slip.early { color: var(--early-text); }
+      .opt.on { background: #ece8fb; box-shadow: inset 3px 0 0 var(--accent); }
+      .kind { font-size: 10px; color: var(--t3); text-transform: none; margin-left: 6px; font-family: Inter, sans-serif; }
+      .foot-note { padding: 6px 10px; font-size: 11px; color: var(--t3); background: var(--s1); }
+      .tabs { display: flex; border-bottom: 1px solid var(--b1); }
+      .tab { padding: 5px 10px; font-size: 12px; color: var(--t2); }
+      .tab.on { color: var(--t1); font-weight: 600; box-shadow: inset 0 -2px 0 var(--accent); }
+      .search { margin: 8px 10px; padding: 4px 8px; border: 1px solid var(--b2); border-radius: 4px; font-size: 12px; }
+      .tray { position: absolute; left: 0; right: 0; bottom: 100%; background: var(--s0); border-top: 1px solid var(--b2); box-shadow: 0 -4px 16px rgb(28 27 24 / 10%); }
+      .sent { margin: 8px 0 0; padding: 8px; background: var(--s2); border-radius: 6px; color: var(--t1); font-size: 12px; }
+      .sent .lbl { font-size: 11px; color: var(--t3); }
+    </style>
+  </head>
+  <body>
+    <header>
+      <h1>Exploration 12: the mention picker</h1>
+      <p>The product spec says only that <code>#</code> opens an activity, WBS or code picker in the assistant's input. The planner wants to point at the activity they mean without copying its code, at 350,000 activities, where a name such as "Install catenary" may match a thousand rows. What is picked must reach the model as a code it can look up, and the planner must still be able to read their own question.</p>
+      <p>Each option is drawn in the assistant panel at its real width (420px), against the 1,000 activity fixture. The search is the grid's own engine search over codes and names, so no new index is needed.</p>
+      <div class="controls" id="controls">
+        <span>State:</span>
+        <button data-state="typing" aria-pressed="true">Typing "#catenary"</button>
+        <button data-state="none" aria-pressed="false">No match</button>
+        <button data-state="many" aria-pressed="false">At 350,000 activities</button>
+        <button data-state="chosen" aria-pressed="false">After choosing</button>
+      </div>
+    </header>
+    <main id="main"></main>
+
+    <script>
+      const MATCHES = [
+        ['P03-A002-TRK-0170', 'Survey catenary, section 2', 18],
+        ['P01-A001-TRK-1000', 'Install catenary, section 2', 67],
+        ['P02-A003-TRK-1049', 'Install catenary, section 2', 0],
+        ['P03-A001-TRK-1035', 'Commission catenary, section 5', 5],
+        ['P01-A004-TRK-0410', 'Survey catenary, section 4', -3],
+        ['P02-A001-TRK-0222', 'Tension catenary, section 1', 2],
+      ];
+      let state = 'typing';
+      const slip = (d) => (d === 0 ? '<span class="slip">0d</span>' : `<span class="slip ${d > 0 ? 'late' : 'early'}">${d > 0 ? '+' : '−'}${Math.abs(d)}d</span>`);
+      const options = (on = 1) =>
+        MATCHES.map((m, i) => `<div class="opt ${i === on ? 'on' : ''}"><span class="name">${m[1]}</span><span class="code">${m[0]}</span>${slip(m[2])}</div>`).join('');
+      const total = () => (state === 'many' ? '1,204 activities match. Showing the 6 that slipped most. Keep typing to narrow.' : '6 activities match');
+      const panel = (input, extra = '', above = '') =>
+        `<div class="panel"><div class="phead"><span>Ask</span><span>Close</span></div><div class="thread">The assistant answers questions about the two updates you have loaded.</div><div class="foot">${above}${extra}<div class="row"><div class="input">${input}</div><span class="btn">Ask</span></div></div></div>`;
+
+      function optionA() {
+        if (state === 'chosen') {
+          return panel(`Why did <span class="mono">#P01-A001-TRK-1000</span> slip?<span class="caret"></span>`, '') +
+            `<div class="sent"><div class="lbl">What the model receives</div>Why did #P01-A001-TRK-1000 slip?</div>`;
+        }
+        const pop = state === 'none'
+          ? `<div class="pop"><div class="cap"><span>No activity has "catenaryx" in its code or name</span></div></div>`
+          : `<div class="pop"><div class="cap"><span>${total()}</span><span>↑↓ Enter</span></div>${options()}</div>`;
+        return panel(`Why did <span class="hash">#${state === 'none' ? 'catenaryx' : 'catenary'}</span><span class="caret"></span>`, pop);
+      }
+
+      function optionB() {
+        if (state === 'chosen') {
+          return panel(`Why did <span class="chip">Install catenary, section 2 <span class="x">×</span></span> slip?<span class="caret"></span>`, '') +
+            `<div class="sent"><div class="lbl">What the model receives</div>Why did #P01-A001-TRK-1000 (Install catenary, section 2) slip?</div>`;
+        }
+        const pop = state === 'none'
+          ? `<div class="pop"><div class="cap"><span>No activity, WBS or code matches "catenaryx"</span></div></div>`
+          : `<div class="pop"><div class="tabs"><span class="tab on">Activities</span><span class="tab">WBS</span></div><div class="cap"><span>${total()}</span><span>↑↓ Enter</span></div>${options()}</div>`;
+        return panel(`Why did <span class="chip" style="border-style:dashed">#${state === 'none' ? 'catenaryx' : 'catenary'}</span><span class="caret"></span>`, pop);
+      }
+
+      function optionC() {
+        const attached = state === 'chosen'
+          ? `<div class="attached">About <span class="chip">P01-A001-TRK-1000 <span class="x">×</span></span><span class="chip">MS-COMPLETE <span class="x">×</span></span></div>`
+          : '';
+        if (state === 'chosen') {
+          return panel(`Why did this slip, and does it drive completion?<span class="caret"></span>`, '', attached) +
+            `<div class="sent"><div class="lbl">What the model receives</div>About #P01-A001-TRK-1000 and #MS-COMPLETE: Why did this slip, and does it drive completion?</div>`;
+        }
+        const list = state === 'none'
+          ? `<div class="foot-note">No activity has "catenaryx" in its code or name.</div>`
+          : `<div class="cap" style="padding:6px 10px;font-size:11px;color:var(--t3);display:flex;justify-content:space-between"><span>${total()}</span><span>↑↓ Enter</span></div>${options()}`;
+        const tray = `<div class="tray"><div class="tabs"><span class="tab">Selected in the grid</span><span class="tab on">Search</span><span class="tab">Milestones</span></div><div class="search">${state === 'none' ? 'catenaryx' : 'catenary'}<span class="caret"></span></div>${list}</div>`;
+        return panel(`<span style="color:var(--t3)">Ask about these updates</span>`, '', tray);
+      }
+
+      const OPTIONS = [
+        { title: 'A. A list at the caret; the code goes into the text', render: optionA,
+          notes: [['Does well', 'The smallest change: a plain textarea, and the question reads exactly as it is sent. The code is what the model is already told to cite.'], ['Does badly', 'The question fills with codes, which are hard to read back. Activities only: WBS needs another prefix.'], ['Scale', 'Shows the 6 that slipped most and says how many match.']] },
+        { title: 'B. A list at the caret; the choice becomes a chip in the text', render: optionB,
+          notes: [['Does well', 'Reads like the question the planner meant, with the activity’s name. Tabs for activities and WBS, as the spec lists.'], ['Does badly', 'Needs an editable field that holds chips, which is hard to make accessible and to edit with the keyboard. The model is sent code and name.'], ['Scale', 'Same as A.']] },
+        { title: 'C. A tray above the input; choices are attached, not typed', render: optionC,
+          notes: [['Does well', 'The activity the planner just selected in the grid is one click away, and milestones too. The question stays plain words; the attached activities are listed apart.'], ['Does badly', 'Not a # in the text, which the spec names. One more thing on screen, and the link between a word and the activity it means is lost.'], ['Scale', 'Same search; the first tab needs no search at all.']] },
+      ];
+
+      function render() {
+        document.getElementById('main').innerHTML = OPTIONS.map((o) => `<section><h2>${o.title}</h2><dl class="notes">${o.notes.map(([dt, dd]) => `<dt>${dt}</dt><dd>${dd}</dd>`).join('')}</dl>${o.render()}</section>`).join('');
+      }
+      document.getElementById('controls').addEventListener('click', (e) => {
+        const b = e.target.closest('button');
+        if (!b) return;
+        state = b.dataset.state;
+        for (const x of document.querySelectorAll('#controls button')) x.setAttribute('aria-pressed', String(x === b));
+        render();
+      });
+      render();
+    </script>
+  </body>
+</html>
