@@ -20,4 +20,4 @@ The agent server (`apps/api`, D20) and the panel (D22) existed, but the public s
 
 - Three paid questions through the app on 15 November 2026 (local server, `claude-opus-5-5`, medium effort): answered in 7 to 9 seconds, each cited only codes the tools returned, and every call after the first read the cached prompt (2,870 to 5,223 tokens).
 - Production needs, on Vercel: `AGENT_MODE=live`, `ANTHROPIC_API_KEY`, `ANTHROPIC_MODEL=claude-opus-5-5`, `AGENT_EFFORT=medium`, `APP_ORIGIN=https://slip.usmankadai.dev`, `AGENT_DAILY_CALL_CAP=300`, `UPSTASH_REDIS_REST_URL` and `UPSTASH_REDIS_REST_TOKEN`. Without them the site stays scripted. A spending limit on the key in the Anthropic console is the final backstop.
-- Not built: numbers right-aligned inside the model's tables. The setting "Send activity names to the agent" was built later ([D27](D27-withholding-activity-names.md)).
+- Both were built later: the setting "Send activity names to the agent" ([D27](D27-withholding-activity-names.md)), and numbers right-aligned inside the model's tables (17 November 2026, see the agent API spec).

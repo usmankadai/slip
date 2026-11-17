@@ -2,6 +2,25 @@
 
 What was built, what Usman decided or designed, and what an agent generated. Newest first.
 
+## 17 November 2026: numbers in the assistant's tables
+
+**Done**
+
+- Columns of numbers in the assistant's tables are right aligned, header included, so they follow the rule for every number in Slip. A column counts as numbers when the model's own separator row says right (`---:`), or every filled cell is a number with an optional sign, commas, decimals and a unit.
+- Done when the answer is drawn, so the prompt and the evals are unchanged. Tests for the rule and the markup; the AgentText story shows it.
+
+**Usman decided or designed**
+
+- The rule itself is his, from the UI spec: every number tabular, right aligned, with a unit.
+
+**The agent (Claude) generated**
+
+- The column test, the change to AgentText and the tests.
+
+**Worth Usman's attention**
+
+- Nothing makes the model add a unit to a bare number such as "+18" in a column headed "Working days". The header carries the unit there, which reads well, so it was left.
+
 ## 17 November 2026: keeping activity names from the assistant
 
 **Done**

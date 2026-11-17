@@ -13,7 +13,13 @@ export interface InlinePart extends TextPart {
 export type AnswerBlock =
   | { kind: 'paragraph'; parts: InlinePart[] }
   | { kind: 'list'; ordered: boolean; items: InlinePart[][] }
-  | { kind: 'table'; head: InlinePart[][]; rows: InlinePart[][][] };
+  | {
+      kind: 'table';
+      head: InlinePart[][];
+      rows: InlinePart[][][];
+      /** Per column. Numbers are right aligned, as everywhere in Slip. */
+      align: ('left' | 'right')[];
+    };
 
 /** The most rows a table shows; the model is told to keep lists short, and the panel is narrow. */
 const MAX_ROWS = 50;
@@ -77,6 +83,29 @@ const cells = (line: string) =>
     .map((cell) => cell.trim());
 const isSeparator = (line: string) =>
   /^\|?\s*:?-{2,}:?\s*(\|\s*:?-{2,}:?\s*)*\|?$/.test(line.trim());
+/**
+ * A number as an answer writes it: a sign, digits with commas, a decimal part, and a unit such
+ * as d, %, days or working days. "+18", "−3d", "7.0%", "1,204", "65 working days".
+ */
+const NUMBER = /^[+\-−]?\d[\d,]*(\.\d+)?\s?(d|%|days?|working days?|wd|h|hours?|MB)?$/i;
+
+/**
+ * How each column lines up: as the separator row says when it says (`---:`), otherwise right
+ * when every filled cell below the header is a number.
+ */
+export function columnAlign(separator: string, rows: readonly string[][], width: number) {
+  const marks = cells(separator);
+  return Array.from({ length: width }, (_, column): 'left' | 'right' => {
+    const mark = marks[column] ?? '';
+    if (/^:-+:$/.test(mark) || /^-+:$/.test(mark)) return 'right';
+    if (/^:-+$/.test(mark)) return 'left';
+    const filled = rows
+      .map((row) => (row[column] ?? '').replace(/\*\*/g, '').trim())
+      .filter(Boolean);
+    return filled.length > 0 && filled.every((cell) => NUMBER.test(cell)) ? 'right' : 'left';
+  });
+}
+
 const BULLET = /^\s*[-*•]\s+(.*)$/;
 const NUMBERED = /^\s*\d{1,3}[.)]\s+(.*)$/;
 const HEADING = /^\s*#{1,6}\s+(.*)$/;
@@ -97,15 +126,21 @@ export function answerBlocks(text: string, known: ReadonlySet<string>): AnswerBl
     // A table: a row of cells, then a separator row, then more rows.
     if (line.trim().startsWith('|') && k + 1 < lines.length && isSeparator(lines[k + 1]!)) {
       flush();
-      const head = cells(line).map((cell) => inline(cell, known));
-      const rows: InlinePart[][][] = [];
+      const headCells = cells(line);
+      const separator = lines[k + 1]!;
+      const raw: string[][] = [];
       k += 2;
       while (k < lines.length && lines[k]!.trim().startsWith('|')) {
-        if (rows.length < MAX_ROWS) rows.push(cells(lines[k]!).map((cell) => inline(cell, known)));
+        if (raw.length < MAX_ROWS) raw.push(cells(lines[k]!));
         k++;
       }
       k--;
-      blocks.push({ kind: 'table', head, rows });
+      blocks.push({
+        kind: 'table',
+        head: headCells.map((cell) => inline(cell, known)),
+        rows: raw.map((row) => row.map((cell) => inline(cell, known))),
+        align: columnAlign(separator, raw, headCells.length),
+      });
       continue;
     }
     const bullet = BULLET.exec(line) ?? NUMBERED.exec(line);
