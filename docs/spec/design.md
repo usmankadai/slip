@@ -132,6 +132,7 @@ Storybook is deployed publicly with the app and linked from the README and the a
 | Research notes and findings | `docs/research/` | Ongoing from phase 1 |
 | Usability session and resulting changes | `docs/research/`, case study | Phase 3 |
 | Storybook written pages | `packages/ui` | Phase 4 |
+| Design process pages: every exploration and layout, what was chosen and by whom | Storybook, `Design process` | Built 17 November 2026 |
 | Case study | `docs/case-study.md` (also published) | Phase 4 |
 | Demo recording, under three minutes | linked from the README | Phase 4 |
 

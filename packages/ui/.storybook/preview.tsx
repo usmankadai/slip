@@ -29,7 +29,15 @@ const preview: Preview = {
     layout: 'padded',
     options: {
       storySort: {
-        order: ['Foundations', ['Colour', 'Slip scale', 'Type', 'Density', 'Space and shape']],
+        order: [
+          'Foundations',
+          ['Colour', 'Slip scale', 'Type', 'Density', 'Space and shape'],
+          'Design process',
+          ['About', 'Explorations'],
+          'Components',
+          'Screens',
+          'App',
+        ],
       },
     },
   },
