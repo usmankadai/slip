@@ -1,3 +1,5 @@
+import { existsSync, readFileSync, readdirSync } from 'node:fs';
+import { join, resolve } from 'node:path';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { describe, expect, it } from 'vitest';
 import {
@@ -20,6 +22,7 @@ import {
   mentionAt,
   formatDelta,
 } from '../src/index.ts';
+import { EXPLORATIONS, LAYOUTS } from '../src/process/process.ts';
 
 describe('Button', () => {
   it('is a button that does not submit a form by default', () => {
@@ -421,5 +424,28 @@ describe('MentionInput', () => {
     expect(outside).not.toContain('role="status"');
     const none = renderToStaticMarkup(<MentionInput {...props} value="#cat" list={null} />);
     expect(none).not.toContain('role="status"');
+  });
+});
+
+describe('Design process pages', () => {
+  const design = resolve(import.meta.dirname, '../../../docs/design');
+
+  it('list every exploration in docs/design, and each drawing exists', () => {
+    const folders = readdirSync(join(design, 'explorations')).filter((name) => /^\d\d-/.test(name));
+    expect(EXPLORATIONS.map((entry) => entry.folder).sort()).toEqual(folders.sort());
+    for (const entry of EXPLORATIONS) {
+      expect(existsSync(join(design, 'explorations', entry.folder, entry.page))).toBe(true);
+      expect(entry.chosen.every((letter) => entry.options.some((o) => o.letter === letter))).toBe(
+        true,
+      );
+    }
+    for (const layout of LAYOUTS) expect(existsSync(join(design, 'flows', layout.page))).toBe(true);
+  });
+
+  it('give the decision date written in each README', () => {
+    for (const entry of EXPLORATIONS) {
+      const readme = readFileSync(join(design, 'explorations', entry.folder, 'README.md'), 'utf8');
+      expect(readme.split('\n').find((line) => line.startsWith('Status:'))).toContain(entry.date);
+    }
   });
 });

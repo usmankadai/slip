@@ -20,6 +20,18 @@ for (const story of stories) {
     await page.locator('#storybook-root').waitFor({ state: 'attached' });
     // Fonts are self-hosted; wait for them, and for any canvas to be painted.
     await page.evaluate(async () => {
+      // A page that embeds a drawing waits for it to load, and for the drawing's own fonts.
+      await Promise.all(
+        Array.from(document.querySelectorAll('iframe'), async (frame) => {
+          if (
+            frame.contentDocument?.readyState !== 'complete' ||
+            frame.contentDocument.URL === 'about:blank'
+          ) {
+            await new Promise((done) => frame.addEventListener('load', done, { once: true }));
+          }
+          await frame.contentDocument?.fonts.ready;
+        }),
+      );
       await document.fonts.ready;
       await new Promise((done) => requestAnimationFrame(() => requestAnimationFrame(done)));
     });

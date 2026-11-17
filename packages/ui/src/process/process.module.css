@@ -1,0 +1,181 @@
+.page {
+  display: grid;
+  gap: var(--space-6);
+  max-width: 1040px;
+  color: var(--text-primary);
+}
+
+.header,
+.section {
+  display: grid;
+  gap: var(--space-2);
+}
+
+.eyebrow {
+  margin: var(--space-0);
+  color: var(--text-muted);
+  font-size: var(--text-sm);
+  line-height: var(--leading-sm);
+}
+
+.title {
+  margin: var(--space-0);
+  font-size: var(--text-xl);
+  line-height: var(--leading-xl);
+  font-weight: var(--weight-semibold);
+}
+
+.lead {
+  max-width: 72ch;
+  margin: var(--space-0);
+  color: var(--text-secondary);
+}
+
+.heading {
+  margin: var(--space-0);
+  font-size: var(--text-md);
+  line-height: var(--leading-md);
+  font-weight: var(--weight-semibold);
+}
+
+.options {
+  display: grid;
+  gap: var(--space-2);
+  margin: var(--space-0);
+  padding: var(--space-0);
+  list-style: none;
+}
+
+.option {
+  display: grid;
+  grid-template-columns: var(--space-6) minmax(0, 1fr);
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-card);
+  background: var(--surface-0);
+}
+
+/* The option taken: an accent rule and the word "Chosen", not colour alone. */
+.taken {
+  border-color: var(--border-strong);
+  box-shadow: inset var(--space-1) 0 0 var(--accent);
+}
+
+.letter {
+  font-weight: var(--weight-semibold);
+}
+
+.name {
+  font-weight: var(--weight-semibold);
+}
+
+.badge {
+  margin-left: var(--space-2);
+  padding: var(--space-0) var(--space-1);
+  border: 1px solid var(--accent);
+  border-radius: var(--radius-control);
+  font-size: var(--text-xs);
+  line-height: var(--leading-xs);
+}
+
+.summary {
+  display: block;
+  color: var(--text-secondary);
+  font-size: var(--text-sm);
+  line-height: var(--leading-sm);
+}
+
+.decision {
+  max-width: 72ch;
+  margin: var(--space-0);
+  font-weight: var(--weight-medium);
+}
+
+.who {
+  max-width: 72ch;
+  margin: var(--space-0);
+  color: var(--text-secondary);
+  font-size: var(--text-sm);
+  line-height: var(--leading-sm);
+}
+
+.reasons {
+  display: grid;
+  gap: var(--space-1);
+  max-width: 72ch;
+  margin: var(--space-0);
+  padding-left: var(--space-5);
+}
+
+.built {
+  max-width: 72ch;
+  margin: var(--space-0);
+}
+
+.link {
+  color: var(--text-primary);
+  text-decoration: underline;
+}
+
+.link:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+
+.drawing {
+  display: grid;
+  gap: var(--space-2);
+  margin: var(--space-0);
+}
+
+.frame {
+  width: 100%;
+  height: 760px;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-card);
+  background: var(--surface-0);
+}
+
+.caption {
+  color: var(--text-muted);
+  font-size: var(--text-sm);
+  line-height: var(--leading-sm);
+}
+
+.table {
+  border-collapse: collapse;
+  font-size: var(--text-sm);
+  line-height: var(--leading-sm);
+}
+
+.table th,
+.table td {
+  padding: var(--space-2) var(--space-3);
+  border-bottom: 1px solid var(--border-subtle);
+  text-align: left;
+  vertical-align: top;
+}
+
+.table thead th {
+  color: var(--text-secondary);
+  font-weight: var(--weight-medium);
+}
+
+.table tbody th {
+  font-weight: var(--weight-medium);
+}
+
+.table .number {
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+
+.hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}

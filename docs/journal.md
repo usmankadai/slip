@@ -2,6 +2,29 @@
 
 What was built, what Usman decided or designed, and what an agent generated. Newest first.
 
+## 17 November 2026: the design process in Storybook
+
+**Done**
+
+- A "Design process" group in Storybook, after Foundations: an overview of how each design was decided, the screen layouts with a tab per screen, the colour values, and one page for each of the 12 explorations.
+- Each exploration page: the problem, the options drawn with what each does well and badly, the one chosen marked in words, the decision with its date, whose reasons it rests on and Usman's words when he chose, links to the stories built from it, and the original drawing embedded.
+- Storybook serves `docs/design` as it is, so the drawings are the same files as in the repository. A test fails if an exploration is missing from the pages or a decision date differs from its README.
+- The screenshot test now waits for embedded drawings to load.
+
+**Usman decided or designed**
+
+- To show the explorations publicly, and in Storybook rather than in the app or on a site of their own. He accepted the recommendation; the reasons are the agent's: the people who would look are already in Storybook, and each exploration sits beside what was built from it.
+
+**The agent (Claude) generated**
+
+- The pages, the summaries of each README, the overview text and the test.
+- The overview says plainly that in 11 of the 12 explorations Usman accepted the recommendation, and each page says whose reasons it rests on.
+
+**Worth Usman's attention**
+
+- The reasons on every page are Claude's, including exploration 08, where you chose without giving reasons. Putting a sentence of your own on the ones you would defend in an interview would make them stronger.
+- The case study does not exist yet; it should link here.
+
 ## 17 November 2026: the mention picker
 
 **Done**

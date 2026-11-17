@@ -4,6 +4,7 @@ A review workspace for the monthly update of a large construction or infrastruct
 
 - **The app:** https://slip.usmankadai.dev. Choose "Generate a sample pair" if you have no XER files to hand.
 - **The design system (Storybook):** https://slip-design-system.usmankadai.dev
+- **How it was designed:** [Design process](https://slip-design-system.usmankadai.dev/?path=/story/design-process-about--overview) in Storybook, every option drawn for each screen and hard interaction, what was chosen and by whom
 - **How it was built, and who decided what:** [docs/journal.md](docs/journal.md)
 
 It is built for schedules of 350,000 to 1,000,000 activities, the size of a large programme, and runs in the browser: your files are never uploaded.
@@ -132,7 +133,7 @@ Set a spending limit on the API key in the Anthropic console. The server limits 
 
 ## Who did what
 
-Usman decided the product, its scope and the spec, and chose every screen's layout from options drawn for him: eleven design explorations, each with three options, in [docs/design/explorations/](docs/design/explorations/). The visual identity was accepted as first proposed, without alternatives ([D16](docs/decisions/D16-visual-identity.md)). An AI coding agent (Claude) wrote the code, the tests and most of the documentation, drew the options, and made the engineering decisions recorded in [docs/decisions/](docs/decisions/README.md). The journal records the split for every step, including where Usman accepted a recommendation rather than choosing for his own reasons.
+Usman decided the product, its scope and the spec, and chose every screen's layout from options drawn for him: twelve design explorations, each with three or four options, in [docs/design/explorations/](docs/design/explorations/) and shown with each decision under [Design process](https://slip-design-system.usmankadai.dev/?path=/story/design-process-about--overview) in Storybook. The visual identity was accepted as first proposed, without alternatives ([D16](docs/decisions/D16-visual-identity.md)). An AI coding agent (Claude) wrote the code, the tests and most of the documentation, drew the options, and made the engineering decisions recorded in [docs/decisions/](docs/decisions/README.md). The journal records the split for every step, including where Usman accepted a recommendation rather than choosing for his own reasons.
 
 ## Where things are
 

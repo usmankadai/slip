@@ -50,6 +50,8 @@ How each check is enforced, and the departures from the list above, are in [D23]
 ## Storybook
 Run with `pnpm storybook`; built by `pnpm build:storybook`, which is part of `pnpm check`. Telemetry is off. So far it holds the foundation pages only (colour, slip scale, type, density, space and shape); every value shown is read from the tokens on the page. It is not deployed yet.
 
+**Design process pages (17 November 2026).** A "Design process" group, after Foundations, shows how Slip was designed: an overview of the method, the screen layouts with a tab per screen, the colour values, and one page per exploration. Each exploration page gives the problem, the options drawn, the one chosen, whose reasons the choice rests on, links to the stories built from it, and the original drawing embedded from `docs/design`, which Storybook serves as it is at `/design`. The text is in `packages/ui/src/process/process.ts`, summarised from each README, which remains the record; a test fails if an exploration in `docs/design/explorations` is missing from it or a decision date differs. The embedded drawings are low-fidelity working files: axe checks the pages around them, not the drawings.
+
 Deployed publicly with the app. As well as component stories it carries written pages (principles, identity, the slip colour scale, density, states, content, do and do not per component, canvas primitives). The list and the reasoning are in [design.md](design.md). The do and do not examples are the same ones used in `AGENTS.md`.
 
 ## Agent comparison experiment
