@@ -6,6 +6,8 @@ import {
   DEFAULT_SORT,
   changeWords,
   engineFilter,
+  gridViewOf,
+  sortOf,
   nextSort,
   scrollReadout,
   statusLine,
@@ -191,5 +193,35 @@ describe('words', () => {
 
   it('gives the scrolling readout in rows', () => {
     expect(scrollReadout(120_401, 350_412)).toBe('Row 120,401 of 350,412');
+  });
+});
+
+describe('the grid layout kept for the address bar', () => {
+  const plain = {
+    sort: DEFAULT_SORT,
+    density: 'compact' as const,
+    gantt: 'shown' as const,
+    zoom: 'months' as const,
+  };
+
+  it('is empty for the default layout', () => {
+    expect(gridViewOf(plain)).toEqual({});
+    expect(sortOf({})).toEqual(DEFAULT_SORT);
+  });
+
+  it('keeps a sort, density, layout and zoom, and turns the sort back for the engine', () => {
+    const view = gridViewOf({
+      sort: { column: 'totalFloatDays', direction: 'asc' },
+      density: 'comfortable',
+      gantt: 'hidden',
+      zoom: 'years',
+    });
+    expect(view).toEqual({
+      sort: { column: 'float', direction: 'asc' },
+      density: 'comfortable',
+      layout: 'grid',
+      zoom: 'years',
+    });
+    expect(sortOf(view)).toEqual({ column: 'totalFloatDays', direction: 'asc' });
   });
 });

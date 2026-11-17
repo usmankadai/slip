@@ -68,6 +68,44 @@ export const COLUMNS: Column[] = [
 /** Largest finish slip first: the worst movers are what the planner came for. */
 export const DEFAULT_SORT: SortSpec = { column: 'finishDeltaDays', direction: 'desc' };
 
+/**
+ * How the planner has set the grid out, beyond what it filters by: the sort, the density, whether
+ * the Gantt is shown and its zoom. Only values that differ from the defaults are kept, so a plain
+ * view has an empty object. Kept in the address bar (D24).
+ */
+export interface GridView {
+  sort?: { column: ColumnId; direction: 'asc' | 'desc' };
+  density?: 'comfortable';
+  layout?: 'grid';
+  zoom?: 'weeks' | 'years';
+}
+
+/** The grid's sort as the engine takes it, from a view. */
+export function sortOf(view: GridView): SortSpec {
+  const column = view.sort && COLUMNS.find((entry) => entry.id === view.sort!.column);
+  return column?.sortBy ? { column: column.sortBy, direction: view.sort!.direction } : DEFAULT_SORT;
+}
+
+/** A view from the grid's state, leaving out whatever is the default. */
+export function gridViewOf(state: {
+  sort: SortSpec | null;
+  density: 'compact' | 'comfortable';
+  gantt: 'shown' | 'hidden';
+  zoom: 'weeks' | 'months' | 'years';
+}): GridView {
+  const view: GridView = {};
+  const column = COLUMNS.find((entry) => entry.sortBy === state.sort?.column);
+  const isDefault =
+    state.sort?.column === DEFAULT_SORT.column && state.sort.direction === DEFAULT_SORT.direction;
+  if (column && state.sort && !isDefault) {
+    view.sort = { column: column.id, direction: state.sort.direction };
+  }
+  if (state.density === 'comfortable') view.density = 'comfortable';
+  if (state.gantt === 'hidden') view.layout = 'grid';
+  if (state.zoom !== 'months') view.zoom = state.zoom;
+  return view;
+}
+
 /** Clicking a sorted column reverses it; clicking another sorts by it, numbers largest first. */
 export function nextSort(current: SortSpec | null, column: Column): SortSpec | null {
   if (!column.sortBy) return current;

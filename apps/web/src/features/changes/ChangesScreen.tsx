@@ -20,7 +20,9 @@ import {
 import { GridMessage } from './GridMessage.tsx';
 import styles from './changes.module.css';
 import {
-  DEFAULT_SORT,
+  gridViewOf,
+  sortOf,
+  type GridView,
   KINDS,
   engineFilter,
   nextSort,
@@ -66,6 +68,8 @@ export function ChangesScreen({
   onFilter,
   initialSelected,
   onSelect,
+  initialGrid = {},
+  onGrid,
 }: {
   pair: { a: SlotFacts; b: SlotFacts };
   /** The kind of change to open on, or null for every activity. */
@@ -88,6 +92,10 @@ export function ChangesScreen({
   initialSelected?: string;
   /** Told the code of the selected activity, or null when the selection is lost. */
   onSelect?: (code: string | null) => void;
+  /** How the grid was set out, from the address bar. */
+  initialGrid?: GridView;
+  /** Told when the planner changes the sort, density, layout or zoom. */
+  onGrid?: (grid: GridView) => void;
 }) {
   const [filter, setFilter] = useState<GridFilter>({
     kind: initialKind,
@@ -95,8 +103,8 @@ export function ChangesScreen({
     ...(check ? { healthCheck: check.id } : {}),
   });
   const [typed, setTyped] = useState(initialText.slice(0, 200));
-  const [sort, setSort] = useState<SortSpec | null>(DEFAULT_SORT);
-  const [density, setDensity] = useState<Density>('compact');
+  const [sort, setSort] = useState<SortSpec | null>(() => sortOf(initialGrid));
+  const [density, setDensity] = useState<Density>(initialGrid.density ?? 'compact');
   const [selectedRow, setSelectedRow] = useState<number | null>(null);
   const [reveal, setReveal] = useState<{ row: number; nonce: number } | null>(null);
   const [lostSelection, setLostSelection] = useState(false);
@@ -104,12 +112,30 @@ export function ChangesScreen({
   const [unknownSelected, setUnknownSelected] = useState<string | null>(null);
   const [position, setPosition] = useState({ first: 0, last: 0 });
   const [removed, setRemoved] = useState(0);
-  const [gantt, setGantt] = useState<'shown' | 'hidden'>('shown');
-  const [zoom, setZoom] = useState<Zoom>('months');
+  const [gantt, setGantt] = useState<'shown' | 'hidden'>(
+    initialGrid.layout === 'grid' ? 'hidden' : 'shown',
+  );
+  const [zoom, setZoom] = useState<Zoom>(initialGrid.zoom ?? 'months');
   const dataDate = pair.b.dataDate === NONE ? 0 : pair.b.dataDate;
   const [origin, setOrigin] = useState(() =>
-    originFor(dataDate, DATA_DATE_AT, ASSUMED_WIDTH, PX_PER_DAY.months),
+    originFor(dataDate, DATA_DATE_AT, ASSUMED_WIDTH, PX_PER_DAY[zoom]),
   );
+  // The address bar follows the layout. Not on the first render: nothing has changed yet.
+  const gridView = useMemo(
+    () => gridViewOf({ sort, density, gantt, zoom }),
+    [sort, density, gantt, zoom],
+  );
+  const firstGrid = useRef(true);
+  // Held in a ref so a new callback from the parent does not count as a change of layout.
+  const tellGrid = useRef(onGrid);
+  tellGrid.current = onGrid;
+  useEffect(() => {
+    if (firstGrid.current) {
+      firstGrid.current = false;
+      return;
+    }
+    tellGrid.current?.(gridView);
+  }, [gridView]);
   const scale = useMemo(() => ({ origin, pxPerDay: PX_PER_DAY[zoom] }), [origin, zoom]);
   const [width, setWidth] = useState(ASSUMED_WIDTH);
   /** The activity shown in the drawer, or null when the drawer is closed. */
