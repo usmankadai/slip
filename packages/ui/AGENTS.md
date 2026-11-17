@@ -45,6 +45,7 @@ Each has a contract in its README. The one-line version:
 | `ProposedEditCard` | A change the assistant proposed, before and after, for approval                                                                    | Changes made without asking                                           |
 | `Dialog`           | Something opened to read or answer, then closed to go back: where your data goes                                                   | A message that should stay on screen; activity detail beside the grid |
 | `TabBar`           | Switching what one panel shows, between parts about the same thing; the first tab holds the answer                                 | Filtering a list; moving between screens                              |
+| `MentionInput`     | The assistant's question box: `#` lists activities and writes the chosen code into the text                                        | Searching a screen; picking from a fixed set                          |
 
 ## Density
 

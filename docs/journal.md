@@ -2,6 +2,28 @@
 
 What was built, what Usman decided or designed, and what an agent generated. Newest first.
 
+## 17 November 2026: the mention picker
+
+**Done**
+
+- `#` in the assistant's question lists activities whose code or name contains what follows, six at a time, sorted by finish slip, and says how many matched. Choosing one writes `#CODE` into the question.
+- With nothing after `#`, the activity selected in the grid comes first.
+- `MentionInput` in `packages/ui` with a contract, seven stories and tests; `useMentions` in the assistant, using the grid's engine search.
+- Checked in the app on a generated 10K pair: the list, the arrows, Enter, Escape closing only the list, and the selected activity first.
+
+**Usman decided or designed**
+
+- Option A of exploration 12. He accepted the recommendation; the reasons recorded are the agent's.
+
+**The agent (Claude) generated**
+
+- The recommendation to take the selected activity first from option C and to leave WBS out for now, the component, the search hook, the tests and the write-up.
+- The list opens above the box rather than at the caret, since the box is at the foot of a narrow panel.
+
+**Worth Usman's attention**
+
+- WBS mentions need a WBS name search in the engine.
+
 ## 16 November 2026: options for the mention picker
 
 **Done**

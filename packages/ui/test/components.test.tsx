@@ -14,7 +14,10 @@ import {
   SegmentedControl,
   Skeleton,
   TabBar,
+  MentionInput,
   barLength,
+  insertMention,
+  mentionAt,
   formatDelta,
 } from '../src/index.ts';
 
@@ -328,5 +331,95 @@ describe('TabBar', () => {
   it('shows a note beside its label', () => {
     expect(html).toContain('Logic<span');
     expect(html).toContain('3 in, 2 out</span>');
+  });
+});
+
+describe('mentionAt', () => {
+  it('finds a # at the start or after a space, with the caret after it', () => {
+    expect(mentionAt('Why did #cat slip', 12)).toEqual({ start: 8, end: 12, query: 'cat' });
+    expect(mentionAt('#P01', 4)).toEqual({ start: 0, end: 4, query: 'P01' });
+    expect(mentionAt('Why did #', 9)).toEqual({ start: 8, end: 9, query: '' });
+  });
+
+  it('runs to the end of the word even when the caret is inside it', () => {
+    expect(mentionAt('Why did #catenary slip', 11)).toEqual({
+      start: 8,
+      end: 17,
+      query: 'catenary',
+    });
+  });
+
+  it('ignores a # inside a word, a caret after a space, and a caret before the #', () => {
+    expect(mentionAt('item#3', 6)).toBeNull();
+    expect(mentionAt('#cat slip', 9)).toBeNull();
+    expect(mentionAt('Why did #cat', 8)).toBeNull();
+    expect(mentionAt('', 0)).toBeNull();
+    expect(mentionAt('#cat', 99)).toBeNull();
+  });
+});
+
+describe('insertMention', () => {
+  it('writes the code and one space, and puts the caret after it', () => {
+    const text = 'Why did #cat';
+    expect(insertMention(text, mentionAt(text, 12)!, 'P01-A001')).toEqual({
+      text: 'Why did #P01-A001 ',
+      caret: 18,
+    });
+  });
+
+  it('keeps the space that was already there and replaces the whole word', () => {
+    const text = 'Why did #catenary slip?';
+    expect(insertMention(text, mentionAt(text, 11)!, 'P01')).toEqual({
+      text: 'Why did #P01 slip?',
+      caret: 13,
+    });
+  });
+});
+
+describe('MentionInput', () => {
+  const props = {
+    id: 'q',
+    onChange: () => {},
+    onSubmit: () => {},
+    onMentionQuery: () => {},
+  };
+  const options = [
+    { code: 'P01', name: 'Install <b>catenary</b>', slipDays: 67 },
+    { code: 'P02', name: 'Survey catenary', slipDays: -3, note: 'Selected in the grid' },
+  ];
+
+  it('lists options with signed slip in days, the first active, names as text', () => {
+    const html = renderToStaticMarkup(
+      <MentionInput {...props} value="Why did #cat" list={{ state: 'ready', options, total: 2 }} />,
+    );
+    expect(html).toContain('role="listbox"');
+    expect(html).toMatch(/role="option" aria-selected="true"[^>]*>.*P01/);
+    expect(html).toContain('+67d');
+    expect(html).toContain('−3d');
+    expect(html).toContain('Selected in the grid');
+    expect(html).toContain('Install &lt;b&gt;catenary&lt;/b&gt;');
+    expect(html).toContain('2 activities match');
+    expect(html).toMatch(/aria-activedescendant="[^"]+-option-0"/);
+  });
+
+  it('says how many matched when it shows fewer, and when none did', () => {
+    const many = renderToStaticMarkup(
+      <MentionInput {...props} value="#cat" list={{ state: 'ready', options, total: 1204 }} />,
+    );
+    expect(many).toContain('1,204 activities match. Showing the 2 that slipped most.');
+    const none = renderToStaticMarkup(
+      <MentionInput {...props} value="#catx" list={{ state: 'ready', options: [], total: 0 }} />,
+    );
+    expect(none).toContain('No activity code or name contains &quot;catx&quot;.');
+    expect(none).not.toContain('role="listbox"');
+  });
+
+  it('shows no list outside a mention or with no list given', () => {
+    const outside = renderToStaticMarkup(
+      <MentionInput {...props} value="Why did it slip" list={{ state: 'loading' }} />,
+    );
+    expect(outside).not.toContain('role="status"');
+    const none = renderToStaticMarkup(<MentionInput {...props} value="#cat" list={null} />);
+    expect(none).not.toContain('role="status"');
   });
 });

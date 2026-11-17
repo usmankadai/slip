@@ -489,6 +489,7 @@ export function App() {
         <AgentDock
           key={key}
           edits={edits}
+          selected={changes?.sel}
           onAudit={audit}
           onOpenActivity={(code) => {
             setTrace(null);

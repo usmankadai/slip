@@ -118,18 +118,6 @@
   align-items: end;
 }
 
-.input {
-  flex: 1;
-  min-width: 0;
-  padding: var(--space-1) var(--space-2);
-  border: 1px solid var(--border-strong);
-  border-radius: var(--radius-control);
-  background: var(--surface-0);
-  color: var(--text-primary);
-  font: inherit;
-  resize: none;
-}
-
 .hidden {
   position: absolute;
   width: 1px;

@@ -1,0 +1,120 @@
+.field {
+  position: relative;
+  flex: 1;
+  min-width: 0;
+}
+
+.input {
+  display: block;
+  box-sizing: border-box;
+  width: 100%;
+  padding: var(--space-1) var(--space-2);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-control);
+  background: var(--surface-0);
+  color: var(--text-primary);
+  font: inherit;
+  resize: none;
+}
+
+.input:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 1px;
+}
+
+/* Opens above the box, which sits at the foot of the panel. */
+.pop {
+  position: absolute;
+  right: 0;
+  bottom: calc(100% + var(--space-1));
+  left: 0;
+  z-index: var(--z-popover);
+  overflow: hidden;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-card);
+  background: var(--surface-0);
+  box-shadow: var(--shadow-floating);
+}
+
+.caption {
+  margin: 0;
+  padding: var(--space-1) var(--space-3);
+  color: var(--text-muted);
+  font-size: var(--text-xs);
+  line-height: var(--leading-xs);
+}
+
+.list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  border-top: 1px solid var(--border-subtle);
+}
+
+.option {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  column-gap: var(--space-2);
+  padding: var(--space-1) var(--space-3);
+  border-bottom: 1px solid var(--border-subtle);
+  cursor: pointer;
+  font-size: var(--text-sm);
+  line-height: var(--leading-sm);
+}
+
+.option:last-child {
+  border-bottom: 0;
+}
+
+.option:hover {
+  background: var(--surface-1);
+}
+
+/* The option Enter would choose: a surface and an accent rule, as in the grid, not colour alone. */
+.active,
+.active:hover {
+  background: var(--surface-2);
+  box-shadow: inset var(--space-1) 0 0 var(--accent);
+}
+
+.name {
+  overflow: hidden;
+  color: var(--text-primary);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.code {
+  grid-column: 1;
+  overflow: hidden;
+  color: var(--text-secondary);
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  line-height: var(--leading-xs);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.note {
+  margin-left: var(--space-2);
+  color: var(--text-muted);
+  font-family: var(--font-sans);
+}
+
+.slip {
+  grid-row: 1 / 3;
+  grid-column: 2;
+  align-self: center;
+  color: var(--text-secondary);
+  font-variant-numeric: tabular-nums;
+  font-weight: var(--weight-semibold);
+  text-align: right;
+}
+
+.late {
+  color: var(--slip-late-text);
+}
+
+.early {
+  color: var(--slip-early-text);
+}
