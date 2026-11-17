@@ -94,6 +94,7 @@ Schedules never enter React state: the screens ask the engine worker for the row
 Most of Slip's code was written by an AI coding agent working from the spec. The design system is built so that an agent writing UI gets told when it goes wrong, not trusted to remember:
 
 - [`packages/ui/AGENTS.md`](packages/ui/AGENTS.md): the rules for agents, which of them are checked and how, and every component's use in one line.
+- [Guidelines](https://slip-design-system.usmankadai.dev/?path=/story/guidelines-principles--principles) in Storybook: the principles, states, content rules and each component's do and do not, read from the same spec and READMEs the agents use, so the two cannot drift apart.
 - Lint rules that fail on a raw colour or raw spacing outside the tokens.
 - A check that every screen has stories for loading, empty, error and populated.
 - axe on every Storybook story, failing on any serious or critical WCAG 2.2 AA fault.

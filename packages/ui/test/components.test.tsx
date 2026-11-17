@@ -23,6 +23,15 @@ import {
   formatDelta,
 } from '../src/index.ts';
 import { EXPLORATIONS, LAYOUTS } from '../src/process/process.ts';
+import { parseContract } from '../src/guidelines/contract.ts';
+import { GOAL_EXAMPLES } from '../src/guidelines/Pages.tsx';
+import {
+  CONTRACTS,
+  designGoals,
+  identity,
+  reviewChecklist,
+  uiPrinciples,
+} from '../src/guidelines/spec.ts';
 
 describe('Button', () => {
   it('is a button that does not submit a form by default', () => {
@@ -447,5 +456,49 @@ describe('Design process pages', () => {
       const readme = readFileSync(join(design, 'explorations', entry.folder, 'README.md'), 'utf8');
       expect(readme.split('\n').find((line) => line.startsWith('Status:'))).toContain(entry.date);
     }
+  });
+});
+
+describe('Guideline pages', () => {
+  it('show the design goals from the spec, each with an example from the product', () => {
+    const goals = designGoals();
+    expect(goals.length).toBe(5);
+    for (const goal of goals) expect(GOAL_EXAMPLES[goal.title], goal.title).toBeDefined();
+  });
+
+  it('read the identity table, the interaction principles and the review checklist', () => {
+    const rows = identity();
+    expect(rows.length).toBeGreaterThanOrEqual(10);
+    expect(rows.every((row) => row.element && row.decision && row.reason)).toBe(true);
+    expect(rows.map((row) => row.element)).toContain('Accent');
+    expect(uiPrinciples().map((entry) => entry.title)).toContain('Density first');
+    expect(reviewChecklist().length).toBeGreaterThanOrEqual(6);
+  });
+
+  it('have a full contract and both examples for every component, as AGENTS.md lists them', () => {
+    const agents = readFileSync(resolve(import.meta.dirname, '../AGENTS.md'), 'utf8');
+    const folders = readdirSync(resolve(import.meta.dirname, '../src/components'));
+    expect(CONTRACTS.map((contract) => contract.name).sort()).toEqual([...folders].sort());
+    for (const contract of CONTRACTS) {
+      expect(contract.useFor, contract.name).not.toBe('');
+      expect(contract.notFor, contract.name).not.toBe('');
+      expect(contract.correct, contract.name).not.toBe('');
+      expect(contract.incorrect, contract.name).not.toBe('');
+      expect(agents, contract.name).toContain(`| \`${contract.name}\``);
+    }
+  });
+
+  it('parse a contract the way the README writes it', () => {
+    const contract = parseContract(
+      '# Thing\n\n## Contract\n\n- **Use for** one `x`.\n- **Do not use for** two.\n- **Rules:**\n  - A rule.\n\n## Correct\n\n```tsx\n<Thing />\n```\n\n## Incorrect\n\n```tsx\n<Other />\n```\n',
+    );
+    expect(contract).toEqual({
+      name: 'Thing',
+      useFor: 'one x.',
+      notFor: 'two.',
+      rules: ['A rule.'],
+      correct: '<Thing />',
+      incorrect: '<Other />',
+    });
   });
 });

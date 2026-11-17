@@ -107,7 +107,7 @@ Research notes go in `docs/research/`. A finding only counts when it is tied to 
 
 ## Storybook as the design system's public face
 
-Storybook is deployed publicly with the app and linked from the README and the app footer. Beyond component stories, it has written pages (MDX):
+Storybook is deployed publicly with the app and linked from the README and the app footer. Beyond component stories, it has written pages (built as TSX stories under Guidelines, each reading its source; see [design-system.md](design-system.md)):
 
 - **Principles:** the design goals above, each with one example from the product
 - **Identity:** type, colour and shape, with the reasoning
@@ -131,7 +131,7 @@ Storybook is deployed publicly with the app and linked from the README and the a
 | Explorations 3, 4, 5 | `docs/design/explorations/` | Phases 3 and 4, same rule |
 | Research notes and findings | `docs/research/` | Ongoing from phase 1 |
 | Usability session and resulting changes | `docs/research/`, case study | Phase 3 |
-| Storybook written pages | `packages/ui` | Phase 4 |
+| Storybook written pages | `packages/ui`, Storybook `Guidelines` | Built 17 November 2026 |
 | Design process pages: every exploration and layout, what was chosen and by whom | Storybook, `Design process` | Built 17 November 2026 |
 | Case study | `docs/case-study.md` (also published) | Phase 4 |
 | Demo recording, under three minutes | linked from the README | Phase 4 |

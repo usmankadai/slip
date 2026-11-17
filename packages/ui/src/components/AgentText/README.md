@@ -8,3 +8,16 @@
 - **Rules:**
   - Only codes that appeared in this answer's tool results are chips. Anything else is text with the word "unverified" beside it, where it was written.
   - Text is rendered as text, never as HTML: an answer can contain anything the schedule file contained. Only an allow-list of shapes is drawn: paragraphs, bulleted and numbered lists, tables and bold. Links, images, headings beyond bold and anything else stay as the characters written.
+
+## Correct
+
+```tsx
+const blocks = answerBlocks(answer.text, new Set(answer.known));
+<AgentText blocks={blocks} onOpen={openActivity} />;
+```
+
+## Incorrect
+
+```tsx
+<div dangerouslySetInnerHTML={{ __html: marked(answer.text) }} /> // model text drawn as HTML, citations unchecked
+```
