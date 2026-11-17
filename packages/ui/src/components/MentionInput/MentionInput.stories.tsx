@@ -15,7 +15,7 @@ function Example({ start, list }: { start: string; list: MentionList | null }) {
   const [value, setValue] = useState(start);
   return (
     // Leaves room above for the list, which opens upwards from a box at the foot of a panel.
-    <div style={{ width: 380, paddingTop: 'calc(var(--space-8) * 8)' }}>
+    <div style={{ width: 380, paddingTop: 'calc(var(--space-8) * 11)' }}>
       <label htmlFor="story-question" style={{ display: 'block' }}>
         Your question
       </label>
