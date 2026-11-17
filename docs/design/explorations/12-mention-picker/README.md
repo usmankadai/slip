@@ -1,6 +1,6 @@
 # Exploration 12: the mention picker
 
-Status: **options drawn on 16 November 2026, waiting for Usman's decision.**
+Status: **decided on 17 November 2026: option A. Built.**
 
 ## Problem
 
@@ -25,8 +25,16 @@ Things the mock made visible:
 
 ## Decision
 
-Not made. Usman chooses.
+**Option A**, chosen by Usman on 17 November 2026. He accepted the recommendation, so the reasons are the agent's: it keeps a plain textarea, which is the most robust and accessible field; the question reads exactly as it is sent; and the code is what the model already looks up and cites.
+
+Taken from option C: typing `#` with nothing after it lists the activity selected in the grid first, marked "Selected in the grid", then the activities that slipped most.
+
+Activities only for now. WBS mentions wait until the engine searches WBS names.
 
 ## What changed
 
-Nothing yet.
+- `MentionInput` in `packages/ui`: the textarea, the list above it, and the caption that says how many matched. It only draws; the caller searches. Contract in its README.
+- The list opens above the box rather than at the caret itself: the box is at the foot of a 420px panel, so the two are nearly the same place, and the list is never clipped.
+- `useMentions` in the assistant asks the engine for six rows of update B, filtered by the text after `#` and sorted by finish slip, with a 120ms pause after the last key. A newer search replaces an older one that has not started.
+- Arrows move, Enter or Tab chooses, Escape closes the list but not the panel. Enter with no list open asks the question.
+- Nothing new leaves the browser: the code is part of the question, which was already sent in live mode.

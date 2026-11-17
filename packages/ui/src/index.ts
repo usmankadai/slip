@@ -41,3 +41,10 @@ export {
   type Tab,
   type TabBarProps,
 } from './components/TabBar/TabBar.tsx';
+export {
+  MentionInput,
+  type MentionInputProps,
+  type MentionList,
+  type MentionOption,
+} from './components/MentionInput/MentionInput.tsx';
+export { insertMention, mentionAt, type Mention } from './components/MentionInput/mention.ts';

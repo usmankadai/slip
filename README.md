@@ -34,7 +34,7 @@ It is built for schedules of 350,000 to 1,000,000 activities, the size of a larg
 
 ![Finish update, the narrative](docs/readme/6-narrative.png)
 
-**7. Ask about it.** An assistant that looks things up with the same tools as the screens. It cites activities, and a code it did not see in its own tool results is marked unverified. It can propose a change, which you approve or reject; both are logged.
+**7. Ask about it.** An assistant that looks things up with the same tools as the screens. Type `#` to name an activity by its code or name. It cites activities, and a code it did not see in its own tool results is marked unverified. It can propose a change, which you approve or reject; both are logged.
 
 ![The assistant answering why the project slipped](docs/readme/7-assistant.png)
 
@@ -70,7 +70,7 @@ The full table, with what holds it true, is in the app under "Where your data go
 - **Not yet checked against real P6 exports.** The engine matches the synthetic generator on every date and float value, but its match rate against dates P6 itself calculated is still to be measured, and needs real files.
 - **No export back to XER.** The narrative exports as Markdown or PDF. The PDF uses Windows Latin fonts, so names in other scripts print as a question mark; the Markdown keeps them.
 - **Desktop browsers, 1280px and wider.** Measured in Chromium only.
-- **Not built yet:** error reporting, the `#` mention picker in the assistant, and a setting to keep activity names from the assistant.
+- **Not built yet:** error reporting, WBS mentions in the assistant, and a setting to keep activity names from the assistant.
 
 ## How it is built
 

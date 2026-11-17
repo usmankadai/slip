@@ -20,7 +20,7 @@ Part of the Slip spec. Start at [CLAUDE.md](../../CLAUDE.md).
 A side panel in the style of a copilot:
 - Streams its reasoning steps ("Worked for 12s, 4 steps") with collapsible step detail.
 - Renders inline blocks: text, table, chart, activity chips, proposed edit.
-- `#` opens an activity / WBS / code mention picker in the input.
+- `#` opens an activity mention picker in the input: activities by code or name, sorted by slip; choosing one writes its code into the question (exploration 12, option A). WBS mentions come later.
 - **Never edits the schedule silently.** Edits arrive as a proposed diff card (before / after per field). Approving it applies the change, reruns CPM, and writes an audit log entry. Rejecting it also writes an entry.
 - Answers must cite activity IDs. If the data cannot answer a question, the agent says so.
 - **Two modes.** *Scripted* (the public default): canned, clearly labelled answers over the bundled fixtures, costing nothing, so the public link always has a working agent panel. *Live*: calls the Anthropic API through `apps/api`. See [agent API](agent-api.md).

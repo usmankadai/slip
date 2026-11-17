@@ -1,6 +1,14 @@
 import { useEffect, useRef, useState, type FormEvent } from 'react';
 import { answerBlocks, partsOf } from '@slip/agent';
-import { AgentSteps, AgentText, Button, Notice, ScriptedBadge } from '@slip/ui';
+import {
+  AgentSteps,
+  AgentText,
+  Button,
+  MentionInput,
+  Notice,
+  ScriptedBadge,
+  type MentionList,
+} from '@slip/ui';
 import type { EditsController } from '../../app/useEdits.ts';
 import { OPEN_DATA_FLOW } from '../dataflow/flows.ts';
 import type { Answer } from './loop.ts';
@@ -30,7 +38,12 @@ export interface AgentPanelProps {
   onAskScripted?: (question: string) => void;
   /** Questions that have a scripted answer. */
   scriptable?: readonly string[];
+  /** The list for a `#` mention being typed, and where the panel says what is being typed. */
+  mentions?: MentionList | null;
+  onMentionQuery?: (query: string | null) => void;
 }
+
+const ignore = () => {};
 
 /** Opens "Where your data goes", which lives in the footer. */
 const showDataFlow = () => dispatchEvent(new Event(OPEN_DATA_FLOW));
@@ -128,6 +141,8 @@ export function AgentPanel({
   onDeclineNotice,
   onAskScripted,
   scriptable = [],
+  mentions = null,
+  onMentionQuery = ignore,
 }: AgentPanelProps) {
   const [draft, setDraft] = useState('');
   const end = useRef<HTMLDivElement>(null);
@@ -137,8 +152,8 @@ export function AgentPanel({
     end.current?.scrollIntoView({ block: 'end' });
   }, [answers.length, last?.text, last?.steps.length]);
 
-  const submit = (event: FormEvent) => {
-    event.preventDefault();
+  const submit = (event?: FormEvent) => {
+    event?.preventDefault();
     const question = draft.trim();
     if (!question || working) return;
     onAsk(question);
@@ -239,19 +254,20 @@ export function AgentPanel({
           <label className={styles.hidden} htmlFor="agent-question">
             Your question
           </label>
-          <textarea
+          <MentionInput
             id="agent-question"
-            className={styles.input}
             rows={2}
             maxLength={2000}
             value={draft}
             placeholder={
-              scripted ? 'Choose a suggested question, or type one' : 'Ask about these updates'
+              scripted
+                ? 'Choose a suggested question, or type one'
+                : 'Ask about these updates. Type # to name an activity'
             }
-            onChange={(event) => setDraft(event.target.value)}
-            onKeyDown={(event) => {
-              if (event.key === 'Enter' && !event.shiftKey) submit(event);
-            }}
+            onChange={setDraft}
+            onSubmit={() => submit()}
+            onMentionQuery={onMentionQuery}
+            list={mentions}
           />
           {working ? (
             <Button onClick={onStop}>Stop</Button>
