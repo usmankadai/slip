@@ -49,6 +49,30 @@ describe('the URL for a view', () => {
       },
     },
     { pair, view: { underneath: 'summary', changes: null, trace: 'P01 A001/TRK#1000' } },
+    {
+      pair,
+      view: {
+        underneath: 'summary',
+        changes: {
+          kind: 'all',
+          grid: {
+            sort: { column: 'float', direction: 'asc' },
+            density: 'comfortable',
+            layout: 'grid',
+            zoom: 'weeks',
+          },
+        },
+        trace: null,
+      },
+    },
+    {
+      pair,
+      view: {
+        underneath: 'health',
+        changes: { kind: null, check: 4, grid: { sort: { column: 'name', direction: 'desc' } } },
+        trace: null,
+      },
+    },
   ];
 
   it.each(views.map((view) => [writeUrl(view), view]))('reads %s back as written', (url, view) => {
@@ -109,5 +133,59 @@ describe('a URL that was typed, cut short or tampered with', () => {
     expect(readUrl(`${base}&c=all&q=${encodeURIComponent('a\nb')}`).view.changes).toEqual({
       kind: 'all',
     });
+  });
+});
+
+describe('the grid layout in the URL', () => {
+  const base = '?a=3f9c0a1b2c3d-p12&b=aa11bb22cc33-p12&c=all';
+
+  it("writes only what differs from the default, in Slip's own words", () => {
+    expect(
+      writeUrl({
+        pair,
+        view: {
+          underneath: 'summary',
+          changes: { kind: 'all', grid: { sort: { column: 'slip', direction: 'desc' } } },
+          trace: null,
+        },
+      }),
+    ).toBe(base);
+    expect(
+      writeUrl({
+        pair,
+        view: {
+          underneath: 'summary',
+          changes: { kind: 'all', grid: { zoom: 'years', layout: 'grid' } },
+          trace: null,
+        },
+      }),
+    ).toBe(`${base}&l=grid&z=years`);
+  });
+
+  it('drops a sort, density, layout or zoom it does not know', () => {
+    for (const tail of [
+      '&sort=what.asc',
+      '&sort=changes.asc',
+      '&sort=slip.sideways',
+      '&sort=slip.desc',
+      '&d=huge',
+      '&l=gantt',
+      '&z=months',
+      '&z=decades',
+      '&sort=<script>',
+    ]) {
+      expect(readUrl(base + tail).view.changes, tail).toEqual({ kind: 'all' });
+    }
+  });
+
+  it('ignores a layout with no grid open', () => {
+    const url = '?a=3f9c0a1b2c3d-p12&b=aa11bb22cc33-p12&d=comfortable&sort=float.asc';
+    expect(readUrl(url).view.changes).toBeNull();
+  });
+
+  it('treats a new layout as the same screen, so it replaces the history step', () => {
+    const plain = readUrl(base).view;
+    const sorted = readUrl(`${base}&sort=float.asc&d=comfortable`).view;
+    expect(sameScreen(plain, sorted)).toBe(true);
   });
 });

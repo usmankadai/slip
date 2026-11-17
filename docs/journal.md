@@ -2,6 +2,27 @@
 
 What was built, what Usman decided or designed, and what an agent generated. Newest first.
 
+## 17 November 2026: the grid's layout in the address bar
+
+**Done**
+
+- The URL now keeps how the changes grid is set out: its sort (`sort=float.asc`), comfortable density (`d=comfortable`), grid only (`l=grid`) and the Gantt's zoom (`z=weeks`). Only what differs from the default is written. A reload or a shared link opens the grid as it was left.
+- Everything read is checked against a fixed list; anything else is dropped. A change replaces the history step, like a change of filter.
+- The data flow table, its doc and the security spec say the address can say how the grid is set out, as Slip's own words, never schedule content.
+- Checked in the app: set float sort, comfortable, weeks and grid only, reloaded, and all four came back.
+
+**Usman decided or designed**
+
+- To do it, from the list of what was left.
+
+**The agent (Claude) generated**
+
+- The parameters and their names, the tests and the doc changes. Columns were left out because the grid has no column chooser; typed search stays out as D24 decided.
+
+**Worth Usman's attention**
+
+- The spec once listed configurable columns (`cols`). The grid has a fixed set; choosing columns would be a new feature, and a design decision.
+
 ## 17 November 2026: keeping activity names from the assistant
 
 **Done**

@@ -4,7 +4,7 @@ import { AgentDock } from './features/agent/AgentDock.tsx';
 import { AuditScreen } from './features/audit/AuditScreen.tsx';
 import { DevHarness } from './dev/DevHarness.tsx';
 import { ChangesScreen } from './features/changes/ChangesScreen.tsx';
-import type { ChangeKind } from './features/changes/model.ts';
+import type { ChangeKind, GridView } from './features/changes/model.ts';
 import { HealthScreen } from './features/health/HealthScreen.tsx';
 import { ImportScreen } from './features/import/ImportScreen.tsx';
 import type { Block, Evidence } from './features/narrative/model.ts';
@@ -73,6 +73,8 @@ export function App() {
     text?: string;
     /** The selected activity's code, for the address bar. */
     sel?: string;
+    /** How the grid is set out, when not the default, for the address bar. */
+    grid?: GridView;
   } | null>(null);
   /** True while the Finish update screen is showing, or waiting behind the changes screen. */
   const [narrative, setNarrative] = useState(false);
@@ -151,6 +153,7 @@ export function App() {
             ...(check ? { check } : {}),
             ...(view.changes.text ? { text: view.changes.text } : {}),
             ...(view.changes.sel ? { sel: view.changes.sel } : {}),
+            ...(view.changes.grid ? { grid: view.changes.grid } : {}),
           }
         : null,
     );
@@ -259,6 +262,7 @@ export function App() {
                   ...(changes.text ? { text: changes.text } : {}),
                   ...(changes.check ? { check: changes.check.id } : {}),
                   ...(changes.sel ? { sel: changes.sel } : {}),
+                  ...(changes.grid ? { grid: changes.grid } : {}),
                 }
               : null,
             trace: trace?.code ?? null,
@@ -368,6 +372,16 @@ export function App() {
             check={changes.check}
             initialText={changes.text}
             initialSelected={changes.sel}
+            initialGrid={changes.grid}
+            onGrid={(grid) =>
+              setChanges((open) => {
+                if (!open) return open;
+                const next = { ...open };
+                if (Object.keys(grid).length > 0) next.grid = grid;
+                else delete next.grid;
+                return next;
+              })
+            }
             onSelect={(code) =>
               setChanges((open) => {
                 if (!open || open.sel === (code ?? undefined)) return open;
@@ -388,6 +402,7 @@ export function App() {
                       ...(check && open.check ? { check: open.check } : {}),
                       ...(code && open.text ? { text: open.text } : {}),
                       ...(open.sel ? { sel: open.sel } : {}),
+                      ...(open.grid ? { grid: open.grid } : {}),
                     }
                   : open,
               )

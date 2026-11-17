@@ -12,18 +12,27 @@
  * - `check`: a health check whose activities the grid shows.
  * - `sel`: the activity selected in the grid, by its task code. The drawer shows it.
  * - `t`: the activity whose slip is traced, by its task code.
+ * - `sort`, `d`, `l`, `z`: how the grid is set out, when not the default: its sort (`float.asc`),
+ *   comfortable density (`d=comfortable`), grid only (`l=grid`) and the Gantt's zoom (`z=weeks`).
  *
  * Only task codes and Slip's own words go in the URL, never activity names or other schedule
  * content (security spec). Everything read back is checked; anything unexpected is dropped.
  */
-import type { ChangeKind } from '../features/changes/model.ts';
+import type { ChangeKind, ColumnId, GridView } from '../features/changes/model.ts';
 
 export type Underneath = 'summary' | 'health' | 'finish' | 'log';
 
 export interface UrlView {
   underneath: Underneath;
   /** `text` is an activity code the grid opened on, never typed search text. */
-  changes: { kind: ChangeKind | null; text?: string; check?: number; sel?: string } | null;
+  changes: {
+    kind: ChangeKind | null;
+    text?: string;
+    check?: number;
+    sel?: string;
+    /** How the grid is set out; only what differs from the default. */
+    grid?: GridView;
+  } | null;
   trace: string | null;
 }
 
@@ -45,6 +54,33 @@ const KINDS: readonly ChangeKind[] = [
   'added',
 ];
 const UNDERNEATH: readonly Underneath[] = ['health', 'finish', 'log'];
+const SORTABLE: readonly ColumnId[] = ['code', 'name', 'was', 'now', 'slip', 'float'];
+const SORT = /^([a-z]+)\.(asc|desc)$/;
+
+/** The grid's layout from the address bar. The default sort, largest slip first, is never written. */
+function readGrid(params: URLSearchParams): GridView {
+  const grid: GridView = {};
+  const sort = SORT.exec(params.get('sort') ?? '');
+  if (sort && SORTABLE.includes(sort[1] as ColumnId) && params.get('sort') !== 'slip.desc') {
+    grid.sort = { column: sort[1] as ColumnId, direction: sort[2] as 'asc' | 'desc' };
+  }
+  if (params.get('d') === 'comfortable') grid.density = 'comfortable';
+  if (params.get('l') === 'grid') grid.layout = 'grid';
+  const zoom = params.get('z');
+  if (zoom === 'weeks' || zoom === 'years') grid.zoom = zoom;
+  return grid;
+}
+
+function writeGrid(params: URLSearchParams, grid: GridView | undefined) {
+  if (!grid) return;
+  if (grid.sort && SORTABLE.includes(grid.sort.column)) {
+    const value = `${grid.sort.column}.${grid.sort.direction === 'asc' ? 'asc' : 'desc'}`;
+    if (value !== 'slip.desc') params.set('sort', value);
+  }
+  if (grid.density === 'comfortable') params.set('d', 'comfortable');
+  if (grid.layout === 'grid') params.set('l', 'grid');
+  if (grid.zoom === 'weeks' || grid.zoom === 'years') params.set('z', grid.zoom);
+}
 const ID = /^[0-9a-f]{12}-p\d{1,9}$/;
 /** P6 task codes are at most 40 characters; allow a little room, and nothing that is not printable. */
 const CODE = /^[\x20-\x7e]{1,60}$/;
@@ -73,6 +109,8 @@ export function readUrl(search: string): UrlState {
     if (Number.isInteger(check) && check >= 1 && check <= 14) changes.check = check;
     const sel = params.get('sel');
     if (sel && CODE.test(sel)) changes.sel = sel;
+    const grid = readGrid(params);
+    if (Object.keys(grid).length > 0) changes.grid = grid;
   }
 
   const t = params.get('t');
@@ -95,6 +133,7 @@ export function writeUrl(state: UrlState): string {
     if (changes.text && CODE.test(changes.text)) params.set('q', changes.text);
     if (changes.check) params.set('check', String(changes.check));
     if (changes.sel && CODE.test(changes.sel)) params.set('sel', changes.sel);
+    writeGrid(params, changes.grid);
   }
   if (trace && CODE.test(trace)) params.set('t', trace);
   return `?${params.toString()}`;

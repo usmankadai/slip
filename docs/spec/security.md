@@ -13,7 +13,7 @@ Planlab sells to organisations that ask where their data goes. Slip should be ab
 | Questions to the assistant, live mode | Yes | In transit, not stored | Yes |
 | Rows the assistant asks for, live mode: activity codes and dates, and names unless you turn them off | Yes | In transit, not stored | Yes |
 | Anything, scripted mode | Yes | Never | Never |
-| The page address: the two files' short ids and at most three activity codes | Yes | With each page load, as for any website; not stored by Slip | Never |
+| The page address: the two files' short ids, at most three activity codes, and how the grid is set out | Yes | With each page load, as for any website; not stored by Slip | Never |
 | Error reports | Not collected yet | Never | Never |
 
 When error reporting is added (Sentry, with the scrubber), its row becomes: scrubbed events go to Sentry, never to Anthropic. The in-app panel and `docs/data-flow.md` print this same table from `apps/web/src/features/dataflow/flows.ts`; a test fails if they differ.
