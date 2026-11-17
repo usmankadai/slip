@@ -11,7 +11,7 @@ Planlab sells to organisations that ask where their data goes. Slip should be ab
 | XER files and parsed schedules | Yes | Never | Never |
 | Edits, the activity log and the narrative | Yes | Never | Never |
 | Questions to the assistant, live mode | Yes | In transit, not stored | Yes |
-| Rows the assistant asks for, live mode: activity codes, names and dates | Yes | In transit, not stored | Yes |
+| Rows the assistant asks for, live mode: activity codes and dates, and names unless you turn them off | Yes | In transit, not stored | Yes |
 | Anything, scripted mode | Yes | Never | Never |
 | The page address: the two files' short ids and at most three activity codes | Yes | With each page load, as for any website; not stored by Slip | Never |
 | Error reports | Not collected yet | Never | Never |
@@ -21,7 +21,7 @@ When error reporting is added (Sentry, with the scrubber), its row becomes: scru
 Do not write "the schedule never leaves the browser" anywhere without the live-mode qualification. The accurate claim is: the files are never uploaded, and in live mode only the rows the agent asks for are sent to answer the question.
 
 - Before the first live question in a session, show a one-time notice saying this, with a link to the data flow panel.
-- A setting, "Send activity names to the agent", defaults to on. When off, tool results replace names with codes only and the agent is told names are withheld.
+- A setting, "Send activity names to the assistant", defaults to on. When off, tool results replace names with codes only and the agent is told names are withheld. Built on 17 November 2026 as a switch under the question box in live mode; changing it starts a new conversation so earlier rows are not resent ([D27](../decisions/D27-withholding-activity-names.md)).
 
 ## Application security
 - **Headers:** a strict Content Security Policy with no inline scripts or styles (`default-src 'self'`; `script-src 'self'`; `style-src 'self'`; `worker-src 'self'`; `connect-src 'self'` plus the Sentry ingest host only when configured; `frame-ancestors 'none'`; `object-src 'none'`), plus `X-Content-Type-Options`, `Referrer-Policy` and `Permissions-Policy`. One shared list is used by the preview server (so Playwright runs under it) and by production; a unit test fails if they differ. An e2e test asserts there are no CSP violations during the main workflow, including workers and the MSW service worker.

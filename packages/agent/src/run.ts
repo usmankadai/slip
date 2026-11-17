@@ -143,6 +143,20 @@ const dayMinutesFor = (info: ScheduleInfo, calendar: number): number => {
   return info.calendarDayMinutes[index] ?? 480;
 };
 
+/** What the planner lets leave the browser in tool results. */
+export interface ToolOptions {
+  /** Activity names. When false, activities are given by code only and each result says so. */
+  names?: boolean;
+}
+
+/** Told to the model in every result that would have carried names. */
+export const NAMES_WITHHELD =
+  'The planner has chosen not to send activity names. Activities are given by code only; refer to them by code, and do not guess what they are called.';
+
+/** An activity's name, or nothing when names are withheld (a missing key, not an empty one). */
+const nameIf = (names: boolean, name: string) => (names ? name : undefined);
+const withheld = (names: boolean) => (names ? {} : { names_withheld: NAMES_WITHHELD });
+
 function ok(result: unknown): ToolOutcome {
   return { content: JSON.stringify(result), isError: false, codes: [...codesInResult(result)] };
 }
@@ -166,6 +180,7 @@ function refusal(error: unknown): string | null {
 async function searchActivities(
   engine: ToolEngine,
   input: ToolInput<'search_activities'>,
+  names: boolean,
 ): Promise<ToolOutcome> {
   const { b: info } = await engine.request({ type: 'info' });
   if (!info) return failed('The current update is not loaded.');
@@ -210,7 +225,7 @@ async function searchActivities(
     const dayMinutes = dayMinutesFor(info, n.calendar![k]!);
     return {
       code: rows.text.code![k]!,
-      name: rows.text.name![k]!,
+      name: nameIf(names, rows.text.name![k]!),
       status: STATUS_NAMES[n.status![k]!] ?? 'unknown',
       start: date(n.start![k]!),
       finish: date(n.finish![k]!),
@@ -221,7 +236,7 @@ async function searchActivities(
   });
   const capped = capResult(
     list,
-    { update: 'current', activities_in_update: rows.unfiltered },
+    { update: 'current', activities_in_update: rows.unfiltered, ...withheld(names) },
     rows.total,
   );
   return {
@@ -231,15 +246,20 @@ async function searchActivities(
   };
 }
 
-function shapeActivity(detail: ActivityDetail, withLinks: boolean, linkLimit: number) {
+function shapeActivity(
+  detail: ActivityDetail,
+  withLinks: boolean,
+  linkLimit: number,
+  names: boolean,
+) {
   const link = (entry: ActivityDetail['predecessors'][number]) => ({
     task_code: entry.taskCode,
-    name: entry.name,
+    name: nameIf(names, entry.name),
     type: REL_NAMES[entry.type] ?? 'unknown',
     lag_days: days(entry.lagMinutes, detail.dayMinutes),
   });
   return {
-    name: detail.name,
+    name: nameIf(names, detail.name),
     wbs: detail.wbs,
     type: TYPE_NAMES[detail.type] ?? 'unknown',
     status: STATUS_NAMES[detail.status] ?? 'unknown',
@@ -271,6 +291,7 @@ function shapeActivity(detail: ActivityDetail, withLinks: boolean, linkLimit: nu
 async function getActivity(
   engine: ToolEngine,
   input: ToolInput<'get_activity'>,
+  names: boolean,
 ): Promise<ToolOutcome> {
   const found = await engine.request({ type: 'activity', taskCode: input.task_code });
   if (!found.previous && !found.current)
@@ -283,6 +304,7 @@ async function getActivity(
   for (const linkLimit of [15, 8, 4, 0]) {
     const result = {
       code: input.task_code,
+      ...withheld(names),
       in_previous_update: found.previous !== null,
       in_current_update: found.current !== null,
       changes: changesOf(found.flags),
@@ -290,10 +312,10 @@ async function getActivity(
       start_slip_days: days(found.startDelta, dayMinutes),
       duration_change_days: days(found.durationDelta, dayMinutes),
       float_change_days: days(found.floatDelta, dayMinutes),
-      current: found.current ? shapeActivity(found.current, true, linkLimit) : null,
+      current: found.current ? shapeActivity(found.current, true, linkLimit, names) : null,
       // The previous update's relationships are only shown when the activity is gone from the current one.
       previous: found.previous
-        ? shapeActivity(found.previous, found.current === null, linkLimit)
+        ? shapeActivity(found.previous, found.current === null, linkLimit, names)
         : null,
     };
     if (encoder.encode(JSON.stringify(result)).length <= TOOL_LIMITS.bytes || linkLimit === 0)
@@ -302,7 +324,11 @@ async function getActivity(
   return failed('That activity could not be described.');
 }
 
-async function traceSlip(engine: ToolEngine, input: ToolInput<'trace_slip'>): Promise<ToolOutcome> {
+async function traceSlip(
+  engine: ToolEngine,
+  input: ToolInput<'trace_slip'>,
+  names: boolean,
+): Promise<ToolOutcome> {
   let trace: Extract<EngineResult, { type: 'trace' }>;
   try {
     trace = await engine.request({
@@ -327,7 +353,8 @@ async function traceSlip(engine: ToolEngine, input: ToolInput<'trace_slip'>): Pr
   }
   return ok({
     task_code: input.task_code,
-    name: trace.names[0] ?? '',
+    name: nameIf(names, trace.names[0] ?? ''),
+    ...withheld(names),
     slip_working_days: trace.slipMinutes === NONE ? null : trace.slipWorkingDays,
     note:
       trace.slipMinutes === NONE
@@ -341,7 +368,7 @@ async function traceSlip(engine: ToolEngine, input: ToolInput<'trace_slip'>): Pr
       const at = position.get(entry.activity)!;
       return {
         code: trace.codes[at]!,
-        name: trace.names[at]!,
+        name: nameIf(names, trace.names[at]!),
         cause: entry.kind,
         working_days: Math.round(entry.workingDays * 100) / 100,
       };
@@ -388,7 +415,7 @@ async function healthSummary(
   });
 }
 
-async function diffSummary(engine: ToolEngine): Promise<ToolOutcome> {
+async function diffSummary(engine: ToolEngine, names: boolean): Promise<ToolOutcome> {
   let diff: Extract<EngineResult, { type: 'diff' }>;
   try {
     diff = await engine.request({ type: 'diff' });
@@ -433,11 +460,12 @@ async function diffSummary(engine: ToolEngine): Promise<ToolOutcome> {
       lag_changed: diff.relationships.lagChanged,
     },
     milestones_moved_total: milestones.total,
+    ...withheld(names),
     milestones_moved_note:
       'The milestones whose finish moved, largest slip first. At most 15 are listed.',
     milestones_moved: Array.from(milestones.indices, (_, k) => ({
       code: milestones.text.code![k]!,
-      name: milestones.text.name![k]!,
+      name: nameIf(names, milestones.text.name![k]!),
       previous_finish: date(milestones.numbers.previousFinish![k]!),
       current_finish: date(milestones.numbers.finish![k]!),
       slip_working_days: b
@@ -453,6 +481,7 @@ async function diffSummary(engine: ToolEngine): Promise<ToolOutcome> {
 async function proposeEdit(
   engine: ToolEngine,
   input: ToolInput<'propose_edit'>,
+  names: boolean,
 ): Promise<ToolOutcome> {
   const found = await engine.request({ type: 'activity', taskCode: input.task_code });
   const current = found.current;
@@ -508,7 +537,8 @@ async function proposeEdit(
     applied: false,
     note: 'The planner now sees this proposal and decides. Nothing in the schedule has changed.',
     task_code: input.task_code,
-    name: current.name,
+    name: nameIf(names, current.name),
+    ...withheld(names),
     change: input.change,
     from: describe(from),
     to: describe(to),
@@ -547,21 +577,23 @@ export async function runTool(
   engine: ToolEngine,
   name: unknown,
   input: unknown,
+  options: ToolOptions = {},
 ): Promise<ToolOutcome> {
+  const names = options.names ?? true;
   const parsed = parseToolCall(name, input);
   if (!parsed.ok) return failed(parsed.problem);
   switch (parsed.name as ToolName) {
     case 'search_activities':
-      return searchActivities(engine, parsed.input as ToolInput<'search_activities'>);
+      return searchActivities(engine, parsed.input as ToolInput<'search_activities'>, names);
     case 'get_activity':
-      return getActivity(engine, parsed.input as ToolInput<'get_activity'>);
+      return getActivity(engine, parsed.input as ToolInput<'get_activity'>, names);
     case 'trace_slip':
-      return traceSlip(engine, parsed.input as ToolInput<'trace_slip'>);
+      return traceSlip(engine, parsed.input as ToolInput<'trace_slip'>, names);
     case 'health_summary':
       return healthSummary(engine, parsed.input as ToolInput<'health_summary'>);
     case 'diff_summary':
-      return diffSummary(engine);
+      return diffSummary(engine, names);
     case 'propose_edit':
-      return proposeEdit(engine, parsed.input as ToolInput<'propose_edit'>);
+      return proposeEdit(engine, parsed.input as ToolInput<'propose_edit'>, names);
   }
 }

@@ -26,6 +26,26 @@ const markNoticeRead = () => {
   }
 };
 
+/**
+ * "Send activity names to the assistant", remembered in this browser. On unless the planner turned
+ * it off (security spec). If storage is blocked the setting lasts for the page only.
+ */
+const NAMES_KEY = 'slip:send-activity-names';
+const namesSetting = () => {
+  try {
+    return localStorage.getItem(NAMES_KEY) !== 'no';
+  } catch {
+    return true;
+  }
+};
+const saveNamesSetting = (on: boolean) => {
+  try {
+    localStorage.setItem(NAMES_KEY, on ? 'yes' : 'no');
+  } catch {
+    // Kept for this page only.
+  }
+};
+
 const toolEngine: ToolEngine = {
   request: (request) => engine().request(request as never) as never,
 };
@@ -53,6 +73,17 @@ export function useConversation(
     [],
   );
   const stop = useRef<AbortController | null>(null);
+  const [sendNames, setSendNamesState] = useState(namesSetting);
+  /**
+   * Earlier tool results are sent again with every question, so a change starts a new
+   * conversation with the model: rows sent with names are never resent once names are off.
+   * The answers stay on screen.
+   */
+  const onSendNames = useCallback((on: boolean) => {
+    saveNamesSetting(on);
+    setSendNamesState(on);
+    messages.current = [];
+  }, []);
 
   const send = useCallback(
     (question: string, transport: AgentTransport) => {
@@ -83,6 +114,8 @@ export function useConversation(
         engine: toolEngine,
         messages: messages.current,
         question,
+        // Scripted answers never leave the browser and are written from the names.
+        names: transport.scripted || sendNames,
         signal: controller.signal,
         onUpdate: (answer) =>
           setAnswers((all) => all.map((item, at) => (at === index.at ? answer : item))),
@@ -111,7 +144,7 @@ export function useConversation(
         }
       });
     },
-    [onAudit],
+    [onAudit, sendNames],
   );
 
   const onAsk = useCallback(
@@ -155,5 +188,7 @@ export function useConversation(
     onStop,
     decisions,
     onDecision,
+    sendNames,
+    onSendNames,
   };
 }

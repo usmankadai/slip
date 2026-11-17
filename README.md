@@ -60,7 +60,7 @@ No task blocks the main thread for more than 50ms during an import or a scroll. 
 
 Your XER files are never uploaded. They are read in your browser, and the parsed schedules, your edits, the activity log and the narrative are kept in your browser's storage on your computer.
 
-The assistant is the one exception. In **live** mode, which the public site uses, your question and the specific rows the assistant asks for to answer it (activity codes, names and dates) are sent through Slip's server to Anthropic. The server passes them on and does not store them. A notice says this before your first live question, and you can choose scripted answers instead. In **scripted** mode nothing about your schedule leaves the browser.
+The assistant is the one exception. In **live** mode, which the public site uses, your question and the specific rows the assistant asks for to answer it (activity codes, names and dates) are sent through Slip's server to Anthropic. The server passes them on and does not store them. A notice says this before your first live question, and you can choose scripted answers instead, or turn off "Send activity names to the assistant" so only codes and dates are sent. In **scripted** mode nothing about your schedule leaves the browser.
 
 The full table, with what holds it true, is in the app under "Where your data goes" and in [docs/data-flow.md](docs/data-flow.md). A test keeps the two the same.
 
@@ -71,7 +71,7 @@ The full table, with what holds it true, is in the app under "Where your data go
 - **Not yet checked against real P6 exports.** The engine matches the synthetic generator on every date and float value, but its match rate against dates P6 itself calculated is still to be measured, and needs real files.
 - **No export back to XER.** The narrative exports as Markdown or PDF. The PDF uses Windows Latin fonts, so names in other scripts print as a question mark; the Markdown keeps them.
 - **Desktop browsers, 1280px and wider.** Measured in Chromium only.
-- **Not built yet:** error reporting, WBS mentions in the assistant, and a setting to keep activity names from the assistant.
+- **Not built yet:** error reporting, and WBS mentions in the assistant.
 
 ## How it is built
 

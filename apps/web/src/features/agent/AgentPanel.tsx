@@ -41,6 +41,9 @@ export interface AgentPanelProps {
   /** The list for a `#` mention being typed, and where the panel says what is being typed. */
   mentions?: MentionList | null;
   onMentionQuery?: (query: string | null) => void;
+  /** "Send activity names to the assistant". Shown in live mode only: scripted sends nothing. */
+  sendNames?: boolean;
+  onSendNames?: (on: boolean) => void;
 }
 
 const ignore = () => {};
@@ -143,6 +146,8 @@ export function AgentPanel({
   scriptable = [],
   mentions = null,
   onMentionQuery = ignore,
+  sendNames = true,
+  onSendNames,
 }: AgentPanelProps) {
   const [draft, setDraft] = useState('');
   const end = useRef<HTMLDivElement>(null);
@@ -232,9 +237,9 @@ export function AgentPanel({
               </>
             }
           >
-            Your question and the rows the assistant asks for to answer it, including activity
-            codes, names and dates, will be sent through Slip&apos;s server to Anthropic. Your files
-            are not uploaded.
+            {sendNames
+              ? "Your question and the rows the assistant asks for to answer it, including activity codes, names and dates, will be sent through Slip's server to Anthropic. Your files are not uploaded."
+              : "Your question and the rows the assistant asks for to answer it, activity codes and dates but not names, will be sent through Slip's server to Anthropic. Your files are not uploaded."}
           </Notice>
         ) : null}
         <div className={styles.suggested} aria-label="Suggested questions">
@@ -277,6 +282,25 @@ export function AgentPanel({
             </Button>
           )}
         </form>
+        {!scripted && onSendNames ? (
+          <div className={styles.setting}>
+            <input
+              id="agent-send-names"
+              type="checkbox"
+              className={styles.check}
+              checked={sendNames}
+              disabled={working}
+              aria-describedby="agent-send-names-note"
+              onChange={(event) => onSendNames(event.target.checked)}
+            />
+            <label htmlFor="agent-send-names">Send activity names to the assistant</label>
+            <p id="agent-send-names-note" className={styles.settingNote}>
+              {sendNames
+                ? 'Codes and dates are always sent. Changing this starts a new conversation.'
+                : 'Only codes and dates are sent; the assistant is told names are withheld. Changing this starts a new conversation.'}
+            </p>
+          </div>
+        ) : null}
       </div>
     </aside>
   );

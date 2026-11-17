@@ -2,6 +2,30 @@
 
 What was built, what Usman decided or designed, and what an agent generated. Newest first.
 
+## 17 November 2026: keeping activity names from the assistant
+
+**Done**
+
+- "Send activity names to the assistant", a switch under the question box in live mode, on by default. Off, every tool leaves activity names out of what it returns, before anything leaves the browser, and each result tells the model names are withheld so it refers to activities by code.
+- Changing it starts a new conversation with the model, so rows sent with names earlier are not sent again. The answers stay on screen.
+- The notice before the first live question, the "Where your data goes" table, `docs/data-flow.md` and the security spec say "names unless you turn them off".
+- Tests: no activity name from either update appears in any tool's result with names off, and the loop sends none. Decision D27.
+- Fixed in passing: `docs/data-flow.md` still said the live transport was not connected.
+
+**Usman decided or designed**
+
+- Where the switch goes: in the assistant panel, under the question box. He accepted the recommendation; the reasons are the agent's.
+- That the setting exists and is on by default was already in the security spec.
+
+**The agent (Claude) generated**
+
+- The change to the tools, the switch, the wording under it and in the notice, the tests and D27.
+- Two choices of its own, recorded in D27: the model is told in each tool result rather than in the system prompt, and changing the setting starts a new conversation.
+
+**Worth Usman's attention**
+
+- Check the wording under the switch reads well to a planner: "Only codes and dates are sent; the assistant is told names are withheld. Changing this starts a new conversation."
+
 ## 17 November 2026: Storybook written pages
 
 **Done**

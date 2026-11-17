@@ -40,7 +40,7 @@ export const FLOWS: readonly Flow[] = [
     liveOnly: true,
   },
   {
-    data: 'Rows the assistant asks for, live mode: activity codes, names and dates',
+    data: 'Rows the assistant asks for, live mode: activity codes and dates, and names unless you turn them off',
     stays: 'Yes',
     server: 'In transit, not stored',
     anthropic: 'Yes',

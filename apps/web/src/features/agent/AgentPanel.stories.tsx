@@ -90,7 +90,22 @@ export const Error: Story = {
 };
 
 /** Live, before anything is asked. */
-export const LiveEmpty: Story = { args: { scripted: false, answers: [] } };
+export const LiveEmpty: Story = {
+  args: { scripted: false, answers: [], sendNames: true, onSendNames: noop },
+};
+
+/** Live, with activity names turned off: the notice says names are not sent. */
+export const LiveNamesWithheld: Story = {
+  args: {
+    scripted: false,
+    answers: [],
+    sendNames: false,
+    onSendNames: noop,
+    waiting: 'Why did the project slip?',
+    onAcceptNotice: noop,
+    onDeclineNotice: noop,
+  },
+};
 
 /** The first live question is held until the planner has read what will be sent. */
 export const LiveFirstQuestionNotice: Story = {
