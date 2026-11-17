@@ -199,8 +199,9 @@ describe('AgentText', () => {
           { kind: 'list', ordered: true, items: [[{ kind: 'text', text: 'one', strong: true }]] },
           {
             kind: 'table',
-            head: [[{ kind: 'text', text: 'Check' }]],
-            rows: [[[{ kind: 'verified', text: 'MS-COMPLETE' }]]],
+            head: [[{ kind: 'text', text: 'Check' }], [{ kind: 'text', text: 'Days' }]],
+            rows: [[[{ kind: 'verified', text: 'MS-COMPLETE' }], [{ kind: 'text', text: '+65' }]]],
+            align: ['left', 'right'],
           },
         ]}
       />,
@@ -209,7 +210,9 @@ describe('AgentText', () => {
     expect(html).not.toContain('<img');
     expect(html).toContain('<ol');
     expect(html).toContain('<strong>one</strong>');
-    expect(html).toContain('<th scope="col">');
+    expect(html).toContain('<th scope="col"><span>Check');
+    expect(html).toMatch(/<th scope="col" class="[^"]*number[^"]*"><span>Days/);
+    expect(html).toMatch(/<td class="[^"]*number[^"]*"><span>\+65<\/span><\/td>/);
     expect(html).toContain('MS-COMPLETE');
   });
 

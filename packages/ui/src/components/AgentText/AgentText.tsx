@@ -18,6 +18,8 @@ export type AgentTextBlock =
       kind: 'table';
       head: readonly (readonly AgentTextPart[])[];
       rows: readonly (readonly (readonly AgentTextPart[])[])[];
+      /** Per column; numbers are right aligned. Left when missing. */
+      align?: readonly ('left' | 'right')[];
     };
 
 export interface AgentTextProps {
@@ -94,7 +96,11 @@ export function AgentText({ parts, blocks, onOpen }: AgentTextProps) {
               <thead>
                 <tr>
                   {block.head.map((cell, at) => (
-                    <th key={at} scope="col">
+                    <th
+                      key={at}
+                      scope="col"
+                      className={block.align?.[at] === 'right' ? styles.number : undefined}
+                    >
                       <Parts parts={cell} onOpen={onOpen} />
                     </th>
                   ))}
@@ -104,7 +110,10 @@ export function AgentText({ parts, blocks, onOpen }: AgentTextProps) {
                 {block.rows.map((row, at) => (
                   <tr key={at}>
                     {row.map((cell, column) => (
-                      <td key={column}>
+                      <td
+                        key={column}
+                        className={block.align?.[column] === 'right' ? styles.number : undefined}
+                      >
                         <Parts parts={cell} onOpen={onOpen} />
                       </td>
                     ))}

@@ -39,6 +39,12 @@
   vertical-align: top;
 }
 
+/* A column of numbers: right aligned and tabular, so the digits line up. */
+.table .number {
+  text-align: right;
+  white-space: nowrap;
+}
+
 .table thead th {
   background: var(--surface-2);
   color: var(--text-secondary);

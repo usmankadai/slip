@@ -66,6 +66,7 @@ export const WithListAndTable: Story = {
             [{ kind: 'text', text: '14.6%' }],
           ],
         ],
+        align: ['left', 'right', 'right'],
       },
       {
         kind: 'list',

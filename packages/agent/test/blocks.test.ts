@@ -31,6 +31,27 @@ describe('the shapes an answer may take', () => {
     expect(table.head.map((cell) => cell[0]?.text)).toEqual(['Check', 'Before', 'Now']);
     expect(table.rows).toHaveLength(2);
     expect(table.rows[1]![0]).toEqual([{ kind: 'text', text: 'Negative float', strong: true }]);
+    expect(table.align).toEqual(['left', 'right', 'right']);
+  });
+
+  it('right-aligns a column of numbers, and follows the alignment the model wrote', () => {
+    const table = (text: string) =>
+      answerBlocks(text, known)[0] as Extract<
+        ReturnType<typeof answerBlocks>[number],
+        { kind: 'table' }
+      >;
+    expect(
+      table(
+        '| Activity | Cause | Working days | Share |\n|---|---|---|---|\n| #P03-A002-ENB-0110 | Duration | +18 | 27% |\n| #MS-COMPLETE | Logic | −1 | |\n| Other | Duration | 1,204d | 0.5% |',
+      ).align,
+    ).toEqual(['left', 'left', 'right', 'right']);
+    expect(table('| Name | Days |\n|:--|:--|\n| A | 3 |').align).toEqual(['left', 'left']);
+    expect(table('| Name | Note |\n|---|---:|\n| A | late |').align).toEqual(['left', 'right']);
+    expect(table('| When | Days |\n|---|---|\n| 7 May 2027 | 65 working days |').align).toEqual([
+      'left',
+      'right',
+    ]);
+    expect(table('| Code | Days |\n|---|---|\n| P01 | n/a |').align).toEqual(['left', 'left']);
   });
 
   it('reads bulleted and numbered lists, and a heading as bold text', () => {
