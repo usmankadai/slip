@@ -24,4 +24,7 @@ The security spec asks for a setting, "Send activity names to the agent", on by 
 
 - The model can still search by name text: `search_activities` filters on codes and names in the browser and returns codes. What the planner types in a question is sent as typed; mentions write codes, not names.
 - Answers with names withheld cite codes only, which are still chips that open the grid.
+- Two paid questions through the app on 17 November 2026 (local server, `claude-opus-5-5`, medium effort, 1,000 activity rail pair, names off):
+  - The first made three correct lookups (a search, the change summary, the trace) and then failed on the call that writes the answer, after about 70 seconds, with an Anthropic SDK error whose type alone is logged. The browser's connection to the page also dropped during it. Cause not found; not seen again.
+  - The second, "Which milestone slipped most, and which activities drove it?", answered in 9 seconds over three calls. All four tool results sent carried the withheld note and no activity name; the answer named MS-P07 and MS-COMPLETE (+65 working days) and the nine causes by code, matching the trace.
 - Tested against a generated pair: with names off, no activity name from either update appears in any tool's result (`packages/gen/test/agent-tools.test.ts`), and the loop sends none (`apps/web/src/features/agent/agent.test.ts`).

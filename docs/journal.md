@@ -11,6 +11,7 @@ What was built, what Usman decided or designed, and what an agent generated. New
 - The notice before the first live question, the "Where your data goes" table, `docs/data-flow.md` and the security spec say "names unless you turn them off".
 - Tests: no activity name from either update appears in any tool's result with names off, and the loop sends none. Decision D27.
 - Fixed in passing: `docs/data-flow.md` still said the live transport was not connected.
+- Two paid questions with names off, on Usman's go-ahead. The second answered correctly in 9 seconds, citing codes only, and nothing sent held an activity name. The first failed on its last call with an SDK error whose cause was not found (D27).
 
 **Usman decided or designed**
 
