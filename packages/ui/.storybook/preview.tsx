@@ -32,6 +32,8 @@ const preview: Preview = {
         order: [
           'Foundations',
           ['Colour', 'Slip scale', 'Type', 'Density', 'Space and shape'],
+          'Guidelines',
+          ['Principles', 'Identity', 'States', 'Content', 'Do and do not', 'Canvas primitives'],
           'Design process',
           ['About', 'Explorations'],
           'Components',

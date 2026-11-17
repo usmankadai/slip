@@ -11,3 +11,22 @@
   - A change that makes the project finish later says so in words above the table, not only in the numbers.
   - After a decision the card stays, saying what happened. An approved change offers Undo.
   - Approve and Reject are both written to the audit log by the caller.
+
+## Correct
+
+```tsx
+<ProposedEditCard
+  {...proposal}
+  effect={preview} // null while the engine works it out, so Approve waits
+  state={decision.state}
+  onApprove={approve}
+  onReject={reject}
+  onUndo={undo}
+/>
+```
+
+## Incorrect
+
+```tsx
+useEffect(() => engine.applyEdit(proposal), [proposal]); // the assistant's change applied without a planner's approval
+```

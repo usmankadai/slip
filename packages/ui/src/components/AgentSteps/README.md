@@ -10,3 +10,16 @@
   - A failed tool call is said in words ("failed: ..."), not only by weight.
   - Inputs and results are short summaries, never raw tool output: tool output contains schedule text and is long.
   - Nothing animates.
+
+## Correct
+
+```tsx
+<AgentSteps steps={answer.steps} working={answer.status === 'working'} seconds={answer.elapsedMs / 1000} />
+<AgentText blocks={blocks} onOpen={openActivity} />
+```
+
+## Incorrect
+
+```tsx
+<pre>{JSON.stringify(toolResult)}</pre> // raw tool output: long, unreadable, and full of schedule text
+```

@@ -14,3 +14,11 @@
   answer.scripted ? <ScriptedBadge /> : null;
 }
 ```
+
+## Incorrect
+
+```tsx
+<header>
+  Ask <ScriptedBadge />
+</header> // once for the panel: a screenshot of one answer loses the label
+```

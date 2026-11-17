@@ -7,7 +7,8 @@
     ".": "./src/index.ts",
     "./tokens.css": "./src/tokens.css",
     "./fonts.css": "./src/fonts.css",
-    "./base.css": "./src/base.css"
+    "./base.css": "./src/base.css",
+    "./guide": "./src/guidelines/Guide.tsx"
   },
   "scripts": {
     "typecheck": "tsc --noEmit",

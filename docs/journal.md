@@ -2,6 +2,29 @@
 
 What was built, what Usman decided or designed, and what an agent generated. Newest first.
 
+## 17 November 2026: Storybook written pages
+
+**Done**
+
+- A Guidelines group in Storybook: Principles, Identity, States, Content, Do and do not, and Canvas primitives.
+- Each page reads its source instead of repeating it. The design goals, the identity table, the interaction principles and the review checklist come from the spec. Each component's use, rules and examples come from its README, the file agents read. The number and date formats are drawn by the app's own formatters, and the Gantt marks by the real painter at device pixel ratio 1 and 2.
+- Correct and incorrect examples added to the four component READMEs that lacked them: AgentSteps, AgentText, ProposedEditCard and ScriptedBadge.
+- A test fails if a component has no full contract, misses either example, or is missing from AGENTS.md; and if a design goal has no example from the product.
+- Written as TSX stories, not MDX as the spec first said; the reason is in the design system spec.
+
+**Usman decided or designed**
+
+- To build the written pages next.
+- The rules on the pages are his from the spec. The page layouts, the examples from the product, the vocabulary table and the tone examples are new wording by the agent, drawn from what the app already does; none of them is a new rule.
+
+**The agent (Claude) generated**
+
+- All six pages, the parsers that read the spec and the READMEs, the four missing examples and the tests.
+
+**Worth Usman's attention**
+
+- The Content page's vocabulary and tone tables ("Update A, not baseline"; "Activity, not task") put into words what the app already does. Check they say what you would say.
+
 ## 17 November 2026: the design process in Storybook
 
 **Done**
