@@ -6,7 +6,7 @@ import { describe, expect, it } from 'vitest';
 import { TOOL_LIMITS, splitCitations } from '@slip/agent';
 import { runTool, type ToolEngine, type ToolOutcome } from '@slip/agent/run';
 import { EngineSession, type EngineRequest } from '@slip/engine';
-import { parseXerText } from '@slip/xer';
+import { parseXerText, stringAt } from '@slip/xer';
 import { generatePair, xerText } from '../src/index.ts';
 
 const pair = generatePair({ activities: 1000, seed: 42, sector: 'rail' });
@@ -389,5 +389,60 @@ describe('every tool', () => {
       'verified',
       'unverified',
     ]);
+  });
+});
+
+describe('with activity names withheld', () => {
+  const withheld = { names: false };
+  // Every name in both updates, so a result can be checked for any of them.
+  const allNames = new Set<string>();
+  for (const data of [parseXerText(textA), parseXerText(textB)]) {
+    for (let i = 0; i < data.n; i++) {
+      const name = stringAt(data.strings, data.taskName[i]!);
+      if (name.length > 3) allNames.add(name);
+    }
+  }
+  const leaked = (outcome: ToolOutcome) =>
+    [...allNames].filter((name) => outcome.content.includes(JSON.stringify(name).slice(1, -1)));
+
+  it('sends no activity name from any tool, and says why', async () => {
+    session.handle({ type: 'cpm', slot: 'b' });
+    const current = read(await runTool(engine, 'get_activity', { task_code: driver.code })).current
+      .original_duration_days;
+    const calls: [string, unknown][] = [
+      ['search_activities', { changed_only: true, limit: 50 }],
+      ['search_activities', { query: 'install' }],
+      ['get_activity', { task_code: driver.code }],
+      ['get_activity', { task_code: expected.milestone.code }],
+      ['trace_slip', { task_code: expected.milestone.code }],
+      ['diff_summary', {}],
+      [
+        'propose_edit',
+        {
+          task_code: driver.code,
+          change: 'set_original_duration',
+          working_days: current - 5,
+          reason: 'Recover time.',
+        },
+      ],
+    ];
+    for (const [tool, input] of calls) {
+      const outcome = await runTool(engine, tool, input, withheld);
+      expect(outcome.isError, tool).toBe(false);
+      expect(leaked(outcome), tool).toEqual([]);
+      expect(outcome.content, tool).toContain('names_withheld');
+      expect(outcome.codes.length, tool).toBeGreaterThan(0);
+    }
+  });
+
+  it('still sends names by default', async () => {
+    const outcome = await runTool(engine, 'get_activity', { task_code: driver.code });
+    expect(leaked(outcome).length).toBeGreaterThan(0);
+    expect(outcome.content).not.toContain('names_withheld');
+  });
+
+  it('leaves the health check names, which are not schedule content', async () => {
+    const outcome = await runTool(engine, 'health_summary', { update: 'current' }, withheld);
+    expect(read(outcome).checks[0].name).toBeTruthy();
   });
 });

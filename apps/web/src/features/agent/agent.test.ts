@@ -197,6 +197,49 @@ describe('the question loop', () => {
     ]);
   });
 
+  it('sends the tool results without activity names when the planner turns them off', async () => {
+    const sent: Message[][] = [];
+    const calls: AgentEvent[][] = [
+      [
+        {
+          type: 'tool-request',
+          toolUseId: 't1',
+          name: 'trace_slip',
+          input: { task_code: 'MS-COMPLETE' },
+          valid: true,
+        },
+        done('tool_use'),
+      ],
+      [{ type: 'text-delta', text: 'It moved.' }, done('end_turn')],
+    ];
+    const recording = (): AgentTransport => {
+      let call = 0;
+      return {
+        scripted: false,
+        async *send(messages) {
+          sent.push(structuredClone([...messages]));
+          yield* calls[Math.min(call++, calls.length - 1)]!;
+        },
+      };
+    };
+    const results = () => JSON.stringify(sent.at(-1));
+    for (const names of [true, false]) {
+      sent.length = 0;
+      await ask({
+        transport: recording(),
+        engine: loaded(),
+        messages: [],
+        question: 'Why?',
+        signal: new AbortController().signal,
+        onUpdate: () => {},
+        names,
+      });
+      // The milestone's name in the generated pair.
+      expect(results().includes('Project completion'), `names ${names}`).toBe(names);
+      expect(results().includes('names_withheld'), `names ${names}`).toBe(!names);
+    }
+  });
+
   it('stops at the step limit', async () => {
     const answer = await run(
       'Loop',

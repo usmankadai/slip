@@ -28,4 +28,5 @@ Part of the Slip spec. Start at [CLAUDE.md](../../CLAUDE.md).
 - **D23: How the design-system rules are enforced.** Lint rules for code, tests for CSS and for screen states, axe on every story. See [D23](D23-how-design-system-rules-are-enforced.md).
 - **D24: What goes in the address bar.** Updates by hash, open screens and codes only, never typed search; screens are history steps. See [D24](D24-url-state.md).
 - **D25: The narrative's PDF, written without a library.** Helvetica, text only, every string escaped; characters outside Windows Latin become a question mark and the planner is told. See [D25](D25-pdf-without-a-library.md).
+- **D27: Withholding activity names from the assistant.** A switch under the question box, live mode only; names left out of tool results in the browser, with a note telling the model; changing it starts a new conversation. See [D27](D27-withholding-activity-names.md).
 - **D26: The live assistant on the public site.** One Vercel Function under /api on the app's origin, live only when the server says so, a notice before the first live question, scripted when live is off or capped. See [D26](D26-live-assistant-on-vercel.md).

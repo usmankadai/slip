@@ -17,7 +17,7 @@ The assistant has two modes, and the panel says which one is on. In **scripted**
 | XER files and parsed schedules | Yes | Never | Never |
 | Edits, the activity log and the narrative | Yes | Never | Never |
 | Questions to the assistant, live mode | Yes | In transit, not stored | Yes |
-| Rows the assistant asks for, live mode: activity codes, names and dates | Yes | In transit, not stored | Yes |
+| Rows the assistant asks for, live mode: activity codes and dates, and names unless you turn them off | Yes | In transit, not stored | Yes |
 | Anything, scripted mode | Yes | Never | Never |
 | The page address: the two files' short ids and at most three activity codes | Yes | With each page load, as for any website; not stored by Slip | Never |
 | Error reports | Not collected yet | Never | Never |
@@ -29,12 +29,12 @@ What any website receives also applies: the host (Vercel) sees requests for the 
 ## How this is enforced
 
 - The Content Security Policy allows the page to connect only to its own origin (`connect-src 'self'`). A request anywhere else is blocked by the browser. The policy is in `config/securityHeaders.ts`, and a test fails if production's copy differs.
-- The assistant panel uses the scripted transport (`apps/web/src/features/agent/scripted.ts`). The live transport exists in code but is not connected to the panel.
+- The assistant is live only when the server's `GET /api/health` says so ([D26](decisions/D26-live-assistant-on-vercel.md)); otherwise it uses the scripted transport (`apps/web/src/features/agent/scripted.ts`), which sends nothing. Before the first live question in a tab, the question is held behind a notice that says what will be sent.
+- With "Send activity names to the assistant" off, the tools leave every activity name out of what they return, in the browser, before anything is sent (`packages/agent/src/run.ts`). A test checks that no activity name from either update appears in any tool's result ([D27](decisions/D27-withholding-activity-names.md)).
 - `pnpm check:secrets` fails the build if the bundle contains an API key pattern.
 - The in-app panel ("Where your data goes", in the footer of every screen) draws its table from `apps/web/src/features/dataflow/flows.ts`. A test fails if the table in this file or in the security spec differs from it.
-- The assistant's mode is one constant, `apps/web/src/features/agent/mode.ts`, read by both the conversation and the panel.
+- The assistant's mode is decided once, in `apps/web/src/features/agent/mode.ts`, and read by both the conversation and the panel.
 
 ## Not built yet
 
-- The setting "Send activity names to the agent".
 - Error reporting through Sentry, with its scrubber.

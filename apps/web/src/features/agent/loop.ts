@@ -66,6 +66,8 @@ export async function ask(options: {
   signal: AbortSignal;
   onUpdate: (answer: Answer) => void;
   now?: () => number;
+  /** Whether tool results carry activity names. Off sends codes only (the planner's setting). */
+  names?: boolean;
 }): Promise<Answer> {
   const { transport, engine, messages, question, signal, onUpdate } = options;
   const now = options.now ?? (() => performance.now());
@@ -143,7 +145,7 @@ export async function ask(options: {
     const results: unknown[] = [];
     for (const request of requests) {
       const outcome = request.valid
-        ? await runTool(engine, request.name, request.input)
+        ? await runTool(engine, request.name, request.input, { names: options.names ?? true })
         : {
             content: JSON.stringify({
               error: request.problem ?? 'The input did not fit the tool.',
